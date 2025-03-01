@@ -1,0 +1,146 @@
+/* Estilos Generales */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), no-repeat center center/cover;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Sección HERO */
+.hero {
+    margin-top: 100px;
+}
+.hero h1 {
+    font-size: 54px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.hero .icon {
+    color: #6cc9f5;
+    font-size: 54px;
+}
+
+/* Sección de estadísticas */
+.stats-container {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #9ACBD0;
+    padding: 20px;
+    border-radius: 10px;
+    width: 180px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.stat:hover {
+    transform: scale(1.1);
+}
+
+.stat i {
+    font-size: 40px;
+    color: #007bff; /* Color azul para resaltar */
+    margin-bottom: 10px;
+}
+
+.stat p {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.stat span {
+    font-size: 14px;
+    color: #555;
+}
+
+
+/* Sección Turismo de Bienestar */
+.info-section {
+    padding: 60px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    margin-top: 0px;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+.info-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+}
+.info-content h2 {
+    font-size: 32px;
+    color: #6cc9f5;
+    text-transform: uppercase;
+}
+.info-content p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* Botón */
+.btn {
+    background: #2973B2;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s ease-in-out;
+}
+.btn:hover {
+    background: #50a6d4;
+    transform: scale(1.05);
+}
+
+/* Sección de Galeria */
+.galeria {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente si es necesario */
+    margin: auto;
+    max-width: 800px; /* Ajusta según sea necesario */
+    overflow: hidden;
+}
+section {
+    margin-top: 40px;
+    display: flex;
+    width: 600px;
+    height: 430px;
+}
+section img {
+    width: 0px;
+    flex-grow: 1;
+    object-fit: cover;
+    opacity: .8;
+    transition: .5s ease;
+}
+section img:hover {
+    width: 100%;
+    opacity: 1;
+    filter: contrast(120%)
+}
+
+
