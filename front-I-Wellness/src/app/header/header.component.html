@@ -1,4 +1,4 @@
-<header [ngClass]="{'scrolled': isScrolled}">
+<header [ngClass]="{'scrolled': isScrolled, 'white-bg': isWhiteBackground}">
   <nav>
       <ul>
           <li><a class ="nav-link" routerLink="" [ngClass]="{active: menuOption == 'home'}" (click)="onOption('home')">Home</a></li>
@@ -12,7 +12,7 @@
         <input type="text" placeholder="Buscar">
         <span class="search-icon">🔍</span>
     </div>
-    <button class="login-btn">Log in</button>
+    <button class="login-btn" routerLink="/login">Log in</button>
 </div>
 
 </header>

@@ -1,0 +1,111 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* Contenedor principal */
+.container {
+    display: flex;
+    width: 80%;
+    max-width: 1000px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo h1 strong{
+    color: #000000;
+}
+
+/* Panel izquierdo */
+.left-panel {
+    width: 60%;
+    height: 400px;
+    background-color: #5fa9a9;
+    border-radius: 12px 0 0 12px;
+    background-image: url("https://media.istockphoto.com/id/1135365219/es/foto/arenal-volcano-costa-rica.jpg?s=612x612&w=0&k=20&c=YP055BJEpRX_07BtlZG6xK6orVcfhDAWanyB5QUTZHo=");
+}
+
+/* Panel derecho */
+.right-panel {
+    width: 40%;
+    padding: 40px;
+    text-align: center;
+}
+
+.logo h1 {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.icon {
+    font-size: 20px;
+    color: #5fa9a9;
+}
+
+p {
+    font-size: 18px;
+    margin: 20px 0;
+    color: #333;
+}
+
+/* Botones */
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #5fa9a9;
+    color: white;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #4b8d8d;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .left-panel {
+        width: 100%;
+        height: 200px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .right-panel {
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+.active{
+    background-color: #5fa9a9;
+}
