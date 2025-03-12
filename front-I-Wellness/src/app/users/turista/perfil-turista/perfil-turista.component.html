@@ -1,1 +1,62 @@
-<p>perfil-turista works!</p>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Hola, Pepito</h2>
+            <ul>
+                <li class="active">&#9998; Edit profile</li>
+                <li>&#9992; Preferencias</li>
+                <li>&#10067; Help</li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div class="profile-header">
+                <h1>Edit profile</h1>
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" alt="Profile Picture" class="profile-pic">
+            </div>
+            <form class="profile-form">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" value="Mehrab">
+                </div>
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" value="Bozorgi">
+                </div>
+                <div class="input-group full-width">
+                    <label>Email</label>
+                    <input type="email" value="Mehrabness@gmail.com">
+                    <span class="checkmark">✔</span>
+                </div>
+                <div class="input-group full-width">
+                    <label>Address</label>
+                    <input type="text" value="33062 Zboncak isle">
+                </div>
+                <div class="input-group full-width">
+                    <label>Contact Number</label>
+                    <input type="text" value="58077.79">
+                </div>
+                <div class="input-group">
+                    <label>City</label>
+                    <select>
+                        <option selected>Mehrab</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>State</label>
+                    <select>
+                        <option selected>Bozorgi</option>
+                    </select>
+                </div>
+                <div class="input-group full-width">
+                    <label>Password</label>
+                    <input type="password" value="sbdfbnd65sfvdb s">
+                    <span class="checkmark">✔</span>
+                </div>
+                <div class="buttons">
+                    <button class="cancel" (click)="navigateTo('hometurista')">Cancel</button>
+                    <button class="save" (click)="navigateTo('hometurista')">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>

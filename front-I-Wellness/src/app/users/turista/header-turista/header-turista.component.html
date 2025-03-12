@@ -1,0 +1,25 @@
+<header class="navbar">
+  <div class="nav-left">
+    <a href="/hometurista" class="logo">Home</a>
+  </div>
+
+  <div class="nav-center">
+    <input type="text" placeholder="Buscar" class="search-input">
+    <button class="search-btn">
+      <i class="fas fa-search"></i>
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <button class="icon-btn">
+      <i class="fas fa-bell"></i>
+    </button>
+
+    <div class="profile-container">
+      <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User" class="profile-pic" (click)="navigateTo('perfilturista')">
+      <button class="logout-btn" (click)="navigateTo('')">Salir</button>
+    </div>
+  </div>
+</header>
+
+  

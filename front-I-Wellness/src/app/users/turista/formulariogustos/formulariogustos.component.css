@@ -1,0 +1,90 @@
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  top: 200px;
+  bottom: 200px;
+}
+
+.form-container {
+  max-width: 500px;
+  margin: auto;
+  background: #F2EFE7;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  color: black;
+  }
+
+  h2, h3 {
+    color: #333;
+  }
+
+  .subtext {
+    font-size: 14px;
+    color: #000000;
+  }
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .card {
+    position: relative;
+    background: #f8f8f8;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+  }
+
+  .card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  .card span {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .card.selected {
+    border: 3px solid #009688; /* Borde resaltado */
+    box-shadow: 0px 0px 10px rgba(0, 150, 136, 0.8); /* Sombra */
+    transform: scale(1.05); /* Efecto de agrandamiento */
+  }
+  
+  .card.selected span {
+    background: #009688; /* Fondo de texto diferente */
+  }
+
+  .next-button {
+    background: #009688;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+
+  .next-button:hover {
+    background: #00796B;
+  }

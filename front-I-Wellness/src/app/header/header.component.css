@@ -15,7 +15,7 @@ header {
 }
 
 header.scrolled {
-    background: #9ACBD0; /* Más opaco al hacer scroll */
+    background: linear-gradient(to right, #9ACBD0, #48A6A7)/* Más opaco al hacer scroll */
 }
 
 
