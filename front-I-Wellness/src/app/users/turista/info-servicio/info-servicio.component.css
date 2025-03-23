@@ -1,8 +1,8 @@
 .experience-container {
     max-width: 800px;
-    margin: 100px auto;
+    margin: 200px auto;
     background: #F2EFE7;
-    padding: 20px;
+    padding: 50px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -46,29 +46,3 @@
     color: #444;
   }
 
-  .reviews-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 20px;
-    color: black;
-  }
-
-  .order-text {
-    font-size: 14px;
-    color: #888;
-    text-align: left;
-    margin-bottom: 10px;
-  }
-
-  .reviews {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .review {
-    background: #9ACBD0;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: left;
-  }

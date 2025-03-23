@@ -19,6 +19,14 @@ import { AgregarServicioComponent } from './users/proveedor/agregar-servicio/agr
 import { EditarServicioComponent } from './users/proveedor/editar-servicio/editar-servicio.component';
 import { DashboardComponent } from './users/proveedor/dashboard/dashboard.component';
 import { HeaderProveedorComponent } from './users/proveedor/header-proveedor/header-proveedor.component';
+import { LoginAdminComponent } from './users/administrador/login-admin/login-admin.component';
+import { EditPreferenciasComponent } from './users/turista/edit-preferencias/edit-preferencias.component';
+import { HeaderAdminComponent } from './users/administrador/header-admin/header-admin.component';
+import { HomeAdminComponent } from './users/administrador/home-admin/home-admin.component';
+import { PerfilAdminComponent } from './users/administrador/perfil-admin/perfil-admin.component';
+import { VisitantesComponent } from './users/administrador/visitantes/visitantes.component';
+import { ServiciosComponent } from './users/administrador/servicios/servicios.component';
+import { ProveedoresComponent } from './users/administrador/proveedores/proveedores.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent},
@@ -41,5 +49,13 @@ export const routes: Routes = [
     { path: 'editarservicio', component: EditarServicioComponent},
     { path: 'dashboard', component: DashboardComponent},	
     { path: 'headerproveedor', component: HeaderProveedorComponent},
+    { path: 'loginadmin', component: LoginAdminComponent},
+    { path: 'editpreferencias', component: EditPreferenciasComponent},
+    { path: 'headeradmin', component: HeaderAdminComponent},
+    { path: 'homeadmin', component: HomeAdminComponent},	
+    { path: 'perfiladmin', component: PerfilAdminComponent},
+    { path: 'visitantes', component: VisitantesComponent},
+    { path: 'servicios', component: ServiciosComponent},
+    { path: 'proveedores', component: ProveedoresComponent},
     { path: '**', redirectTo: ''} // Redirect to home
 ];
