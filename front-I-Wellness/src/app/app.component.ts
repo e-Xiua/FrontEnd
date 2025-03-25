@@ -7,6 +7,7 @@ import { HeaderProveedorComponent } from './users/proveedor/header-proveedor/hea
 import { HeaderTuristaComponent } from './users/turista/header-turista/header-turista.component';
 import { HeaderAdminComponent } from './users/administrador/header-admin/header-admin.component';
 
+
 @Component({
   selector: 'app-root',
   standalone: true,

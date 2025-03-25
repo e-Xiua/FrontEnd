@@ -69,6 +69,9 @@ h2 {
     width: 60%;
     gap: 10px;
 }
+label {
+    color: black;
+}
 
 .form-fields input,
 .form-fields textarea {
@@ -100,4 +103,19 @@ textarea {
 
 .save-btn:hover {
     background-color: #3B8E8E;
+}
+
+
+.days-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20%, 1fr)); 
+    gap: 10px; 
+    padding: 10px;
+    font-size: small;
+}
+
+.day-item {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
 }

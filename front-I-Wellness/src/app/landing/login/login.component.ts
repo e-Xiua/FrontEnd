@@ -1,5 +1,4 @@
-import { Component, EventEmitter, Output, Renderer2 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -9,13 +8,4 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
 
-  @Output() fondoBlanco = new EventEmitter<boolean>();
-  
-
-  //Navegar a login turista
-
-  constructor(private router: Router) {}
-  navigateTo(path: string) {
-    this.router.navigate([path]);
-  }
 }
