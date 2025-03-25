@@ -1,0 +1,28 @@
+<body>
+    <div class="container">
+        <h2>Aquí está la lista de empresas:</h2>
+  
+        <div class="services-box">
+            <button class="add-service-btn" (click)="navigateTo('agregarservicio')">Añadir nueva empresa <span>+</span></button>
+  
+            <div class="service-card">
+                <img src="https://media-cdn.tripadvisor.com/media/photo-s/06/96/b8/da/volcano-lodge-springs.jpg" alt="Día de Sauna" class="service-image">
+                <div class="service-info">
+                    <h3>Hotel La Fortuna</h3>
+                    <p>La Fortuna, San Carlos</p>
+                    <p class="categoria">Balnearios</p>
+                </div>
+                <div class="service-actions">
+                    <button class="visibility-btn" (click)="navigateTo('infoservicio')">👁</button>
+                    <button class="edit-btn" (click)="navigateTo('editarservicio')">✏️</button>
+                    <button class="delete-btn">🗑</button>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                      </label>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+  

@@ -1,0 +1,61 @@
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Hola, Pepito</h2>
+            <ul>
+                <li class="active">&#9998; Edit profile</li>
+                <li><a href="/editpreferencias">&#9992; Preferencias</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div class="profile-header">
+                <h1>Editar perfil</h1>
+                <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture" class="profile-pic">
+            </div>
+            <form class="profile-form">
+                <div class="input-group">
+                    <label>Nombre</label>
+                    <input type="text" value="Mehrab">
+                </div>
+                <div class="input-group">
+                    <label>Apellido</label>
+                    <input type="text" value="Bozorgi">
+                </div>
+                <div class="input-group full-width">
+                    <label>Correo</label>
+                    <input type="email" value="Mehrabness@gmail.com">
+                    <span class="checkmark">✔</span>
+                </div>
+                <div class="input-group full-width">
+                    <label>Dirección</label>
+                    <input type="text" value="33062 Zboncak isle">
+                </div>
+                <div class="input-group full-width">
+                    <label>Número de Contacto</label>
+                    <input type="text" value="58077.79">
+                </div>
+                <div class="input-group">
+                    <label>Ciudad</label>
+                    <select>
+                        <option selected>Mehrab</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>País</label>
+                    <select>
+                        <option selected>Bozorgi</option>
+                    </select>
+                </div>
+                <div class="input-group full-width">
+                    <label>Contraseña</label>
+                    <input type="password" value="sbdfbnd65sfvdb s">
+                    <span class="checkmark">✔</span>
+                </div>
+                <div class="buttons">
+                    <button class="cancel" (click)="navigateTo('hometurista')">Cancel</button>
+                    <button class="save" (click)="navigateTo('hometurista')">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>

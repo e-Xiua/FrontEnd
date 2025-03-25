@@ -1,0 +1,13 @@
+<div class="app-container">
+  <ng-container [ngSwitch]="headerType">
+    <app-header *ngSwitchCase="'default'"></app-header>
+    <app-header-turista *ngSwitchCase="'headerturista'"></app-header-turista>
+    <app-header-proveedor *ngSwitchCase="'headerproveedor'"></app-header-proveedor>
+    <app-header-admin *ngSwitchCase="'headeradmin'"></app-header-admin>
+
+  </ng-container>
+
+  <router-outlet></router-outlet>
+
+  <app-footer></app-footer>
+</div>

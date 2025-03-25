@@ -1,0 +1,99 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), no-repeat center center/cover;
+    color: white;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Contenedor principal del título */
+.titulo-principal {
+    max-width: 800px;
+    margin-top: 150px; /* Se bajó aún más */
+    padding: 0 20px;
+    text-align: center;
+}
+
+.titulo-principal h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.titulo-principal p {
+    font-size: 18px;
+    color: #ddd;
+    line-height: 1.8;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: justify;
+}
+
+/* Sección de temas clave */
+.temas-clave {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tema {
+    background: #9ACBD0;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px #F2EFE7;
+    position: relative;
+}
+
+.tema img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.tema h3 {
+    padding: 15px;
+    font-size: 18px;
+    margin: 0;
+    color: white;
+    text-align: left;
+}
+
+.tema a {
+    display: inline-block;
+    padding: 5px 15px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: right;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+}
+
+.tema:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 25px #48A6A7(0, 0, 0, 0.5);
+}
+
+/* Efecto de superposición en las imágenes */
+.tema::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, #2973B2(0, 0, 0, 0.8) 0%, #2973B2(0, 0, 0, 0.4), #2973B2(0, 0, 0, 0.1) 100%);
+    pointer-events: none;
+}

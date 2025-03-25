@@ -1,0 +1,28 @@
+<body>
+    <div class="container">
+        <h2>Aquí está tu lista de servicios:</h2>
+
+        <div class="services-box">
+            <button class="add-service-btn" (click)="navigateTo('agregarservicio')">Añadir nuevo servicio <span>+</span></button>
+
+            <div class="service-card">
+                <img src="https://images.trvl-media.com/lodging/3000000/2150000/2145600/2145540/e68d6fa4.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill" alt="Día de Sauna" class="service-image">
+                <div class="service-info">
+                    <h3>Día de Sauna</h3>
+                    <p>Centro de sauna</p>
+                    <p class="price">20$ USD</p>
+                </div>
+                <div class="service-actions">
+                    <button class="visibility-btn" (click)="navigateTo('infoservicio')">👁</button>
+                    <button class="edit-btn" (click)="navigateTo('editarservicio')">✏️</button>
+                    <button class="delete-btn">🗑</button>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                      </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+

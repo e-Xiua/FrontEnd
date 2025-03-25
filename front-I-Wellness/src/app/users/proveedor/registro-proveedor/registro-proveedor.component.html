@@ -1,0 +1,49 @@
+<body>
+    <div class="container">
+        <!-- Sección Izquierda (Imagen y Logo) -->
+        <div class="left-section">
+            <div class="logo">
+                <img src="logo.png" alt="I-Wellness">
+                <h2>I-Wellness</h2>
+            </div>
+        </div>
+
+        <!-- Sección Derecha (Formulario de Registro) -->
+        <div class="right-section">
+            <h2 class="title"><span>EMPRESA</span> Registro</h2>
+
+            <div class="form-container">
+                <!-- Datos de Contacto -->
+                <div class="form-column">
+                    <h3 class="section-title">Datos de contacto</h3>
+                    <input type="text" placeholder="Nombre">
+                    <input type="text" placeholder="Cargo de contacto">
+                    <input type="text" placeholder="Teléfono">
+                    <input type="password" placeholder="Contraseña">
+                    <input type="password" placeholder="Repite tu contraseña">
+                </div>
+
+                <!-- Datos de la Empresa -->
+                <div class="form-column">
+                    <h3 class="section-title">Datos de la empresa</h3>
+                    <input type="text" placeholder="Empresa">
+                    <input type="text" placeholder="No de identificación fiscal">
+                    <input type="email" placeholder="Email">
+                    <input type="text" placeholder="Dirección física">
+                    <input type="text" placeholder="Teléfono de la empresa">
+                    <input type="text" placeholder="Licencias o permisos">
+                    <input type="text" placeholder="Certificados de calidad">
+                </div>
+            </div>
+
+            <!-- Aceptar términos -->
+            <div class="terms">
+                <input type="checkbox" id="terms">
+                <label for="terms">Aceptar términos y condiciones</label>
+            </div>
+
+            <!-- Botón de registro -->
+            <button class="register-btn" (click)="navigateTo('homeproveedor')">Crear cuenta</button>
+        </div>
+    </div>
+</body>

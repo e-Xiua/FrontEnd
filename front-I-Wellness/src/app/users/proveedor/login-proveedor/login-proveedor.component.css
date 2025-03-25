@@ -1,0 +1,127 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #F8F8F8;
+}
+
+/* Contenedor principal */
+.container {
+    display: flex;
+    width: 80%;
+    max-width: 900px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Sección izquierda (imagen de fondo) */
+.left-section {
+    width: 50%;
+    background: url('https://sancarlosdeviaje.com/wp-content/uploads/58543478_2124855614298767_7021957218958311424_n.jpg') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+.logo img {
+    width: 100px;
+}
+
+.logo h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Sección derecha (Formulario de Login) */
+.right-section {
+    width: 50%;
+    background: white;
+    padding: 40px;
+    text-align: center;
+}
+
+.title {
+    color: #2F5EA7;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.icon {
+    width: 50px;
+    margin-bottom: 15px;
+}
+
+.login-text {
+    color: #9FC0C7;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* Estilos del formulario */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-form input {
+    padding: 12px;
+    width: 100%;
+    border: 1px solid #EAE7DC;
+    border-radius: 5px;
+    background: #F7F3EC;
+    font-size: 14px;
+}
+
+.login-btn {
+    background-color: #48A6A7;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    background-color: #3B8E8E;
+}
+
+/* Links adicionales */
+.extra-links {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.create-account, .forgot-password {
+    font-size: 14px;
+    color: black;
+    text-decoration: none;
+}
+
+.create-account {
+    font-weight: bold;
+}
+
+.forgot-password {
+    color: gray;
+}
