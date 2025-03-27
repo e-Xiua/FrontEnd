@@ -16,18 +16,16 @@
             <input type="password" placeholder="Contraseña">
             <input type="password" placeholder="Repite tu contraseña">
 
-            <select id="country" [(ngModel)]="selectedCountry">
+            <select id="country" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
                 <option value="" disabled selected>Seleccione un país de procedencia</option>
                 <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
             </select>
             
-            <input type="text" id="city" placeholder="Ingrese su ciudad">
-            
-            <div class="checkbox-container">
-                <input type="checkbox" id="terms">
-                <label for="terms">Aceptar términos y condiciones</label>
-            </div>
-
+            <select id="city" [disabled]="!selectedCountry">
+                <option value="" disabled selected>Seleccione su ciudad</option>
+                <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+           
             <button class="btn-submit" (click)="navigateTo('formulariogustos')">Crear cuenta</button>
         </div>
     </div>
