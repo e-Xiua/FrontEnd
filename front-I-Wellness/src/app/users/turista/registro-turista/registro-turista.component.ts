@@ -2,32 +2,45 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth.service';
 import countriesData from '../../../../assets/countries+cities.json';
 
 @Component({
   selector: 'app-registro-turista',
   standalone: true,
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule],
   templateUrl: './registro-turista.component.html',
   styleUrl: './registro-turista.component.css'
 })
 export class RegistroTuristaComponent implements OnInit {
-  countriesData: any[] = countriesData;
+  // Variables de datos
+  countriesData: any[] = countriesData as any[];
   countries: string[] = [];
   cities: string[] = [];
   selectedCountry: string = '';
+  selectedCity: string = '';
 
+  // Campos del formulario
   name: string = '';
   email: string = '';
   phone: string = '';
   password: string = '';
   confirmPassword: string = '';
 
+  // Mensajes de error
   nameError: string = '';
   emailError: string = '';
   phoneError: string = '';
   passwordError: string = '';
   confirmPasswordError: string = '';
+  
+  // Estado de carga
+  isLoading: boolean = false;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.countries = this.countriesData.map(country => country.name);
@@ -36,6 +49,7 @@ export class RegistroTuristaComponent implements OnInit {
   onCountryChange() {
     const country = this.countriesData.find(c => c.name === this.selectedCountry);
     this.cities = country ? country.cities : [];
+    this.selectedCity = this.cities.length > 0 ? this.cities[0] : '';
   }
 
   validateName() {
@@ -90,20 +104,43 @@ export class RegistroTuristaComponent implements OnInit {
     this.validateConfirmPassword();
 
     if (!this.nameError && !this.emailError && !this.phoneError && !this.passwordError && !this.confirmPasswordError) {
-      console.log('Registro exitoso:', {
-        name: this.name,
-        email: this.email,
-        phone: this.phone,
-        country: this.selectedCountry,
-        city: this.cities,
-      });
+      this.isLoading = true;
+      
+      // Obtener la ciudad seleccionada o la primera de la lista
+      const selectedCity = this.selectedCity || (this.cities.length > 0 ? this.cities[0] : '');
+      
+      const userData = {
+        nombre: this.name,
+        correo: this.email,
+        contraseña: this.password,
+        telefono: this.phone,
+        ciudad: selectedCity,
+        pais: this.selectedCountry,
+      };
 
-      this.router.navigate(['formulariogustos']);
+      this.authService.registerTurista(userData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          console.log('Registro exitoso:', response);
+          
+          // Guardar el email para usarlo en el formulario de gustos
+          localStorage.setItem('registeredEmail', this.email);
+          
+          this.router.navigate(['formulariogustos']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error en el registro:', error);
+          
+          if (error.error && error.error.includes('correo ya está registrado')) {
+            this.emailError = 'Este correo electrónico ya está registrado';
+          } else {
+            alert('Error en el registro. Por favor, intente nuevamente.');
+          }
+        }
+      });
     } else {
       console.log('Corrige los errores antes de enviar el formulario.');
     }
   }
-
-  constructor(private router: Router) {}
-
 }
