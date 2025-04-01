@@ -134,3 +134,8 @@ input {
 .register-btn:hover {
     background-color: #3B8E8E;
 }
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}

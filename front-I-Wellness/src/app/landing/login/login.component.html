@@ -9,11 +9,13 @@
         <div class="right-panel">
             <h2 class="title">¡Bienvenido!</h2>
             <p class="subtitle">Log In</p>
-            <form>
-                <input type="text" placeholder="Email" class="input-field">
-                <input type="password" placeholder="Contraseña" class="input-field">
+            <form (submit)="onSubmit()">
+                <input type="text" [(ngModel)]="correo" name="correo" placeholder="Email" class="input-field">
+                <input type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" class="input-field">
                 <button type="submit" class="btn">Ingresar</button>
             </form>
+            
+            
             <div class="links">
                 <a href="/registro" class="create-account">Crear cuenta</a>
                 <a href="/recuperar" class="forgot-password">Olvidé mi contraseña</a>

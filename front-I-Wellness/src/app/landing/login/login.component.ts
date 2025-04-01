@@ -3,17 +3,18 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   correo: string = '';
-  contraseña: string = '';
+  password: string = '';
   errorMessage: string = '';
   isLoading: boolean = false;
 
@@ -23,7 +24,7 @@ export class LoginComponent {
   ) {}
 
   onSubmit() {
-    if (!this.correo || !this.contraseña) {
+    if (!this.correo || !this.password) {
       this.errorMessage = 'Por favor ingrese correo y contraseña';
       return;
     }
@@ -31,9 +32,9 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.correo, this.contraseña)
-      .subscribe({
-        next: (response) => {
+    this.authService.login(this.correo, this.password)
+    .subscribe({
+      next: (response:  any ) =>  {
           this.isLoading = false;
           
           // Redireccionar según el rol

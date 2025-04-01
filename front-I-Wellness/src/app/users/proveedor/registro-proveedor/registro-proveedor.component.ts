@@ -12,26 +12,26 @@ import { AuthService } from '../../../services/auth.service';
   styleUrl: './registro-proveedor.component.css'
 })
 export class RegistroProveedorComponent {
-  // Campos del formulario
-  nombre: string = '';
-  correo: string = '';
-  contraseña: string = '';
-  confirmarContraseña: string = '';
-  nombre_empresa: string = '';
-  cargoContacto: string = '';
-  telefono: string = '';
-  telefonoEmpresa: string = '';
-  coordenadaX: string = '';
-  coordenadaY: string = '';
+  // Form fields
+  name: string = '';
+  email: string = '';
+  password: string = '';
+  confirmPassword: string = '';
+  companyName: string = '';
+  contactPosition: string = '';
+  phone: string = '';
+  companyPhone: string = '';
+  coordinateX: string = '';
+  coordinateY: string = '';
 
-  // Variables de error
-  nombreError: string = '';
-  correoError: string = '';
-  contraseñaError: string = '';
-  confirmarContraseñaError: string = '';
-  empresaError: string = '';
-  telefonoError: string = '';
-  telefonoEmpresaError: string = '';
+  // Error variables
+  nameError: string = '';
+  emailError: string = '';
+  passwordError: string = '';
+  confirmPasswordError: string = '';
+  companyError: string = '';
+  phoneError: string = '';
+  companyPhoneError: string = '';
   
   isLoading: boolean = false;
 
@@ -40,39 +40,170 @@ export class RegistroProveedorComponent {
     private router: Router
   ) {}
 
-  // Método que mantiene la compatibilidad con tu HTML existente
+  // Method that maintains compatibility with your existing HTML
   navigateTo(path: string) {
-    // Antes de navegar, realizamos el registro
+    // Before navigating, we perform the registration
     if (this.validateForm()) {
       this.isLoading = true;
       
-      const proveedorData = {
-        nombre: this.nombre,
-        correo: this.correo,
-        contraseña: this.contraseña,
-        nombre_empresa: this.nombre_empresa,
-        coordenadaX: this.coordenadaX || '0',
-        coordenadaY: this.coordenadaY || '0',
-        cargoContacto: this.cargoContacto || '',
-        telefono: this.telefono,
-        telefonoEmpresa: this.telefonoEmpresa
+      const providerData = {
+        nombre: this.name,
+        correo: this.email,
+        contraseña: this.password,
+        nombre_empresa: this.companyName,
+        coordenadaX: this.coordinateX || '0',
+        coordenadaY: this.coordinateY || '0',
+        cargoContacto: this.contactPosition || '',
+        telefono: this.phone,
+        telefonoEmpresa: this.companyPhone
       };
       
-      this.authService.registerProveedor(proveedorData).subscribe({
+      this.authService.registerProveedor(providerData).subscribe({
         next: (response) => {
           this.isLoading = false;
-          console.log('Registro exitoso:', response);
-          // Ahora sí navegamos a la ruta deseada
+          console.log('Successful registration:', response);
+          // Now we navigate to the desired route
           this.router.navigate([path]);
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Error en registro:', error);
+          console.error('Registration error:', error);
           
           if (error.error && error.error.includes('correo ya está registrado')) {
-            this.correoError = 'Este correo electrónico ya está registrado';
+            this.emailError = 'This email is already registered';
           } else {
-            alert('Error en el registro: ' + (error.message || 'Intente nuevamente'));
+            alert('Registration error: ' + (error.message || 'Please try again'));
+          }
+        }
+      });
+    } else {
+      console.log('Fix the errors before submitting the form.');
+    }
+  }
+
+  // Validation methods
+  validateForm(): boolean {
+    this.validateName();
+    this.validateEmail();
+    this.validatePassword();
+    this.validateConfirmPassword();
+    this.validateCompany();
+    this.validatePhone();
+    this.validateCompanyPhone();
+    
+    return (
+      !this.nameError && 
+      !this.emailError && 
+      !this.passwordError && 
+      !this.confirmPasswordError && 
+      !this.companyError && 
+      !this.phoneError && 
+      !this.companyPhoneError
+    );
+  }
+
+  validateName() {
+    if (!this.name.trim()) {
+      this.nameError = 'El nombre solo puede contener letras y espacios';
+    } else {
+      this.nameError = '';
+    }
+  }
+
+  validateEmail() {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!this.email.match(regex)) {
+      this.emailError = 'Ingrese un correo electrónico válido';
+    } else {
+      this.emailError = '';
+    }
+  }
+
+  validatePassword() {
+    if (this.password.length < 6) {
+      this.passwordError = 'La contraseña debe tener al menos 6 caracteres';
+    } else {
+      this.passwordError = '';
+    }
+  }
+
+  validateConfirmPassword() {
+    if (this.password !== this.confirmPassword) {
+      this.confirmPasswordError = 'Las contraseñas no coinciden';
+    } else {
+      this.confirmPasswordError = '';
+    }
+  }
+
+  validateCompany() {
+    if (!this.companyName.trim()) {
+      this.companyError = 'Ingrese nombre de la empresa';
+    } else {
+      this.companyError = '';
+    }
+  }
+
+  validatePhone() {
+    const phoneRegex = /^[0-9]{7,15}$/;
+    if (!this.phone.match(phoneRegex)) {
+      this.phoneError = 'El teléfono solo puede contener números (7 a 15 dígitos)';
+    } else {
+      this.phoneError = '';
+    }
+  }
+
+  validateCompanyPhone() {
+    const phoneRegex = /^[0-9]{7,15}$/;
+    if (!this.companyPhone.match(phoneRegex)) {
+      this.companyPhoneError = 'El teléfono solo puede contener números (7 a 15 dígitos)';
+    } else {
+      this.companyPhoneError = '';
+    }
+  }
+
+  registerUser() {
+    this.validateName();
+    this.validateEmail();
+    this.validatePhone();
+    this.validatePassword();
+    this.validateConfirmPassword();
+    this.validateCompany();
+    this.validateCompanyPhone();
+
+    if (!this.nameError && !this.emailError && !this.phoneError && !this.passwordError && !this.confirmPasswordError && !this.companyError && !this.companyPhoneError) {
+      this.isLoading = true;
+      
+      
+      
+      const providerData = {
+        nombre: this.name,
+        correo: this.email,
+        contraseña: this.password,
+        nombre_empresa: this.companyName,
+        coordenadaX: this.coordinateX || '0',
+        coordenadaY: this.coordinateY || '0',
+        cargoContacto: this.contactPosition || '',
+        telefono: this.phone,
+        telefonoEmpresa: this.companyPhone
+      };
+
+      this.authService.registerProveedor(providerData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          console.log('Registro exitoso:', response);
+          
+          localStorage.setItem('registeredEmail', this.email);
+          
+          this.router.navigate(['formulariogustos']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error en el registro:', error);
+          
+          if (error.error && error.error.includes('correo ya está registrado')) {
+            this.emailError = 'Este correo electrónico ya está registrado';
+          } else {
+            alert('Error en el registro. Por favor, intente nuevamente.');
           }
         }
       });
@@ -81,83 +212,5 @@ export class RegistroProveedorComponent {
     }
   }
 
-  // Métodos de validación
-  validateForm(): boolean {
-    this.validateNombre();
-    this.validateCorreo();
-    this.validateContraseña();
-    this.validateConfirmarContraseña();
-    this.validateEmpresa();
-    this.validateTelefono();
-    this.validateTelefonoEmpresa();
-    
-    return (
-      !this.nombreError && 
-      !this.correoError && 
-      !this.contraseñaError && 
-      !this.confirmarContraseñaError && 
-      !this.empresaError && 
-      !this.telefonoError && 
-      !this.telefonoEmpresaError
-    );
-  }
 
-  validateNombre() {
-    if (!this.nombre.trim()) {
-      this.nombreError = 'El nombre es obligatorio';
-    } else {
-      this.nombreError = '';
-    }
-  }
-
-  validateCorreo() {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!this.correo.match(regex)) {
-      this.correoError = 'Ingrese un correo electrónico válido';
-    } else {
-      this.correoError = '';
-    }
-  }
-
-  validateContraseña() {
-    if (this.contraseña.length < 6) {
-      this.contraseñaError = 'La contraseña debe tener al menos 6 caracteres';
-    } else {
-      this.contraseñaError = '';
-    }
-  }
-
-  validateConfirmarContraseña() {
-    if (this.contraseña !== this.confirmarContraseña) {
-      this.confirmarContraseñaError = 'Las contraseñas no coinciden';
-    } else {
-      this.confirmarContraseñaError = '';
-    }
-  }
-
-  validateEmpresa() {
-    if (!this.nombre_empresa.trim()) {
-      this.empresaError = 'El nombre de la empresa es obligatorio';
-    } else {
-      this.empresaError = '';
-    }
-  }
-
-  validateTelefono() {
-    const phoneRegex = /^[0-9]{7,15}$/;
-    if (!this.telefono.match(phoneRegex)) {
-      this.telefonoError = 'Ingrese un número de teléfono válido (7-15 dígitos)';
-    } else {
-      this.telefonoError = '';
-    }
-  }
-
-  validateTelefonoEmpresa() {
-    const phoneRegex = /^[0-9]{7,15}$/;
-    if (!this.telefonoEmpresa.match(phoneRegex)) {
-      this.telefonoEmpresaError = 'Ingrese un número de teléfono válido (7-15 dígitos)';
-    } else {
-      this.telefonoEmpresaError = '';
-    }
-  }
 }
