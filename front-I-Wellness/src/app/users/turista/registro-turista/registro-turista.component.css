@@ -11,12 +11,13 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f8f8f8;
+    padding-top: 4%;
 }
 
 .container {
     display: flex;
     width: 900px;
-    height: 500px;
+    height: wrap-content;
     background: white;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -89,7 +90,7 @@ body {
 }
 
 /* Campos de entrada */
-input[type="text"], input[type="email"], input[type="password"] {
+input[type="text"], input[type="email"], input[type="password"], select {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -126,4 +127,10 @@ input[type="text"], input[type="email"], input[type="password"] {
     margin-top: 15px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
 }

@@ -8,10 +8,27 @@
                     <p>Agregar imagen</p>
                 </div>
                 <div class="form-fields">
-                    <input type="text" value="Sauna" disabled>
-                    <input type="text" value="¿En que centro está ubicado?" disabled>
-                    <input type="text" value="Precio" disabled>
-                    <textarea disabled>Descripción</textarea>
+                    <input type="text" value="Sauna de lujo">
+                    
+                    <!-- Selección de días -->
+                     <label for="days">Horarios disponibles:</label>
+                    <div class="days-selection">
+                        <div class="day-item" *ngFor="let day of days">
+                            <input type="checkbox" [(ngModel)]="day.selected" id="{{ day.name }}">
+                            <label for="{{ day.name }}">{{ day.name }}</label>
+                        </div>
+                    </div>
+
+                    <!-- Horario -->
+                    <div class="time-selection">
+                        <label for="starTime">Hora de apertura:</label>
+                        <input type="time" id="startTime"[(ngModel)]="startTime">
+                        <label for="endTime">Hora de cierre:</label>
+                        <input type="time" id="endTime" [(ngModel)]="endTime">
+                    </div>
+                    
+                    <input type="number" value="20" >
+                    <textarea >Tarde de sauna grupal con aromaterapia</textarea>
                     <button class="save-btn" (click)="navigateTo('homeproveedor')">Guardar</button>
                 </div>
             </div>

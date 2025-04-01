@@ -3,46 +3,54 @@
         <!-- Sección Izquierda (Imagen y Logo) -->
         <div class="left-section">
             <div class="logo">
-                <img src="logo.png" alt="I-Wellness">
+                <img src="../../../../assets/logo.png" alt="I-Wellness Logo">
                 <h2>I-Wellness</h2>
             </div>
         </div>
-
+        
         <!-- Sección Derecha (Formulario de Registro) -->
         <div class="right-section">
             <h2 class="title"><span>EMPRESA</span> Registro</h2>
-
+            
             <div class="form-container">
                 <!-- Datos de Contacto -->
                 <div class="form-column">
                     <h3 class="section-title">Datos de contacto</h3>
-                    <input type="text" placeholder="Nombre">
-                    <input type="text" placeholder="Cargo de contacto">
-                    <input type="text" placeholder="Teléfono">
-                    <input type="password" placeholder="Contraseña">
-                    <input type="password" placeholder="Repite tu contraseña">
+                    
+                    <input type="text" placeholder="Nombre" [(ngModel)]="name" (input)="validateName()" required>
+                    <small *ngIf="nameError" class="error-message">{{ nameError }}</small>
+                    
+                    <input type="text" placeholder="Cargo de contacto" [(ngModel)]="contactPosition">
+                    
+                    <input type="text" placeholder="Teléfono" [(ngModel)]="phone" (input)="validatePhone()" required>
+                    <small *ngIf="phoneError" class="error-message">{{ phoneError }}</small>
+                    
+                    <input type="password" placeholder="Contraseña" [(ngModel)]="password" (input)="validatePassword()" required>
+                    <small *ngIf="passwordError" class="error-message">{{ passwordError }}</small>
+                    
+                    <input type="password" placeholder="Repite tu contraseña" [(ngModel)]="confirmPassword" (input)="validateConfirmPassword()" required>
+                    <small *ngIf="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</small>
                 </div>
-
+                
                 <!-- Datos de la Empresa -->
                 <div class="form-column">
                     <h3 class="section-title">Datos de la empresa</h3>
-                    <input type="text" placeholder="Empresa">
-                    <input type="text" placeholder="No de identificación fiscal">
-                    <input type="email" placeholder="Email">
-                    <input type="text" placeholder="Dirección física">
-                    <input type="text" placeholder="Teléfono de la empresa">
-                    <input type="text" placeholder="Licencias o permisos">
-                    <input type="text" placeholder="Certificados de calidad">
+                    
+                    <input type="text" placeholder="Nombre de la empresa" [(ngModel)]="companyName" (input)="validateCompany()" required>
+                    <small *ngIf="companyError" class="error-message">{{ companyError }}</small>
+                    
+                    <input type="email" placeholder="Email" [(ngModel)]="email" (input)="validateEmail()" required>
+                    <small *ngIf="emailError" class="error-message">{{ emailError }}</small>
+                    
+                    <input type="text" placeholder="Teléfono de la empresa" [(ngModel)]="companyPhone" (input)="validateCompanyPhone()" required>
+                    <small *ngIf="companyPhoneError" class="error-message">{{ companyPhoneError }}</small>
+                    
+                    <input type="text" placeholder="Coordenadas eje X" [(ngModel)]="coordinateX">
+                    
+                    <input type="text" placeholder="Coordenadas eje Y" [(ngModel)]="coordinateY">
                 </div>
             </div>
-
-            <!-- Aceptar términos -->
-            <div class="terms">
-                <input type="checkbox" id="terms">
-                <label for="terms">Aceptar términos y condiciones</label>
-            </div>
-
-            <!-- Botón de registro -->
+            
             <button class="register-btn" (click)="navigateTo('homeproveedor')">Crear cuenta</button>
         </div>
     </div>

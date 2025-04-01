@@ -1,15 +1,24 @@
 <body>
     <div class="container">
-        <div class="left-panel"></div>
-        <div class="right-panel">
+        <div class="left-panel">
             <div class="logo">
-                <h1><strong>I-Wellness</strong> <span class="icon">🌸</span></h1>
+                <img src="../../../assets/logo.png" alt="Logo I-Wellness">
+                <h1>I-Wellness</h1>
             </div>
-            <p>¡Bienvenido/a!</p>
-            <div class="buttons">
-                <button class="btn" (click)="navigateTo('loginturista')">Soy Visitante</button>
-                <button class="btn" (click)="navigateTo('loginproveedor')">Soy Empresa</button>
-                <button class="btn" (click)="navigateTo('loginadmin')">Soy Administrador</button>
+        </div>
+        <div class="right-panel">
+            <h2 class="title">¡Bienvenido!</h2>
+            <p class="subtitle">Log In</p>
+            <form (submit)="onSubmit()">
+                <input type="text" [(ngModel)]="correo" name="correo" placeholder="Email" class="input-field">
+                <input type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" class="input-field">
+                <button type="submit" class="btn">Ingresar</button>
+            </form>
+            
+            
+            <div class="links">
+                <a href="/registro" class="create-account">Crear cuenta</a>
+                <a href="/recuperar" class="forgot-password">Olvidé mi contraseña</a>
             </div>
         </div>
     </div>

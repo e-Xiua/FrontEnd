@@ -97,6 +97,10 @@ h2 {
     margin-bottom: 20px;
 }
 
+label {
+    color: black;
+}
+
 /* Contenido del formulario */
 .form-content {
     display: flex;
@@ -143,7 +147,6 @@ h2 {
     height: 70px;
     resize: none;
 }
-
 /* Botón Guardar */
 .save-btn {
     background-color: #48A6A7;
@@ -158,4 +161,18 @@ h2 {
 
 .save-btn:hover {
     background-color: #3B8E8E;
+}
+
+.days-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20%, 1fr)); 
+    gap: 10px; 
+    padding: 10px;
+    font-size: small;
+}
+
+.day-item {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
 }

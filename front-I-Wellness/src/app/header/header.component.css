@@ -10,12 +10,15 @@ header {
     color: white;
     transition: background 0.3s ease-in-out;
     z-index: 1000;
-    background: transparent; /* Ajuste para hacerlo más similar */
+    background-color:rgba(133, 140, 146, 0.608);
+    backdrop-filter: blur(10px); /* Fondo borroso */
+
     height: 60px;
 }
 
 header.scrolled {
-    background: linear-gradient(to right, #9ACBD0, #48A6A7)/* Más opaco al hacer scroll */
+    backdrop-filter: blur(10px); /* Fondo borroso */
+
 }
 
 
@@ -123,7 +126,7 @@ nav ul li a.active {
 }
 
 /* Botón de Log in */
-.login-btn {
+.login-btn, .register-btn {
     background-color: #007bff;
     color: white;
     border: none;
@@ -134,7 +137,7 @@ nav ul li a.active {
     transition: background 0.3s ease;
 }
 
-.login-btn:hover {
+.login-btn:hover, .register-btn:hover {
     background-color: #0056b3;
 }
 

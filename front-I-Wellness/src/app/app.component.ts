@@ -7,6 +7,7 @@ import { HeaderProveedorComponent } from './users/proveedor/header-proveedor/hea
 import { HeaderTuristaComponent } from './users/turista/header-turista/header-turista.component';
 import { HeaderAdminComponent } from './users/administrador/header-admin/header-admin.component';
 
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -17,6 +18,8 @@ import { HeaderAdminComponent } from './users/administrador/header-admin/header-
 export class AppComponent {
   title: string = 'front-I-Wellness';
   headerType: string = 'default';
+  //se muestra footer o no se muestra
+  showFooter: boolean = false; 
 
   constructor(private router: Router) {
     this.router.events.subscribe(event => {
@@ -39,6 +42,10 @@ export class AppComponent {
 
         // Asigna el header según la ruta, usa 'default' si no está en el mapa
         this.headerType = headersMap[event.url] || 'default';
+        //rutas en las que se permite el header
+        const allowedRoutes = ['/', '/temas', '/analisis'];
+        this.showFooter = allowedRoutes.includes(event.url);
+      
       }
     });
   }

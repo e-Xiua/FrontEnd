@@ -28,7 +28,7 @@ body {
 /* Sección izquierda (imagen de fondo con logo) */
 .left-section {
     width: 40%;
-    background: url('https://sancarlosdeviaje.com/wp-content/uploads/58543478_2124855614298767_7021957218958311424_n.jpg') no-repeat center center/cover;
+    background: url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/602524337.jpg?k=22bf85a61ea14645bc54c0ee436aae8583754e4154ef7b5f4e2c353bd7a86e34&o=&hp=1') no-repeat center center/cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,4 +133,9 @@ input {
 
 .register-btn:hover {
     background-color: #3B8E8E;
+}
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
 }

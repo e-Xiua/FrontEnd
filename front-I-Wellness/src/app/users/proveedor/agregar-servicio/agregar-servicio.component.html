@@ -9,11 +9,27 @@
                     <p>Agregar imagen</p>
                 </div>
                 <div class="form-fields">
-                    <input type="text" placeholder="Categoria">
                     <input type="text" placeholder="Nombre">
-                    <input type="text" placeholder="¿En que centro está ubicado?">
-                    <input type="text" placeholder="Precio">
                     <textarea placeholder="Descripción"></textarea>
+
+                     <!-- Selección de días -->
+                     <label for="days">Horarios disponibles:</label>
+                    <div class="days-selection">
+                        <div class="day-item" *ngFor="let day of days">
+                            <input type="checkbox" [(ngModel)]="day.selected" id="{{ day.name }}">
+                            <label for="{{ day.name }}">{{ day.name }}</label>
+                        </div>
+                    </div>
+
+                    <!-- Horario -->
+                    <div class="time-selection">
+                        <label for="starTime">Hora de apertura:</label>
+                        <input type="time" id="startTime"[(ngModel)]="startTime">
+                        <label for="endTime">Hora de cierre:</label>
+                        <input type="time" id="endTime" [(ngModel)]="endTime">
+                    </div>
+                    
+                    <input type="number" placeholder="Precio"> 
                     <button class="save-btn" (click)="navigateTo('homeproveedor')">Guardar</button>
                 </div>
             </div>
