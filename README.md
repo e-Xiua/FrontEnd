@@ -14,7 +14,6 @@ El sistema se adapta a distintos roles: turistas, proveedores y administradores,
 - TypeScript  
 - HTML5 / CSS3  
 - TailwindCSS  
-- RxJS  
 - JWT / Firebase Authentication  
 - Angular Material / PrimeNG
 
