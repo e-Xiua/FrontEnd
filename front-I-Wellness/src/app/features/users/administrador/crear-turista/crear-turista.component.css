@@ -1,0 +1,331 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: transparent;
+    padding-top: 4%;
+}
+
+.container {
+    display: flex;
+    width: 900px;
+    height: wrap-content;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Panel izquierdo */
+.left-panel {
+    width: 50%;
+    background: url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/602524337.jpg?k=22bf85a61ea14645bc54c0ee436aae8583754e4154ef7b5f4e2c353bd7a86e34&o=&hp=1') no-repeat center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.logo {
+    text-align: center;
+    color: white;
+}
+
+.logo img {
+    width: 120px;
+    margin-bottom: 10px;
+}
+
+.logo h1 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Panel derecho */
+.right-panel {
+    width: 50%;
+    padding: 30px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.title {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.turista {
+    color: #3166A6;
+    font-weight: bold;
+}
+
+.registro {
+    color: #A8D0C6;
+    font-weight: bold;
+}
+
+/* Botón de secciones */
+.btn-section {
+    width: 100%;
+    background: #3166A6;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Campos de entrada */
+input[type="text"], input[type="email"], input[type="password"], select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    background: #f6f3eb;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Checkbox */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.checkbox-container input {
+    margin-right: 10px;
+}
+
+.checkbox-container label{
+    color: black;
+}
+
+/* Botón de envío */
+.btn-submit {
+    width: 100%;
+    background: #4B9E9E;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.preferencias-section {
+    margin-top: 20px;
+}
+
+.preferencias-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #3166A6;
+    font-weight: bold;
+}
+
+.preferencias-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.preferencias-list label {
+    display: flex;
+    align-items: center;
+    background-color: #f6f3eb;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.preferencias-list label:hover {
+    background-color: #e6e2d8;
+}
+
+.preferencias-list input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #3166A6; /* Para navegadores modernos */
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Estilos específicos para el campo de fecha */
+.fecha-nacimiento-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.fecha-nacimiento-label {
+    margin-left: 5px;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+    background: transparent;
+}
+
+input[type="date"] {
+    color: #333;
+    letter-spacing: 1px;
+}
+
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    background-color: #f6f3eb;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+/* Estilo para que el placeholder de fecha se vea correctamente */
+input[type="date"]::-webkit-datetime-edit { 
+    color: #888;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    background-color: #f6f3eb;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+::ng-deep ngx-intl-tel-input input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    background: #f6f3eb;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  ::ng-deep .iti {
+    display: block;
+    margin-top: 10px;
+  }
+  
+  ::ng-deep .iti__arrow {
+    display: none !important;
+  }
+  
+  ::ng-deep .iti .dropdown-menu.country-dropdown {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-color: #c7cace;
+    margin-top: -1px;
+  }
+  
+  ::ng-deep .iti .iti__country-list {
+    box-shadow: none;
+    font-size: 14px;
+    margin-left: 0;
+    width: 244px;
+    max-height: 170px;
+  }
+  
+  ::ng-deep .iti__flag-container.open + input {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  
+  ::ng-deep .iti .search-container input {
+    font-size: 14px;
+    border-color: #c7cace;
+    border-radius: 0;
+    padding: 5px 10px;
+  }
+  
+  ::ng-deep .iti .search-container input:focus {
+    outline: none;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    background: #f6f3eb;
+    border-radius: 5px;
+    padding: 5px 10px;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti__flag-container {
+    position: static !important;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  ::ng-deep ngx-intl-tel-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    padding: 5px;
+  }
+
+::ng-deep .iti--allow-dropdown input.iti__tel-input,
+.iti--show-selected-dial-code input.iti__tel-input {
+    padding-left: 10px !important;
+}
+
+/* Ocultar el input file nativo */
+.file-upload-label input[type="file"] {
+  display: none;
+}
+
+/* Estilo del label que actúa como botón */
+.file-upload-label {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #4B9E9E; 
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(49, 102, 166, 0.3);
+}
+
+/* Hover para el label */
+.file-upload-label:hover {
+  background-color: #3e8383;
+  box-shadow: 0 4px 10px rgba(37, 77, 127, 0.5);
+}

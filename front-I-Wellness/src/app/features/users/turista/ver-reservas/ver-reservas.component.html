@@ -1,0 +1,25 @@
+<div *ngFor="let proveedor of proveedoresFiltrados" class="proveedor-card">
+  <h2 (click)="alternarProveedor(proveedor.id)" class="proveedor-header">
+    {{ proveedor.proveedorInfo?.nombre_empresa }}
+  </h2>
+
+  <!-- Mostrar si el proveedor está en el set de abiertos -->
+  <div *ngIf="proveedoresAbiertos.has(proveedor.id)">
+    <div *ngFor="let servicio of servicios">
+      <div *ngIf="servicio._idProveedor === proveedor.id" class="servicio-card">
+        <h3>{{ servicio.nombre }}</h3>
+
+        <ng-container *ngFor="let reserva of reservas">
+          <div *ngIf="reserva._idServicio === servicio._idServicio" class="reserva-block">
+            <p><strong>Fecha:</strong> {{ reserva.fechaServicio | date: 'dd/MM/yyyy HH:mm' }}</p>
+            <p [ngClass]="getEstadoClass(reserva.estado)"><strong>Estado:</strong> {{ reserva.estado }}</p>
+
+             <button *ngIf="reserva.estado !== 'cancelada' && reserva.estado !== 'completada'" (click)="cancelarReserva(reserva)" class="btn-cancelar">
+              Cancelar reserva
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

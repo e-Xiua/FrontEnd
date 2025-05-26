@@ -1,0 +1,27 @@
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Hola Admin</h2>
+            <ul>
+                <li class="active">&#9998; Edit profile</li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div class="profile-header">
+                <h1>Editar perfil</h1>
+                <img *ngIf="admin?.foto" [src]="admin.foto" alt="Profile Picture" class="profile-pic">
+            </div>
+            <form class="profile-form">
+                <div class="input-group full-width">
+                    <label>Nombre</label>
+                    <input type="text" [(ngModel)]="admin.nombre" name="nombre">
+                </div>
+
+                <div class="buttons">
+                    <button class="cancel" (click)="navigateTo('homeadmin')">Cancel</button>
+                    <button class="save" (click)="guardarCambios()">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>

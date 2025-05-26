@@ -1,0 +1,286 @@
+/* Reset de estilos */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #F8F8F8;
+    overflow-y: auto; 
+}
+
+/* Contenedor principal */
+.container {
+    margin-top: 3%;
+    display: flex;
+    width: 80%;
+    max-width: 1000px;
+    max-height: 85%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+/* Sección izquierda (imagen de fondo con logo) */
+.left-section {
+    width: 40%;
+    background: url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/602524337.jpg?k=22bf85a61ea14645bc54c0ee436aae8583754e4154ef7b5f4e2c353bd7a86e34&o=&hp=1') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+.logo img {
+    width: 120px;
+}
+
+.logo h2 {
+    font-size: 26px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Sección derecha (Formulario) */
+.right-section {
+    width: 60%;
+    background: white;
+    padding: 40px;
+    text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2F5EA7;
+    margin-bottom: 20px;
+}
+
+.title span {
+    color: #9FC0C7;
+}
+
+/* Contenedor de formularios */
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Columnas del formulario */
+.form-column {
+    width: 48%;
+}
+
+/* Títulos de sección */
+.section-title {
+    background-color: #2F5EA7;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Campos de entrada */
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #EAE7DC;
+    border-radius: 5px;
+    background: #F7F3EC;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Sección de Productos y Servicios */
+.products-section {
+    margin-top: 20px;
+}
+
+/* Aceptar términos */
+.terms {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    margin: 15px 0;
+    font-size: 14px;
+    color: gray;
+}
+
+.terms input {
+    margin-right: 10px;
+}
+
+/* Botón de registro */
+.register-btn {
+    background-color: #48A6A7;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.register-btn:hover {
+    background-color: #3B8E8E;
+}
+.error-message {
+    color: red;
+    font-size: 14px;
+}
+.map-container {
+    height: 200px;   
+    width: 100%;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5rem;
+  }
+  
+::ng-deep ngx-intl-tel-input input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    background: #f6f3eb;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  ::ng-deep .iti {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  ::ng-deep .iti__arrow {
+    display: none !important;
+  }
+  
+  ::ng-deep .iti .dropdown-menu.country-dropdown {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-color: #c7cace;
+    margin-top: -1px;
+  }
+  
+  ::ng-deep .iti .iti__country-list {
+    box-shadow: none;
+    font-size: 14px;
+    margin-left: 0;
+    width: 244px;
+    max-height: 170px;
+  }
+  
+  ::ng-deep .iti__flag-container.open + input {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  
+  ::ng-deep .iti .search-container input {
+    font-size: 14px;
+    border-color: #c7cace;
+    border-radius: 0;
+    padding: 5px 10px;
+  }
+  
+  ::ng-deep .iti .search-container input:focus {
+    outline: none;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    background: #f6f3eb;
+    border-radius: 5px;
+    padding: 5px 10px;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti__flag-container {
+    position: static !important;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  ::ng-deep ngx-intl-tel-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    padding: 5px;
+  }
+
+
+  .password-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .password-container input {
+    width: 100%;
+    padding: 10px;
+    padding-right: 40px; /* Espacio para el botón */
+  }
+  
+  .toggle-password {
+    position: absolute;
+    font-size: 14px;
+    right: 10px;
+    top: 30%;
+    transform: translateY(-30%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #3166A6;
+  }
+
+  ::ng-deep .iti--allow-dropdown input.iti__tel-input,
+  .iti--show-selected-dial-code input.iti__tel-input {
+    padding-left: 10px !important;
+  }
+  
+  select.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #EAE7DC;
+    border-radius: 5px;
+    background: #F7F3EC;
+    font-size: 14px;
+    color: #333;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='7' viewBox='0 0 10 7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2348A6A7' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 7px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+select.form-control:focus {
+    outline: none;
+    border-color: #48A6A7;
+    box-shadow: 0 0 0 2px rgba(72, 166, 167, 0.2);
+}
+
+.foto {
+  color: #000;
+}
+

@@ -1,0 +1,34 @@
+<main>
+      <h2>{{ nombreEmpresa }} </h2>
+      <div class="recommendations">
+        <section>
+ <div class="scroll-wrapper">
+              <button
+                class="scroll-btn left"
+                [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollLeft }"
+                (click)="scrollLeft('para-ti')"
+              >&#10094;</button>
+
+              <div
+                class="card-container"
+                id="para-ti"
+                (scroll)="onScroll('para-ti')"
+                #paraTiContainer
+              >
+                <div class="card" *ngFor="let servicio of servicios" (click)="navigateToDetalle(servicio._idServicio)">
+                  <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                  <span>{{ servicio.nombre }}</span>
+                </div>
+              </div>
+
+              <button
+                class="scroll-btn right"
+                [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollRight }"
+                (click)="scrollRight('para-ti')"
+              >&#10095;</button>
+            </div>
+        </section>
+        
+      
+      </div>
+    </main>

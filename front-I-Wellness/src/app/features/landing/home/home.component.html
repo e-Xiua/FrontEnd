@@ -1,0 +1,168 @@
+<div class="overlay"></div>
+
+<div class="container">
+  <div class="hero">
+    <h1>
+      I-Wellness
+      <img
+        src="../../../assets/logo.png"
+        alt="I-Wellness Logo"
+        style="height: 40px; vertical-align: middle"
+      />
+    </h1>
+  </div>
+
+    <!-- Dashboard Section -->
+    <div class="dashboard-container">
+        <h2>Análisis del Ecosistema de Bienestar en La Fortuna</h2>
+        
+        <!-- KPIs Section -->
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-value">Glamping</div>
+                <div class="kpi-label">Producto más ofrecido</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{nacionalidadTop}}</div>
+                <div class="kpi-label">País con más visitantes </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">Conexión con la naturaleza</div>
+                <div class="kpi-label">Actividad más popular</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">Principio de año</div>
+                <div class="kpi-label">Temporada más visitada</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{totalTuristas}}</div>
+                <div class="kpi-label">Visitantes Registrados</div>
+            </div>
+        </div>
+
+    <!-- Charts Grid -->
+    <div class="chart-container">
+      <!-- Productos Chart -->
+      <div class="chart-block medium">
+        <h3>Productos ofrecidos por las empresas</h3>
+        <div class="chart-content">
+          <ngx-charts-pie-chart
+            [view]="[475, 400]"
+            [results]="productosData"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [legendPosition]="legendPosition"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Nacionalidades Chart -->
+      <div class="chart-block medium">
+        <h3>Nacionalidades de los turistas</h3>
+        <div class="chart-content">
+          <ngx-charts-pie-chart
+            [view]="[475, 400]"
+            [results]="nacionalidadesData"
+            [legend]="true"
+            [labels]="true"
+            [doughnut]="true"
+            [legendPosition]="legendPosition"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+
+      <!-- Actividades Chart -->
+      <div class="chart-block full">
+        <h3>Actividades más frecuentes de los visitantes</h3>
+        <div class="chart-content">
+          <ngx-charts-bar-vertical
+            [view]="[1000, 350]"
+            [results]="actividadesVisitantesData"
+            [legend]="false"
+            [xAxis]="true"
+            [yAxis]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Actividad"
+            yAxisLabel="Frecuencia"
+          >
+          </ngx-charts-bar-vertical>
+        </div>
+      </div>
+
+      <!-- Temporada Chart -->
+      <div class="chart-block full">
+        <h3>Visitas por temporada</h3>
+        <div class="chart-content">
+          <ngx-charts-line-chart
+            [view]="[1000, 350]"
+            [results]="temporadaLineData"
+            [legend]="false"
+            [xAxis]="true"
+            [yAxis]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Temporada"
+            yAxisLabel="Cantidad de visitas"
+            [autoScale]="true"
+          >
+          </ngx-charts-line-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section">
+    <h2>¿Qué es el Turismo de Bienestar?</h2>
+    <div class="info-content">
+      <p>
+        El turismo de bienestar es una modalidad que pone en el centro el
+        cuidado integral de la persona, procurando su equilibrio físico, mental
+        y emocional mientras viaja. Según la Organización Mundial del Turismo
+        (UNWTO), se trata de una actividad orientada a mejorar y armonizar los
+        principales ámbitos de la vida humana —físico, mental, emocional,
+        ocupacional, intelectual y espiritual— a través de prácticas
+        preventivas, proactivas y de mejora del estilo de vida. Así, el viajero
+        de bienestar busca experiencias que le permitan relajarse, recuperarse
+        del estrés y fortalecer hábitos saludables mediante ejercicio,
+        alimentación consciente, técnicas de relajación, autocuidado y
+        tratamientos curativos. A diferencia de otras formas de turismo (por
+        ejemplo, el de aventura o el cultural), el turismo de bienestar
+        aprovecha recursos naturales y servicios especializados para ofrecer
+        vivencias que fomentan un estado duradero de salud y equilibrio interior
+        (UNWTO, s. f.).
+      </p>
+      <br />
+      <span class="small-text"
+        >Referencia UNWTO. (s. f.). Glosario de términos de turismo | OMT.
+        //www.unwto.org/es/glosario-terminos-turisticos</span
+      >
+      <br/>
+      <br/>
+      <p *ngIf="mostrarInfoExtra">
+        Esta plataforma hace parte integral del sistema de gobernanza
+        inteligente del ecosistema de turismo de bienestar de la Zona Turística
+        de La Fortuna, Costa Rica.
+      </p>
+      <button class="btn" (click)="onLeerMas()">Leer Más</button>
+      
+    </div>
+  </div>
+
+  <!-- Gallery Section -->
+  <div class="galeria">
+    <section>
+      <img
+        src="https://revistasumma.com/wp-content/uploads/2022/06/wellness.jpg"
+      />
+      <img src="https://www.revistaviajesdigital.com/images/2019/POASSS.jpg" />
+      <img
+        src="https://www.revistaeyn.com/binrepository/1496x900/148c0/1200d900/none/26086/VHQW/Turismowelness1_EN1351768_MG223192163.jpg"
+      />
+    </section>
+  </div>
+</div>

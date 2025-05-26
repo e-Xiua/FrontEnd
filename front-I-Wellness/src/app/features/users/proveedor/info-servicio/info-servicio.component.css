@@ -1,0 +1,234 @@
+.service-container {
+  max-width: 900px;
+  margin: 120px auto;
+  background-color: #fdfdfd;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.service-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.service-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.service-image {
+  flex: 0 0 250px;
+  width: 100%;
+  max-width: 250px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.service-meta {
+  flex: 1;
+}
+
+.service-description {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #444;
+}
+
+.service-price,
+.service-hours {
+  font-size: 16px;
+  margin: 6px 0;
+}
+
+.service-days {
+  margin-top: 30px;
+}
+
+.service-days ul {
+  list-style: none;
+  padding: 0;
+}
+
+.service-days li {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.reviews {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.review {
+  margin-bottom: 15px;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+mat-form-field {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  padding: 0 12px;
+}
+
+::ng-deep .mat-calendar {
+  font-family: 'Segoe UI', sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background-color: #f2efe7;
+  color: #000;
+}
+
+::ng-deep .mat-calendar-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: #63B2B4 !important;
+  color: #fff !important;
+  border-radius: 50%;
+}
+
+::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: #63B2B4;
+}
+
+::ng-deep .mat-calendar-body-disabled {
+  color: rgba(0, 0, 0, 0.3); /* color más tenue */
+  pointer-events: none;
+  background-color: transparent !important;
+  text-decoration: line-through; /* opcional */
+  cursor: not-allowed;
+}
+
+::ng-deep .mat-timepicker-panel {
+  font-family: 'Segoe UI', sans-serif;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background-color: #f2efe7 !important;
+  color: #000;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  padding: 0 12px;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-infix {
+  padding: 0;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-input-element {
+  font-size: 16px;
+  padding: 12px 14px;
+}
+
+::ng-deep .mat-form-field-label {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #555;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-outline {
+  border-radius: 8px;
+}
+
+/* Botón Reservar */
+.btn-reservar {
+    background-color: #63B2B4; /* Color principal */
+    color: white;
+    padding: 12px 20px; /* Tamaño ligeramente mayor para hacerlo más visible */
+    border: none;
+    border-radius: 8px; /* Borde más redondeado */
+    cursor: pointer;
+    font-size: 18px; /* Aumento el tamaño de la fuente para que se vea más destacado */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Agrego una sombra sutil */
+    transition: all 0.3s ease; /* Transición suave al hacer hover */
+}
+
+.btn-reservar:hover {
+    background-color: #4a9e9a; /* Color oscuro en hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada al pasar el cursor */
+}
+
+.btn-reservar:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none; /* Elimino la sombra si el botón está deshabilitado */
+}
+
+.reserva-campos {
+  display: flex;
+  flex-direction: column; /* Asegura que los elementos se apilen verticalmente */
+  align-items: center; /* Alinea los elementos a la izquierda */
+}
+.reserva-container {
+  background-color: #f0fafa;
+  border-radius: 12px;
+  padding: 10px;
+  margin-top: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.reserva-container h3 {
+   display: flex;
+    justify-content: center;
+}
+
+.proveedor-info {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #eef8f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.proveedor-info h3 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+.proveedor-contenido {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.proveedor-foto {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.proveedor-detalles {
+  flex: 1;
+}
+
+.proveedor-detalles p {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #444;
+}
+

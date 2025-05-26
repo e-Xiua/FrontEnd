@@ -1,0 +1,62 @@
+<body>
+    <div class="container">
+        <div class="form-box">
+            <h2>Nuevo servicio</h2>
+            <div class="form-content">
+                <div class="image-upload">
+                    <label for="imageInput">
+                      <div class="image-placeholder" [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : 'none'}"></div>
+                      <p>{{ imagePreview ? 'Imagen seleccionada' : 'Agregar imagen' }}</p>
+                    </label>
+                    <input id="imageInput" type="file" (change)="onImageSelected($event)" accept="image/*" hidden>
+                  </div>
+                  <div class="form-fields">
+                    <input type="text" placeholder="Nombre" [(ngModel)]="nuevoServicio.nombre" required>
+                    
+                    <textarea placeholder="Descripción" [(ngModel)]="nuevoServicio.descripcion" required></textarea>
+                  
+                    <!-- Horario -->
+                    <label>Horarios disponibles:</label>
+                    <div class="days-selection">
+                      <div class="day-item" *ngFor="let day of days">
+                        <input type="checkbox" [(ngModel)]="day.selected" id="{{ day.name }}">
+                        <label for="{{ day.name }}">{{ day.name }}</label>
+                      </div>
+                    </div>
+                  
+                    <div class="time-selection">
+                      <label>Hora de apertura:</label>
+                      <input type="time" [(ngModel)]="startTime" required>
+                      <label>Hora de cierre:</label>
+                      <input type="time" [(ngModel)]="endTime" required>
+                    </div>
+                  
+                    <!-- Precio -->
+                    <label>Precio:</label>
+                    <input type="number" placeholder="Ingresa el precio o 0 si es gratuito" [(ngModel)]="nuevoServicio.precio" required>
+                  
+                    <!-- Preferencias -->
+                    <div class="preferencias-section">
+                      <h3>Selecciona tus preferencias <span style="font-weight: normal;">(mínimo 2, máximo 5)</span>:</h3> 
+                      <div class="preferencias-list">
+                        <label *ngFor="let pref of preferencias">
+                          <input
+                            type="checkbox"
+                            [value]="pref._idPreferencias"
+                            [checked]="selectedPreferences.includes(pref._idPreferencias)"
+                            (change)="onPreferenceChange($event, pref._idPreferencias)"
+                            [disabled]="
+                              !selectedPreferences.includes(pref._idPreferencias) && selectedPreferences.length >= 5
+                            ">
+                          {{ pref.nombre }}
+                        </label>
+                      </div>
+                    </div>
+                  
+                    <!-- Botón -->
+                    <button class="save-btn" (click)="guardarServicio()">Guardar</button>
+                  </div>
+            </div>
+        </div>
+    </div>
+</body>

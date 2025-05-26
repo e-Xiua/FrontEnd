@@ -1,0 +1,109 @@
+
+ <main>
+      <h2>Nuestras Recomendaciones para tu Estadia</h2>
+      <div class="recommendations">
+        <div class="search-bar">
+          <input
+            type="text"
+            placeholder="🔍 Buscar servicios..."
+            [(ngModel)]="searchTerm"
+            (input)="filtrarServiciosPorBusqueda()"
+          />
+        </div>
+              <!-- CARRUSEL DE RESULTADOS DE BÚSQUEDA -->
+        <section *ngIf="hayBusquedaActiva()">
+          <h3>Resultados de búsqueda</h3>
+
+           <!-- Mensaje si no hay resultados -->
+          <p *ngIf="serviciosFiltradosBusqueda.length === 0" class="no-results">
+            <span>😕 No se encontraron resultados para "<strong>{{ searchTerm }}</strong>"</span>
+          </p>
+          <div class="scroll-wrapper">
+            <button
+              class="scroll-btn left"
+              [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollLeft }"
+              (click)="scrollLeft('busqueda')"
+            >&#10094;</button>
+
+            <div
+              class="card-container"
+              id="busqueda"
+              (scroll)="onScroll('busqueda')"
+              #paraTiContainer
+            >
+              <div class="card" *ngFor="let servicio of serviciosFiltradosBusqueda" (click)="navigateToDetalle(servicio._idServicio)">
+                <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                <span>{{ servicio.nombre }}</span>
+              </div>
+            </div>
+
+            <button
+              class="scroll-btn right"
+              [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollRight }"
+              (click)="scrollRight('busqueda')"
+            >&#10095;</button>
+          </div>
+        </section>
+
+        <!-- SECCIÓN AGRUPADA POR PREFERENCIAS SOLO SI NO HAY BÚSQUEDA -->
+        <section *ngIf="!hayBusquedaActiva()">
+          <h3>Nuestra seleccion de servicios para ti</h3>
+          <div class="scroll-wrapper">
+            <button
+              class="scroll-btn left"
+              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollLeft }"
+              (click)="scrollLeft('para-ti')"
+            >&#10094;</button>
+
+            <div
+              class="card-container"
+              id="para-ti"
+              (scroll)="onScroll('para-ti')"
+            >
+              <div class="card" *ngFor="let servicio of serviciosFiltrados" (click)="navigateToDetalle(servicio._idServicio)">
+                <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                <span>{{ servicio.nombre }}</span>
+              </div>
+            </div>
+
+            <button
+              class="scroll-btn right"
+              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollRight }"
+              (click)="scrollRight('para-ti')"
+            >&#10095;</button>
+          </div>
+        </section>
+
+        <!-- AGRUPADOS POR PREFERENCIA -->
+        <section *ngIf="!hayBusquedaActiva()">
+          <div *ngFor="let grupo of serviciosAgrupadosPorPreferencia; let i = index">
+            <h3>{{ grupo.preferencia.nombre }}</h3>
+            <div class="scroll-wrapper">
+              <button
+                class="scroll-btn left"
+                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollLeft }"
+                (click)="scrollLeft('grupo-' + i)"
+              >&#10094;</button>
+
+              <div
+                class="card-container"
+                [id]="'grupo-' + i"
+                (scroll)="onScroll('grupo-' + i)"
+              >
+                <div class="card" *ngFor="let servicio of grupo.servicios" (click)="navigateToDetalle(servicio._idServicio)">
+                  <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                  <span>{{ servicio.nombre }}</span>
+                </div>
+              </div>
+
+              <button
+                class="scroll-btn right"
+                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollRight }"
+                (click)="scrollRight('grupo-' + i)"
+              >&#10095;</button>
+            </div>
+          </div>
+        </section>
+      
+      </div>
+    </main>

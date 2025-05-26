@@ -1,0 +1,52 @@
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <div class="logo">
+        <img src="../../../assets/logo.png" alt="Logo I-Wellness" />
+        <h1>I-Wellness</h1>
+      </div>
+    </div>
+    <div class="right-panel">
+      <h2 class="title">¡Bienvenido!</h2>
+      <p class="subtitle">Log In</p>
+      <form (submit)="onSubmit()">
+        <input
+          type="correo"
+          placeholder="Correo"
+          class="input-field"
+          [(ngModel)]="correo"
+          name="correo"
+          (input)="validateEmail()"
+          required
+        />
+        <small *ngIf="emailError" class="error-message">{{ emailError }}</small>
+
+        <div class="password-container">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Contraseña"
+            class="input-field"
+            name="password"
+            id="password"
+            [(ngModel)]="password"
+            required
+            maxlength="20"
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="toggle-password"
+          >
+            <i class="{{ showPassword ? 'fa fa-eye-slash' : 'fa fa-eye' }}"></i>
+          </button>
+        </div>
+        <button type="submit" class="btn">Ingresar</button>
+      </form>
+
+      <div class="links">
+        <a href="/registro" class="create-account">Crear cuenta</a>
+        <a href="/recuperar" class="forgot-password">Olvidé mi contraseña</a>
+      </div>
+    </div>
+  </div>
+</body>

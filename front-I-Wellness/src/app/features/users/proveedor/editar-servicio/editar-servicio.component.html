@@ -1,0 +1,73 @@
+<body>
+    <div class="container">
+        <div class="form-box">
+            <h2>Editar servicio</h2>
+            <div class="form-content" *ngIf="servicio">
+                <!-- Imagen -->
+                <div class="image-upload">
+                    <label for="fileInput" class="image-label">
+                        <img [src]="servicio.imagen" alt="{{ servicio.nombre }}">
+                        <p class="upload-text">Agregar imagen</p>
+                    </label>
+                    <input type="file" id="fileInput" (change)="onFileSelected($event)" hidden accept="image/*">
+                </div>
+
+                <!-- Campos del formulario -->
+                <div class="form-fields">
+
+                    <!-- Nombre del servicio -->
+                    <label for="nombre">Nombre del servicio:</label>
+                    <input id="nombre" type="text" value="{{ servicio.nombre }}" [(ngModel)]="servicio.nombre">
+
+                    <!-- Descripción -->
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" [(ngModel)]="servicio.descripcion">{{ servicio.descripcion }}</textarea>
+
+                    <!-- Selección de días -->
+                    <label>Horarios disponibles (días):</label>
+                    <div class="days-selection">
+                        <div class="day-item" *ngFor="let day of days">
+                            <input type="checkbox" [(ngModel)]="day.selected" id="{{ day.name }}">
+                            <label for="{{ day.name }}">{{ day.name }}</label>
+                        </div>
+                    </div>
+
+                    <!-- Horario -->
+                    <div class="time-selection">
+                        <label for="startTime">Hora de apertura:</label>
+                        <input type="time" id="startTime" [(ngModel)]="startTime">
+
+                        <label for="endTime">Hora de cierre:</label>
+                        <input type="time" id="endTime" [(ngModel)]="endTime">
+                    </div>
+
+                    <!-- Precio -->
+                    <label for="precio">Precio:</label>
+                    <input id="precio" type="number" value="{{ servicio.precio }}" [(ngModel)]="servicio.precio">
+
+                    <!-- Preferencias -->
+                    <div class="preferencias-section">
+                        <h3>Selecciona tus preferencias <span style="font-weight: normal;">(mínimo 2, máximo 5)</span>:</h3>
+                        <div class="preferencias-list">
+                            <label *ngFor="let pref of preferencias">
+                                <input
+                                    type="checkbox"
+                                    [value]="pref._idPreferencias"
+                                    [checked]="selectedPreferences.includes(pref._idPreferencias)"
+                                    (change)="onPreferenceChange($event, pref._idPreferencias)"
+                                    [disabled]="
+                                        !selectedPreferences.includes(pref._idPreferencias) &&
+                                        selectedPreferences.length >= 5
+                                    ">
+                                {{ pref.nombre }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Botón guardar -->
+                    <button class="save-btn" (click)="navigateTo(); getFormattedSchedule()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

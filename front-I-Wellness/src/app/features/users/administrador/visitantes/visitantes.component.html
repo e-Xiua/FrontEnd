@@ -1,0 +1,33 @@
+<body>
+    <div class="container">
+      <h2>Aquí está tu lista de visitantes:</h2>
+  
+      <div class="add-button-wrapper">
+        <button class="add-service-btn" (click)="agregar('crearturista')">
+          Añadir nuevo visitante <span>+</span>
+        </button>
+      </div>
+  
+      <div class="services-box">
+        <ng-container *ngFor="let visitante of visitantes">
+          <div class="service-card">
+            <img 
+              [src]="visitante.foto ? visitante.foto : 'https://via.placeholder.com/300x200.png?text=Visitante'" 
+              alt="{{ visitante.nombre }}" 
+              class="service-image"
+            >
+            <div class="service-info">
+              <h3>{{ visitante.nombre }}</h3>
+              <p>{{ visitante.turista?.ciudad }}, {{ visitante.turista?.pais }}</p>
+              <p class="categoria">{{ visitante.turista?.actividadesInteres }}</p>
+            </div>
+            <div class="service-actions">
+              <button class="edit-btn" (click)="navigateTo('perfilturista', visitante.id)">✏️</button>
+              <button type="button" class="delete-btn" (click)="deleteVisitante(visitante.id)">🗑</button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </body>
+  

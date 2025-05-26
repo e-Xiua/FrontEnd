@@ -1,0 +1,78 @@
+<body>
+<div class="container">
+  <div class="left-panel">
+    <div class="logo">
+      <img src="../../../assets/logo.png" alt="I-Wellness" />
+      <h1>I-Wellness</h1>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <h2 class="title">Restablecer contraseña</h2>
+    <p class="subtitle">Por favor ingresa tu nueva contraseña</p>
+
+    <form (ngSubmit)="onSubmit()" #restForm="ngForm" novalidate>
+
+      <div class="input-group">
+        <input
+          [type]="mostrarPassword ? 'text' : 'password'"
+          placeholder="Nueva contraseña"
+          class="input-field"
+          [(ngModel)]="nuevaContrasena"
+          name="password"
+          required
+          minlength="8"
+          #password="ngModel"
+          (input)="error = ''"
+        />
+        <button type="button" class="toggle-btn" (click)="mostrarPassword = !mostrarPassword">
+          {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }}
+        </button>
+      </div>
+
+      <!-- Mensajes de validación en tiempo real -->
+      <div *ngIf="nuevaContrasena">
+        <ul class="error-message" style="list-style: none; padding-left: 0;">
+          <li *ngFor="let errorMsg of validarContrasena(nuevaContrasena)">
+            {{ errorMsg }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="input-group">
+        <input
+          [type]="mostrarPassword ? 'text' : 'password'"
+          placeholder="Confirmar nueva contraseña"
+          class="input-field"
+          [(ngModel)]="confirmarContrasena"
+          name="confirmPassword"
+          required
+          #confirmPassword="ngModel"
+          (input)="error = ''"
+        />
+      </div>
+
+      <small *ngIf="confirmarContrasena && confirmarContrasena !== nuevaContrasena" class="error-message">
+        Las contraseñas no coinciden.
+      </small>
+
+      <button
+        type="submit"
+        class="btn"
+        [disabled]="
+          restForm.invalid ||
+          nuevaContrasena !== confirmarContrasena ||
+          validarContrasena(nuevaContrasena).length > 0 ||
+          cargando
+        "
+      >
+        {{ cargando ? 'Procesando...' : 'Restablecer' }}
+      </button>
+    </form>
+
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+  </div>
+</div>
+
+</body>
+

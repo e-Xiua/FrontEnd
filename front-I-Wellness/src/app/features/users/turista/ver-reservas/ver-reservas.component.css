@@ -1,0 +1,110 @@
+:host {
+  display: block;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+
+.proveedor-card:hover {
+  background-color: #e8f4f5; /* claro y suave */
+}
+
+/* Tarjeta del proveedor */
+.proveedor-card {
+  cursor: pointer;
+  background-color: #ffffff;
+  border-left: 6px solid #9acbd0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
+}
+
+.proveedor-card h2 {
+  margin-top: 0;
+  color: #2973b2;
+  font-size: 1.5rem;
+}
+
+/* Tarjeta del servicio */
+.servicio-card {
+  background-color: #f0fafa;
+  border: 1px solid #9acbd0;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #333;
+  position: relative;
+}
+
+/* Imagen del servicio */
+.servicio-imagen {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  float: right;
+  margin-left: 1rem;
+  border: 1px solid #ccc;
+}
+
+/* Título del servicio */
+.servicio-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #2973b2;
+}
+
+/* Bloques de reserva */
+.reserva-block {
+  background-color: #e6f0f7;
+  border-left: 4px solid #2973b2;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.btn-cancelar {
+  background-color: #E82A3C;
+  color: white;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.btn-cancelar:hover {
+  background-color: #E82A3C;
+}
+
+.estado-completada,
+.estado-cancelada,
+.estado-pendiente {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.estado-completada {
+  background-color: lightgreen;
+  color: darkgreen;
+  border-radius: 3px;
+}
+
+.estado-cancelada {
+  background-color: lightcoral;
+  color: darkred;
+  border-radius: 3px;
+}
+
+.estado-pendiente {
+  background-color: lightgoldenrodyellow;
+  color: darkorange;
+  border-radius: 3px;
+}
+

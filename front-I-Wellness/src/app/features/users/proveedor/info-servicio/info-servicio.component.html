@@ -1,0 +1,66 @@
+<div class="service-container" *ngIf="servicio">
+  <h2 class="service-title">{{ servicio.nombre }}</h2>
+
+  <div class="service-header">
+    <img [src]="servicio.imagen" alt="{{ servicio.nombre }}" class="service-image">
+    <div class="service-meta">
+      <p class="service-description">{{ servicio.descripcion }}</p>
+      <p class="service-price" *ngIf="servicio.precio">
+        💰 <strong>Precio (USD):</strong> {{ servicio.precio | currency:'USD' }}
+      </p>
+      <p class="service-price" *ngIf="servicio.precio && tipoCambio">
+        💰 <strong>Precio (CRC):</strong> {{ servicio.precio * tipoCambio | currency:'CRC' }}
+      </p>  
+      <p class="service-hours" *ngIf="servicio.horario">
+        ⏰ <strong>Horario:</strong> {{ servicio.horario }}
+      </p>
+    </div>
+  </div>
+
+  <div class="proveedor-info" *ngIf="proveedor">
+  <h3>🏨 Servicio ofrecido por</h3>
+  <div class="proveedor-contenido">
+    <img *ngIf="proveedor.foto" 
+         [src]="proveedor.foto" 
+         alt="{{ proveedor.nombre }}" 
+         class="proveedor-foto">
+    
+    <div class="proveedor-detalles">
+      <p><strong>Empresa:</strong> {{ proveedor.proveedorInfo.nombre_empresa }}</p>
+      <p><strong>Contacto:</strong> {{ proveedor.nombre }}</p>
+      <p><strong>Cargo:</strong> {{ proveedor.proveedorInfo.cargoContacto }}</p>
+      <p><strong>Correo:</strong> {{ proveedor.correo }}</p>
+    </div>
+  </div>
+</div>
+
+
+  <div *ngIf="usuario && servicio" class="reserva-container">
+    <h3>Reservar este servicio</h3>
+
+    <div class="reserva-campos">
+      <mat-form-field appearance="fill">
+        <mat-label>📅 Selecciona una fecha</mat-label>
+        <input matInput 
+              [matDatepicker]="picker"
+              [(ngModel)]="fechaSeleccionada" 
+              [min]="minFechaObj"
+              [matDatepickerFilter]="filtrarDiasDisponibles"
+              required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>⏰ Selecciona una hora:</mat-label>
+        <input matInput [matTimepicker]="timepicker" [(ngModel)]="horaSeleccionada" required />
+        <mat-timepicker-toggle matSuffix [for]="timepicker"></mat-timepicker-toggle>
+        <mat-timepicker #timepicker></mat-timepicker>
+      </mat-form-field>
+
+      <button (click)="hacerReserva()" class="btn-reservar">
+        Reservar
+      </button>
+    </div>
+  </div>
+</div>

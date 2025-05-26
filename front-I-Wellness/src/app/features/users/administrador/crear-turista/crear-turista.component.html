@@ -1,0 +1,107 @@
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="logo">
+                <img src="../../../../assets/logo.png" alt="I-Wellness Logo">
+                <h1>I-Wellness</h1>
+            </div>
+        </div>
+        <div class="right-panel">
+            <h2 class="title"><span class="turista">Crear</span> <span class="registro"> Turista</span></h2>
+
+            <button class="btn-section">Datos de contacto</button>
+
+            <label class="file-upload-label">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)">
+              <span>Subir foto de perfil (opcional)</span>
+            </label>
+            
+            <input type="text" placeholder="Nombre" [(ngModel)]="name" (input)="validateName()" maxlength="35" required>
+            <small *ngIf="nameError" class="error-message">{{ nameError }}</small>
+
+            <input type="email" placeholder="Correo" [(ngModel)]="email" (input)="validateEmail()" required>
+            <small *ngIf="emailError" class="error-message">{{ emailError }}</small>
+
+            <ngx-intl-tel-input
+              [cssClass]="'custom'"
+              [preferredCountries]="preferredCountries"
+              [enableAutoCountrySelect]="true"
+              [enablePlaceholder]="true"
+              [searchCountryFlag]="true"
+              [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+              [selectFirstCountry]="false"
+              [selectedCountryISO]="CountryISO.CostaRica"
+              [maxLength]="15"
+              [phoneValidation]="true"
+              [separateDialCode]="separateDialCode"
+              [numberFormat]="PhoneNumberFormat.National"
+              [(ngModel)]="phone" 
+              name="phone"  
+              placeholder="Teléfono"
+              required
+              (input)="validatePhone()">
+            </ngx-intl-tel-input>
+            <small *ngIf="phoneError" class="error-message">{{ phoneError }}</small>
+
+            <input type="password" placeholder="Contraseña" [(ngModel)]="password" (input)="validatePassword()" required>
+            <small *ngIf="passwordError" class="error-message">{{ passwordError }}</small>
+
+            <input type="password" placeholder="Repite tu contraseña" [(ngModel)]="confirmPassword" (input)="validateConfirmPassword()" required>
+            <small *ngIf="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</small>
+
+            <select id="country" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
+                <option value="" disabled selected>Seleccione un país de procedencia</option>
+                <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+            </select>
+
+            <select id="city" [disabled]="!selectedCountry">
+                <option value="" disabled selected>Seleccione su ciudad</option>
+                <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+
+            <select id="genero" [(ngModel)]="genero" (change)="validateGenero()">
+              <option value="" disabled selected>Seleccione su género</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="No Binario">No Binario</option>
+              <option value="Prefiero no decir">Prefiero no decir</option>
+          </select>
+          <small *ngIf="generoError" class="error-message">{{ generoError }}</small>
+
+          <div class="fecha-nacimiento-container">
+              <label class="fecha-nacimiento-label" for="fechaNacimiento">Fecha de Nacimiento: </label>
+              <input type="date" id="fechaNacimiento" [(ngModel)]="fechaNacimiento" (change)="validateFechaNacimiento()">
+              <small *ngIf="fechaNacimientoError" class="error-message">{{ fechaNacimientoError }}</small>
+          </div>
+
+          <select id="estadoCivil" [(ngModel)]="estadoCivil" (change)="validateEstadoCivil()">
+              <option value="" disabled selected>Seleccione su estado civil</option>
+              <option value="Soltero/a">Soltero/a</option>
+              <option value="Casado/a">Casado/a</option>
+              <option value="Divorciado/a">Divorciado/a</option>
+              <option value="Viudo/a">Viudo/a</option>
+              <option value="Unión Libre">Unión Libre</option>
+              <option value="Otro">Otro</option>
+          </select>
+          <small *ngIf="estadoCivilError" class="error-message">{{ estadoCivilError }}</small>
+
+            <div class="preferencias-section">
+                <h3>Selecciona tus preferencias (entre 3 y 5):</h3>
+                <div class="preferencias-list">
+                  <label *ngFor="let pref of preferencias">
+                    <input
+                      type="checkbox"
+                      [value]="pref._idPreferencias"
+                      (change)="onPreferenceChange($event, pref._idPreferencias)">
+                    {{ pref.nombre }}
+                  </label>
+                </div>
+                <div class="error-message" *ngIf="selectedPreferences.length < 3 || selectedPreferences.length > 5">
+                  Debes seleccionar entre 3 y 5 preferencias.
+                </div>
+              </div>
+
+            <button class="btn-submit" (click)="createTurista()">Crear turista</button>
+        </div>
+    </div>
+</body>

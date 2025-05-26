@@ -1,0 +1,132 @@
+<div class="dashboard-main-card">
+  <h1 class="dashboard-title">Dashboard General de I-Wellness</h1>
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-title">Turistas Registrados</div>
+      <div class="kpi-value">{{ totalTuristas }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Empresas Registradas</div>
+      <div class="kpi-value">{{ totalEmpresas }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Servicios Activos</div>
+      <div class="kpi-value">{{ serviciosActivos }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Servicios Inactivos</div>
+      <div class="kpi-value">{{ serviciosInactivos }}</div>
+    </div>
+    <div class="kpi-row kpi-row-center">
+      <div class="kpi-card">
+        <div class="kpi-title">Total Reservas</div>
+        <div class="kpi-value">{{ reservas.length }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Confirmadas</div>
+        <div class="kpi-value" style="color: #20c997;">
+          {{ getConfirmadasCount() }}
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Canceladas</div>
+        <div class="kpi-value" style="color: #dc3545;">
+          {{ getCanceladasCount() }}
+        </div>
+      </div>
+  
+  </div>
+  
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h2>Preferencias por Género</h2>
+      <div class="chart-wrapper genero-chart-wrapper">
+        <ngx-charts-bar-vertical-2d
+        [results]="generoChartData"
+        [scheme]="colorSchemeGenero"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [showDataLabel]="true"
+        [xAxisTickFormatting]="xAxisTickFormatting">
+      </ngx-charts-bar-vertical-2d>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Preferencias por Estado Civil</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-vertical-2d
+          [results]="estadoCivilChartData"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="true"
+          [showDataLabel]="true"
+          [xAxisTickFormatting]="xAxisTickFormatting">
+        </ngx-charts-bar-vertical-2d>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Top Categorías por País</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-horizontal
+          [results]="interesesChart"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showDataLabel]="true">
+        </ngx-charts-bar-horizontal>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Servicios por Empresa</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-horizontal
+        [results]="proveedoresChart"
+        [scheme]="colorScheme"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showDataLabel]="true"
+        [xAxisTickFormatting]="xAxisTickFormatting">
+      </ngx-charts-bar-horizontal>
+      </div>
+    </div>
+    <div class="dashboard-card reservas-table-card">
+      <h2>Detalle de Reservas</h2>
+      <div class="table-wrapper">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Servicio</th>
+              <th>Turista</th>
+              <th>Fecha Reserva</th>
+              <th>Fecha Servicio</th>
+              <th>Nombre Servicio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reserva of reservas">
+              <td>{{ reserva.id }}</td>
+              <td>{{ reserva._idServicio }}</td>
+              <td>{{ reserva._idTurista }}</td>
+              <td>{{ reserva.fechaReserva | date:'short' }}</td>
+              <td>{{ reserva.fechaServicio | date:'short' }}</td>
+              <td>{{ reserva.serviceName }}</td>
+              <td>
+                <span [ngClass]="{
+                  'estado-confirmada': reserva.estado === 'confirmada',
+                  'estado-cancelada': reserva.estado === 'cancelada'
+                }">{{ reserva.estado }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</div>

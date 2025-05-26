@@ -1,0 +1,147 @@
+<div class="dashboard-main-card">
+  <h1 class="dashboard-title">¡Hola, {{ user.proveedor?.nombre_empresa || 'Sin nombre' }}!</h1>
+  <h2 class="dashboard-title">Datos Generales de I-Wellness</h2>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-title">Turistas Registrados</div>
+      <div class="kpi-value">{{ totalTuristas }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">País más frecuente</div>
+      <div class="kpi-value">{{ topPais }}</div>
+      <div class="kpi-subvalue">Visitas: {{ topPaisTotal }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Servicios Totales</div>
+      <div class="kpi-value">{{ totalServicios }}</div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h2>Preferencias por Estado Civil</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-vertical-2d
+          [results]="estadoCivilChartData"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="true"
+          [showDataLabel]="true"
+          [xAxisTickFormatting]="xAxisTickFormatting">
+        </ngx-charts-bar-vertical-2d>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Top Categorías por País</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-horizontal
+          [results]="interesesChart"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showDataLabel]="true">
+        </ngx-charts-bar-horizontal>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Distribución de Género</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-pie-chart
+          [results]="generoTuristasChart"
+          [scheme]="colorScheme"
+          [legend]="true"
+          [labels]="true">
+        </ngx-charts-pie-chart>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <h2>Servicios más Solicitados</h2>
+      <div class="chart-wrapper">
+        <ngx-charts-bar-horizontal
+          [results]="serviciosPopularesChart"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showDataLabel]="true">
+        </ngx-charts-bar-horizontal>
+      </div>
+    </div>
+</div>
+<h2 class="dashboard-title-specific">Datos Específicos de {{ user.proveedor.nombre_empresa || 'Sin nombre' }}</h2>
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-title">Servicios Activos</div>
+    <div class="kpi-value" style="color: #20c997;">{{ activos }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">Servicios Inactivos</div>
+    <div class="kpi-value" style="color: #dc3545;">{{ inactivos }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">Reservas Totales</div>
+    <div class="kpi-value">{{ totalReservas }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">Reservas Confirmadas</div>
+    <div class="kpi-value" style="color: #2973B2;">{{ totalConfirmadas }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">Reservas Completadas</div>
+    <div class="kpi-value" style="color: #fd7e14;">{{ totalCompletadas }}</div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="dashboard-card">
+    <h2>Reservas por Servicio</h2>
+    <div class="chart-wrapper">
+      <ngx-charts-bar-horizontal
+        [results]="reservasPorServicioChart"
+        [scheme]="colorScheme"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showDataLabel]="true">
+      </ngx-charts-bar-horizontal>
+    </div>
+  </div>
+  <div class="dashboard-card">
+    <h2>Número de Reservas por Género</h2>
+    <div class="chart-wrapper">
+      <ngx-charts-pie-chart
+        [results]="reservasPorGeneroChart"
+        [scheme]="colorScheme"
+        [legend]="true"
+        [labels]="true">
+      </ngx-charts-pie-chart>
+    </div>
+  </div>
+  <div class="dashboard-card">
+    <h2>Reservas por Nacionalidad</h2>
+    <div class="chart-wrapper">
+      <ngx-charts-bar-horizontal
+        [results]="reservasPorNacionalidadChart"
+        [scheme]="colorScheme"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showDataLabel]="true">
+      </ngx-charts-bar-horizontal>
+    </div>
+  </div>
+  <div class="dashboard-card">
+  <h2>Reservas por Estado Civil</h2>
+  <div class="chart-wrapper">
+  <ngx-charts-pie-chart
+  [results]="reservasPorEstadoCivilChart"
+  [scheme]="colorScheme"
+  [legend]="true"
+  [labels]="true"
+  [doughnut]="false">
+</ngx-charts-pie-chart>
+</div>
+</div>

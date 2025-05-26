@@ -1,0 +1,112 @@
+<body>
+    <!-- Mostrar spinner mientras carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando perfil...</p>
+    </div>
+
+    <!-- Mostrar mensaje de error si no tiene autorización -->
+    <div *ngIf="unauthorized && !isLoading" class="unauthorized-container">
+        <div class="alert alert-danger">
+            <h2>Acceso denegado</h2>
+            <p>{{ error }}</p>
+            <button class="btn btn-primary" (click)="navigateTo()">Volver al inicio</button>
+        </div>
+    </div>
+
+    <!-- Mostrar contenido normal solo si tiene autorización y no está cargando -->
+    <div class="container" *ngIf="!unauthorized && !isLoading">
+        <aside class="sidebar">
+            <p>Hola, {{usuario.nombre}}</p>
+            <ul>
+                <li class="active">📝 Edit profile</li>
+                <li><a [routerLink]="['/editpreferencias', usuario.id]">🎯 Preferencias</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div class="profile-header">
+                <h1>Editar perfil</h1>
+                <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+                <img 
+                    [src]="fotoPreview || usuario.foto" 
+                    alt="Profile Picture" 
+                    class="profile-pic"
+                    (click)="seleccionarFoto()"
+                    title="Haz clic para cambiar tu foto de perfil">
+            </div>
+            <form class="profile-form">
+                <div class="input-group full-width">
+                    <label>Nombre</label>
+                    <input type="text" [(ngModel)]="usuario.nombre" name="nombre">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Número de Contacto</label>
+                    <ngx-intl-tel-input
+                        [cssClass]="'form-control'"
+                        [preferredCountries]="preferredCountries"
+                        [enableAutoCountrySelect]="true"
+                        [enablePlaceholder]="true"
+                        [searchCountryFlag]="true"
+                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                        [selectFirstCountry]="false"
+                        [maxLength]="15"
+                        [phoneValidation]="true"
+                        [separateDialCode]="separateDialCode"
+                        name="telefono"
+                        [(ngModel)]="usuario.turistaInfo.telefono"
+                        (ngModelChange)="onTelefonoChange($event)">
+                    </ngx-intl-tel-input>
+                </div>
+
+                <div class="genero full-width">
+                    <label>Género</label>
+                    <select [(ngModel)]="usuario.turistaInfo.genero" name="genero" class="form-select">
+                      <option value="" disabled selected>Seleccione su género</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Femenino">Femenino</option>
+                      <option value="No Binario">No Binario</option>
+                      <option value="Prefiero no decir">Prefiero no decir</option>
+                    </select>
+                  </div>
+                          
+                <div class="fecha full-width">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" 
+                           [ngModel]="usuario.turistaInfo.fechaNacimiento" 
+                           (ngModelChange)="usuario.turistaInfo.fechaNacimientoFormateada = $event"
+                           name="fechaNacimiento" 
+                           class="form-control">
+                </div>
+                  
+                <div class="estado full-width">
+                    <label>Estado Civil</label>
+                    <select [(ngModel)]="usuario.turistaInfo.estadoCivil" name="estadoCivil" class="form-control">
+                      <option value="" disabled>Seleccione su estado civil</option>
+                      <option value="Soltero/a">Soltero/a</option>
+                      <option value="Casado/a">Casado/a</option>
+                      <option value="Divorciado/a">Divorciado/a</option>
+                      <option value="Viudo/a">Viudo/a</option>
+                      <option value="Unión Libre">Unión Libre</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                
+                <select class="input-group dropdown" id="country" name="country" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
+                    <option value="" disabled selected>Seleccione un país de procedencia</option>
+                    <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+                </select>
+                  
+                <select class="input-group dropdown" id="city" name="city" [(ngModel)]="selectedCity" [disabled]="!selectedCountry">
+                    <option value="" disabled>Seleccione su ciudad</option>
+                    <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                </select>
+
+                <div class="buttons">
+                    <button class="cancel" (click)="navigateTo()">Cancel</button>
+                    <button class="save" type="button" (click)="guardarCambios()">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>

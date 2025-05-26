@@ -1,0 +1,31 @@
+<body>
+    <div class="container">
+        <h2>Aquí está tu lista de servicios:</h2>
+        <div class="add-button-wrapper">
+            <button class="add-service-btn" (click)="agregar('agregarservicio')">
+              Añadir nuevo servicio <span>+</span>
+            </button>
+          </div>
+        <div class="services-box">
+            <ng-container *ngFor="let servicio of servicios">
+                <div class="service-card">
+                    <img [src]="servicio.imagen" alt="{{ servicio.nombre }}" class="service-image">
+                    <div class="service-info">
+                        <h3>{{ servicio.nombre }}</h3>
+                        <p>{{ servicio.descripcion }}</p>
+                        <p class="price">{{ servicio.precio === 0 ? 'Gratis' : servicio.precio + ' USD' }}</p>
+                    </div>
+                    <div class="service-actions">
+                        <button class="visibility-btn" (click)="navigateTo('infoservicio', servicio._idServicio)">👁</button>
+                        <button class="edit-btn" (click)="navigateTo('editarservicio', servicio._idServicio)">✏️</button>
+                        <button type="button" class="delete-btn" (click)="eliminarServicio(servicio)">🗑</button>
+                        <label class="switch">
+                            <input type="checkbox" [checked]="servicio.estado" (change)="cambiarEstado(servicio)">
+                            <span class="slider round"></span>
+                          </label>
+                    </div>
+                </div>
+            </ng-container> 
+        </div>
+    </div>
+</body>

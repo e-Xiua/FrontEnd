@@ -1,0 +1,114 @@
+<body>
+    <!-- Mostrar spinner mientras carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando perfil...</p>
+    </div>
+
+    <!-- Mostrar mensaje de error si no tiene autorización -->
+    <div *ngIf="unauthorized && !isLoading" class="unauthorized-container">
+        <div class="alert alert-danger">
+            <h2>Acceso denegado</h2>
+            <p>{{ error }}</p>
+            <button class="btn btn-primary" (click)="navigateTo()">Volver al inicio</button>
+        </div>
+    </div>
+
+    <!-- Mostrar contenido normal solo si tiene autorización y no está cargando -->
+    <div class="container" *ngIf="!unauthorized && !isLoading">
+        <aside class="sidebar">
+            <p>Hola, {{proveedor.nombre}}</p>
+            <ul>
+                <li class="active">📝 Editar perfil</li>
+                <li><a [routerLink]="['/servicios', proveedor.id]">🛎️ Servicios</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div class="profile-header">
+                <h1>Editar perfil</h1>
+                <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+                <img 
+                    [src]="fotoPreview || proveedor.foto" 
+                    alt="Profile Picture" 
+                    class="profile-pic"
+                    (click)="seleccionarFoto()"
+                    title="Haz clic para cambiar tu foto de perfil">
+            </div>
+            <form class="profile-form">
+                <div class="input-group full-width">
+                    <label>Nombre</label>
+                    <input type="text" [(ngModel)]="proveedor.nombre" name="nombre">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Número de Contacto</label>
+                    <ngx-intl-tel-input
+                        [cssClass]="'form-control'"
+                        [preferredCountries]="preferredCountries"
+                        [enableAutoCountrySelect]="true"
+                        [enablePlaceholder]="true"
+                        [searchCountryFlag]="true"
+                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                        [selectFirstCountry]="false"
+                        [maxLength]="15"
+                        [phoneValidation]="true"
+                        [separateDialCode]="separateDialCode"
+                        name="telefono"
+                        [(ngModel)]="proveedor.proveedorInfo.telefono"
+                        (ngModelChange)="onTelefonoChange($event)">
+                    </ngx-intl-tel-input>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Teléfono de la Empresa</label>
+                    <ngx-intl-tel-input
+                        [cssClass]="'form-control'"
+                        [preferredCountries]="preferredCountries"
+                        [enableAutoCountrySelect]="true"
+                        [enablePlaceholder]="true"
+                        [searchCountryFlag]="true"
+                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                        [selectFirstCountry]="false"
+                        [maxLength]="15"
+                        [phoneValidation]="true"
+                        [separateDialCode]="separateDialCode"
+                        name="telefonoEmpresa"
+                        [(ngModel)]="proveedor.proveedorInfo.telefonoEmpresa"
+                        (ngModelChange)="onTelefonoEmpresaChange($event)">
+                    </ngx-intl-tel-input>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Nombre de la Empresa</label>
+                    <input type="text" [(ngModel)]="proveedor.proveedorInfo.nombre_empresa" name="nombre_empresa">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Cargo de Contacto</label>
+                    <input type="text" [(ngModel)]="proveedor.proveedorInfo.cargoContacto" name="cargoContacto">
+                </div>
+
+                <div class="input-group full-width">
+                <label>Ubicacion</label>
+                <input id="direccionInput" type="text" placeholder="Buscar dirección..." />
+                <button (click)="buscarDireccion()" class="save">Buscar</button>
+                </div>
+
+                <!-- Desplegable que solo se muestra si hay resultados de búsqueda -->
+                <select *ngIf="searchResults.length > 0" class="form-control mt-2" (change)="handleResultSelection($event)">
+                <option disabled selected>Selecciona una dirección</option>
+                <option *ngFor="let result of searchResults" [value]="result.display_name">
+                    {{ result.display_name }}
+                </option>
+                </select>
+
+                <div id="reg-map" class="map-container"></div>
+
+                <div class="buttons">
+                    <button class="cancel" (click)="navigateTo()">Cancelar</button>
+                    <button class="save" type="button" (click)="guardarCambios()">Guardar</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>

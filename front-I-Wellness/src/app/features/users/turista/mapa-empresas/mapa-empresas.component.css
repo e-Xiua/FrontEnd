@@ -1,0 +1,104 @@
+.general-container {
+    max-width: 80%;
+    max-height: 100%;
+    margin-left: 10%;
+    margin-top: 3%;
+    background: #f2efe7e7;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    color: black;
+    }
+
+.map-container {
+    margin-top: 1rem;            
+    height: 30rem;
+    width: 100%;
+    border-radius: 1rem;
+  }
+  
+::ng-deep .leaflet-popup-content {
+  margin: 0;
+  padding: 0 !important;
+  width: auto !important;
+  overflow: hidden;
+}
+
+::ng-deep .popup-card {
+  width: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background-color: #fff;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+::ng-deep .popup-img-container {
+  width: 100%;
+  height: 120px; /* controlas el alto visible */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+::ng-deep .popup-img {
+  height: 100%;
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+::ng-deep .popup-title {
+  margin: 10px 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  padding: 0 8px;
+}
+
+::ng-deep  a.leaflet-popup-close-button {
+  background-color: white !important;
+  border: 1px solid #bbb !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 26px !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  color: #333 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+  top: 8px !important;
+  right: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+  z-index: 1000 !important;
+  display: inline-block !important;
+}
+
+::ng-deep a.leaflet-popup-close-button:hover {
+  background-color: #f0f0f0 !important;
+  color: #000 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer !important;
+}
+
+::ng-deep .custom-tooltip {
+  background-color: #fff;
+  color: #333;
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+
+::ng-deep .leaflet-tooltip-bottom::before {
+  display: none !important;  /* quita la flecha */
+}
+
+

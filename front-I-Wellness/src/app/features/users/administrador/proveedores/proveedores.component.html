@@ -1,0 +1,31 @@
+<div class="container">
+    <h2>Aquí está la lista de proveedores:</h2>
+  
+    <button class="add-service-btn" (click)="navigateTo('crearproveedor')">
+      Añadir nuevo proveedor <span>+</span>
+    </button>
+
+    <div class="services-box">
+      <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+  
+      <div *ngFor="let proveedor of proveedores" class="service-card">
+        <!-- Imagen del proveedor o placeholder -->
+        <img [src]="proveedor.foto || 'https://via.placeholder.com/150'" 
+             alt="Imagen de empresa" 
+             class="service-image">
+  
+        <!-- Información de la empresa -->
+        <div class="service-info">
+          <h3>{{ proveedor.nombre }}</h3>
+          <p>{{ proveedor.proveedor.nombre_empresa }}</p>
+        </div>
+  
+        <!-- Acciones -->
+        <div class="service-actions">
+          <button class="edit-btn" (click)="navigateTo('perfilproveedor/' + proveedor.id)">✏️</button>
+          <button class="delete-btn" (click)="deleteProveedor(proveedor.id)">🗑</button>  
+        </div>
+      </div>
+    </div>
+  </div>
+  

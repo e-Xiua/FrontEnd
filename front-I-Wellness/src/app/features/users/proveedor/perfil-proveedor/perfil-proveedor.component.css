@@ -1,0 +1,363 @@
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: transparent;
+    margin: 100px auto;
+    padding: 20px;
+    display: flex;
+    height: 150vh;
+}
+.container {
+    display: flex;
+    width: 100%;
+    color: black; 
+}
+.container a {
+    text-decoration: none;
+    color: black;
+}
+.sidebar {
+    width: 250px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px 0px 0px 10px;
+}
+.sidebar h2 {
+    margin: 0 0 20px;
+    color: black;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    color: black; 
+}
+.sidebar ul li {
+    padding: 10px;
+    cursor: pointer;
+}
+.sidebar ul .active {
+    font-weight: bold;
+}
+.content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 0px 10px 10px 0px;
+    margin: auto;
+    width: 60%;
+}
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.profile-pic {
+    width: 70px;
+    height: 70px;
+    object-fit: cover; 
+    border-radius: 50%; 
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+  .profile-pic:hover {
+    transform: scale(1.05); 
+}
+.profile-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    width: 48%;
+}
+.full-width {
+    width: 100%;
+}
+.input-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.input-group input, .input-group select .input-group option{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.checkmark {
+    color: green;
+    font-size: 18px;
+    margin-left: 10px;
+}
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+.buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.cancel {
+    background: #ccc;
+}
+.save {
+    background: #48A6A7;
+    color: white;
+}
+
+.add-service-btn {
+    background-color: #48A6A7;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.services-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.service-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    width: 250px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.service-card:hover {
+    transform: scale(1.02);
+}
+
+.service-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.service-info h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.service-info p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.service-actions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.edit-btn, .delete-btn {
+    flex: 1;
+    padding: 8px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    margin-top: 100px;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #48A6A7;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.unauthorized-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    margin-top: 100px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.btn-primary, .save {
+    background-color: #48A6A7;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.btn-primary:hover, .save:hover {
+    background-color: #3B8E8E;
+}
+
+  ::ng-deep .iti {
+    display: block;
+  }
+  
+  ::ng-deep .iti__arrow {
+    display: none !important;
+  }
+  
+  ::ng-deep .iti .dropdown-menu.country-dropdown {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-color: #c7cace;
+    margin-top: -1px;
+  }
+  
+  ::ng-deep .iti .iti__country-list {
+    box-shadow: none;
+    font-size: 14px;
+    margin-left: 0;
+    width: 244px;
+    max-height: 170px;
+  }
+  
+  ::ng-deep .iti__flag-container.open + input {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  
+  ::ng-deep .iti .search-container input {
+    font-size: 14px;
+    border-color: #c7cace;
+    border-radius: 0;
+    padding: 5px 10px;
+  }
+  
+  ::ng-deep .iti .search-container input:focus {
+    outline: none;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  ::ng-deep ngx-intl-tel-input .iti__flag-container {
+    position: static !important;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  ::ng-deep ngx-intl-tel-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  ::ng-deep ngx-intl-tel-input .iti input.iti__tel-input{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+    ::ng-deep .iti--allow-dropdown input.iti__tel-input,
+    .iti--show-selected-dial-code input.iti__tel-input {
+        padding-left: 10px !important;
+    }
+
+  .map-container {
+    height: 300px;   
+    width: 100%;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5rem;
+  }
+
+  select.form-control {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+select.form-control:focus {
+    border-color: #48A6A7;
+    outline: none;
+}
+
+option {
+    padding: 8px;
+    font-size: 14px;
+}
+
+select.form-control:hover,
+select.form-control:focus {
+    border-color: #3B8E8E;
+    background-color: #f9f9f9;
+}
+

@@ -1,0 +1,18 @@
+<header class="navbar">
+    <div class="nav-left">
+      <a href="/homeadmin" class="logo">Home</a>
+      <a href="/visitantes" class="logo">Visitantes</a>
+      <a href="/proveedores" class="logo">Proveedores</a>
+      <a href="/dashboard-admin" class="logo">Dashboard</a>
+    </div>
+  
+  
+    <div class="nav-right">
+      <div class="profile-container">
+        <img [src]="usuario.foto" alt="Profile Picture" class="profile-pic" (click)="navigateTo('perfiladmin', usuario.id)">
+        <button class="logout-btn" (click)="navigateTo('')">Salir</button>
+      </div>
+    </div>
+  </header>
+  
+    

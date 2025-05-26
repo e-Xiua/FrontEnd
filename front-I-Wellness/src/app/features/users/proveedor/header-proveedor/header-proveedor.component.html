@@ -1,0 +1,14 @@
+<header class="navbar">
+    <div class="nav-left">
+      <a href="/homeproveedor" class="nav-link active">Tus servicios</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="profile-container">
+        <img [src]="usuario.foto" alt="Profile Picture" class="profile-pic" alt="User" (click)="navigateTo('perfilproveedor', usuario.id)">
+        <button class="logout-btn" (click)="navigateTo('')">Salir</button>
+      </div>
+    </div>
+  </header>
+  
