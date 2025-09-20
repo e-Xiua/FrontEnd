@@ -1,6 +1,28 @@
-
 <div class="general-container">
-    <h2>Mapa de empresas</h2>
-    <div id="map" class="map-container"></div>  
-</div>
+  <div class="map-layout-column">
+    <!-- Asegura que EXISTE y es ÚNICO -->
+    <div class="map-container full">
+      <div id="map" class="map-leaflet-wrapper"></div>
+    </div>
 
+    <div class="below-map-bar">
+      <app-carousel
+        mode="map-linked"
+        [showHeader]="false"
+        [itemsPerView]="1"
+        [linkedItems]="providerItems"
+        (linkedItemChange)="onCarouselProviderChange($event)">
+      </app-carousel>
+    </div>
+  </div>
+
+  <app-provider-card
+    *ngIf="showProviderCard"
+    class="provider-card-wrapper"
+    [@slideIn]="showProviderCard ? 'visible' : 'hidden'"
+    [placeData]="placeData"
+    [reviews]="reviews"
+    [services]="services"
+    (submitReview)="onSubmitReview($event)">
+  </app-provider-card>
+</div>

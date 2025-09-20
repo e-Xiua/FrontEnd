@@ -1,0 +1,221 @@
+.carousel-section {
+  padding: 4rem 0;
+  background: var(--background);
+}
+
+.carousel-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 3rem;
+  height: 3rem;
+  background: var(--card-bg);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.carousel-nav-btn:hover:not([disabled]) {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 100%;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--items-per-view, 2), 1fr);
+  gap: 2rem;
+  padding: 0 4rem;
+}
+
+.carousel-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.carousel-dot:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.carousel-dot.active {
+  background: var(--primary-color);
+  transform: scale(1.25);
+
+}
+
+.carousel-nav-btn.left-4 {
+  left: 1rem;
+}
+
+.carousel-nav-btn.right-4 {
+  right: 1rem;
+}
+
+.relative {
+  position: relative;
+  min-height: 350px; /* Ajusta según el tamaño de tus cards */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .carousel-slide {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+
+  .carousel-nav-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+/* --- Estilos modo map-linked compacto --- */
+.map-linked-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 340px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: .75rem .85rem .9rem;
+  box-shadow: 0 4px 10px -2px rgba(0,0,0,.08);
+  gap: .65rem;
+}
+
+.map-linked-track-wrapper {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.map-linked-track {
+  display: flex;
+  transition: transform .45s ease;
+  width: 100%;
+}
+
+.map-linked-slide {
+  flex: 0 0 100%;
+  display: grid;
+  gap: .65rem;
+}
+
+.linked-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: .55rem .6rem .65rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: .25s;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.linked-card:hover {
+  background: #fff;
+  box-shadow: 0 4px 12px -2px rgba(0,0,0,.12);
+  transform: translateY(-2px);
+}
+
+.linked-card .title {
+  font-size: .8rem;
+  font-weight: 600;
+  margin: 0 0 .25rem;
+  line-height: 1.1;
+}
+
+.linked-card .coords {
+  font-size: .65rem;
+  margin: 0;
+  opacity: .65;
+}
+
+.linked-card .extra {
+  font-size: .55rem;
+  margin: .25rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  opacity: .55;
+}
+
+.map-linked-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  margin-top: .25rem;
+}
+
+.map-linked-nav .mini-btn {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: .25s;
+}
+
+.map-linked-nav .mini-btn:hover:not([disabled]) {
+  background: #f1f5f9;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+
+.map-linked-nav .mini-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.map-linked-nav .dots {
+  display: flex;
+  gap: .4rem;
+}
+
+.map-linked-nav .dots button {
+  width: 8px;
+  height: 8px;
+  background: #cbd5e1;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition:.25s;
+  padding:0;
+}
+
+.map-linked-nav .dots button.active {
+  background: #2563eb;
+  transform: scale(1.35);
+}
+
+.map-linked-nav .dots button:hover {
+  background:#64748b;
+}

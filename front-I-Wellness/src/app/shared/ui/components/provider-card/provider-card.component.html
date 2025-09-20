@@ -1,0 +1,156 @@
+<div class="card">
+  <div class="scroll-area">
+    <div class="p-0">
+      <!-- Header Image -->
+      <div class="image-container">
+        <img
+          alt="Place"
+          [src]="placeData.foto"
+          [alt]="placeData.name"
+          [title]="placeData.name"
+          class="header-image"
+        />
+        <div class="badge-container">
+          <span class="badge">{{ placeData.category }}</span>  <!-- Usa category -->
+        </div>
+      </div>
+
+      <div class="card-header">
+        <h3 class="card-title">{{ placeData.name }}</h3>
+
+        <div class="rating-container">
+          <div class="stars">
+            <span *ngFor="let filled of getStarArray(placeData.rating)"
+                  class="star" [class.filled]="filled">★</span>
+          </div>
+          <span class="rating-value">{{ placeData.rating }}</span>
+          <span>({{ placeData.totalReviews }} reviews)</span>
+        </div>
+
+        <div class="details">
+          <div class="detail-item">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>{{ placeData.totalReviews }}</span>
+          </div>
+          <div class="detail-item">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>{{ placeData.hours }}</span>
+          </div>
+        </div>
+
+        <p class="description">
+          {{ placeData.description }}
+        </p>
+
+        <!-- Nueva sección: Información de Contacto -->
+        <div class="contact-section">
+          <h4>Contacto</h4>
+          <p><strong>Nombre:</strong> {{ placeData.contactName }}</p>
+          <p><strong>Email:</strong> {{ placeData.email }}</p>
+          <p><strong>Teléfono:</strong> {{ placeData.phone }}</p>
+          <p><strong>Teléfono Empresa:</strong> {{ placeData.companyPhone }}</p>
+          <p><strong>Cargo:</strong> {{ placeData.cargoContacto }}</p>
+        </div>
+
+      <div class="card-content">
+        <!-- Carousel de Servicios (ya muestra images como URLs) -->
+        <app-carousel [itemsPerView]="2">
+          <ng-container *ngFor="let service of services">
+            <ng-template appCarouselItem>
+              <app-service-card
+                [title]="service.title"
+                [description]="service.description"
+                [image]="service.image"
+                [schedule]="service.schedule"
+                [duration]="service.duration"
+                [price]="service.price">
+              </app-service-card>
+            </ng-template>
+          </ng-container>
+        </app-carousel>
+
+        <!-- Rate This Place -->
+        <div class="section">
+          <h3>Rate this place</h3>
+          <div class="stars interactive">
+            <button *ngFor="let star of [1,2,3,4,5]; let i = index"
+                    (click)="setUserRating(i+1)"
+                    (keydown)="setUserRating(i+1)"
+                    type="button"
+                    class="star" [class.filled]="i < userRating"
+                    >★</button>
+          </div>
+        </div>
+
+           <!-- Write Review -->
+        <div class="section">
+          <h3>Write a review</h3>
+          <textarea
+            placeholder="Share your experience..."
+            [(ngModel)]="userReview"
+            class="textarea"
+          ></textarea>
+          <button
+            (click)="handleSubmitReview()"
+            [disabled]="userRating === 0 || !userReview.trim()"
+            class="submit-button"
+          >
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Submit Review
+          </button>
+        </div>
+
+        <div class="separator"></div>
+
+                <!-- Reviews Section -->
+        <div class="section">
+          <h3>Reviews ({{ reviews.length }})</h3>
+          <div class="reviews-list">
+            <div *ngFor="let review of reviews; let last = last" class="review-item">
+              <div class="review-content">
+                <div class="avatar">
+                  <img alt="avatar del usuario" [src]="review.avatar" [alt]="review.author" />
+                </div>
+                <div class="review-details">
+                  <div class="review-header">
+                    <span class="author">{{ review.author }}</span>
+                    <span class="date">{{ review.date }}</span>
+                  </div>
+                  <div class="stars">
+                    <span *ngFor="let filled of getStarArray(review.rating)"
+                          class="star" [class.filled]="filled">★</span>
+                  </div>
+                  <p class="comment">{{ review.comment }}</p>
+                  <div class="review-actions">
+                    <button class="action-button">
+                      <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                      </svg>
+                      <span>{{ review.helpful }}</span>
+                    </button>
+                    <button class="action-button">
+                      <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path>
+                      </svg>
+                      <span>{{ review.notHelpful }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!last" class="separator"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

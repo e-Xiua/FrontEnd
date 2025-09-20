@@ -1,23 +1,14 @@
-.general-container {
-    max-width: 80%;
-    max-height: 100%;
-    margin-left: 10%;
-    margin-top: 3%;
-    background: #f2efe7e7;
-    padding: 1rem;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    color: black;
-    }
 
 .map-container {
-    margin-top: 1rem;            
-    height: 30rem;
-    width: 100%;
-    border-radius: 1rem;
-  }
-  
+  margin-top: 1rem;
+  height: 32rem;        /* usa un solo valor */
+  width: 100%;
+  border-radius: 1rem;
+  position: relative;
+  overflow: hidden;     /* evita que el mapa “salga” visualmente */
+  display: block;
+}
+
 ::ng-deep .leaflet-popup-content {
   margin: 0;
   padding: 0 !important;
@@ -99,6 +90,85 @@
 
 ::ng-deep .leaflet-tooltip-bottom::before {
   display: none !important;  /* quita la flecha */
+}
+
+/* Añadir / ajustar */
+.map-card-flex {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.carousel-inline {
+  flex: 0 0 340px;
+}
+
+.map-container.full-width {
+  flex: 1 1 auto;
+}
+
+.map-container.with-card {
+  flex: 1 1 55%;
+}
+
+.map-layout-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.map-container.full {  /* si no necesitas distinto, puedes eliminar esta clase */
+  height: 32rem;
+}
+#map,
+.map-leaflet-wrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit; /* aplica el mismo radio */
+}
+.below-map-bar {
+  width: 100%;
+}
+.provider-card-wrapper {
+  margin-top: 1.25rem;
+}
+@media (min-width: 1100px) {
+  .general-container {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.2rem;
+    align-items: start;
+  }
+  .provider-card-wrapper {
+    position: sticky;
+    top: 90px;
+  }
+}
+
+.provider-card-wrapper {
+  flex: 0 0 380px;
+}
+
+@media (max-width: 1200px) {
+  .map-card-flex {
+    flex-wrap: wrap;
+  }
+  .carousel-inline,
+  .provider-card-wrapper,
+  .map-container {
+    flex: 1 1 100%;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Ajustes popup existentes */
+::ng-deep .leaflet-container {
+  font: inherit;
 }
 
 
