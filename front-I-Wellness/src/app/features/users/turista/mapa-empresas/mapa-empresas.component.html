@@ -1,28 +1,28 @@
-<div class="general-container">
-  <div class="map-layout-column">
-    <!-- Asegura que EXISTE y es ÚNICO -->
-    <div class="map-container full">
-      <div id="map" class="map-leaflet-wrapper"></div>
-    </div>
-
-    <div class="below-map-bar">
-      <app-carousel
-        mode="map-linked"
-        [showHeader]="false"
-        [itemsPerView]="1"
-        [linkedItems]="providerItems"
-        (linkedItemChange)="onCarouselProviderChange($event)">
-      </app-carousel>
-    </div>
+<div class="mapa-empresas-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando proveedores...</p>
   </div>
 
-  <app-provider-card
-    *ngIf="showProviderCard"
-    class="provider-card-wrapper"
-    [@slideIn]="showProviderCard ? 'visible' : 'hidden'"
-    [placeData]="placeData"
-    [reviews]="reviews"
-    [services]="services"
-    (submitReview)="onSubmitReview($event)">
-  </app-provider-card>
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <p class="error-message">{{ error }}</p>
+    <button (click)="retryLoad()" class="retry-button">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Map POI Component -->
+  <app-map-poi
+    *ngIf="!isLoading && !error"
+    [providers]="providers"
+    [config]="mapConfig"
+    [showRoutes]="true"
+    [showCarousel]="true"
+    [showProviderCard]="true"
+    mapId="mapa-empresas"
+    (providerSelected)="onProviderSelected($event)"
+    (mapInitialized)="onMapInitialized()">
+  </app-map-poi>
 </div>

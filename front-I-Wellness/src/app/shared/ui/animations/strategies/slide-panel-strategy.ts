@@ -4,7 +4,7 @@ export class SlidePanelStrategy implements ProviderDisplayStrategy {
   show(component: any, providerData: any): void {
     component.ngZone.run(() => {
       component.selectedProviderId = providerData.id;
-      component.showProviderCard = true;
+      component.showProviderCardVisible = true;
 
       // Replace placeholder with full mapping
       component.placeData = {
@@ -49,7 +49,7 @@ export class SlidePanelStrategy implements ProviderDisplayStrategy {
 
   hide(component: any): void {
     component.ngZone.run(() => {
-      component.showProviderCard = false;
+      component.showProviderCardVisible = false;
       component.selectedProviderId = null;
       component.cdr.markForCheck(); // If using OnPush
     });
