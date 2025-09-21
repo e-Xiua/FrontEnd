@@ -1,19 +1,45 @@
 <div class="map-poi-container">
   <div class="map-layout-column">
+
+    <!-- Nombre del proveedor activo arriba del mapa -->
+    <div class="provider-name-header" *ngIf="showCarousel && providerItems.length > 0">
+      <h3 class="provider-name">{{ activeProviderName }}</h3>
+      <span class="provider-counter" *ngIf="providerItems.length > 1">
+        {{ activeProviderIndex + 1 }} de {{ providerItems.length }}
+      </span>
+    </div>
+
     <!-- Mapa -->
     <div class="map-container full">
       <div [id]="mapId" class="map-leaflet-wrapper"></div>
     </div>
 
-    <!-- Carousel debajo del mapa -->
-    <div class="below-map-bar" *ngIf="showCarousel && providerItems.length > 0">
-      <app-carousel
-        mode="map-linked"
-        [showHeader]="false"
-        [itemsPerView]="1"
-        [linkedItems]="providerItems"
-        (linkedItemChange)="onCarouselProviderChange($event)">
-      </app-carousel>
+    <!-- Solo navegación del carousel debajo del mapa -->
+    <div class="carousel-navigation-only" *ngIf="showCarousel && providerItems.length > 1">
+      <button
+        class="nav-btn prev-btn"
+        (click)="goToPreviousProvider()"
+        [disabled]="activeProviderIndex <= 0">
+        &#10094;
+      </button>
+
+      <div class="dots-container">
+        <button
+          type="button"
+          *ngFor="let item of providerItems; let i = index"
+          class="nav-dot"
+          [class.active]="i === activeProviderIndex"
+          (click)="goToProviderIndex(i)"
+          [title]="item.data?.nombre_empresa || 'Proveedor ' + (i + 1)">
+        </button>
+      </div>
+
+      <button
+        class="nav-btn next-btn"
+        (click)="goToNextProvider()"
+        [disabled]="activeProviderIndex >= providerItems.length - 1">
+        &#10095;
+      </button>
     </div>
   </div>
 
