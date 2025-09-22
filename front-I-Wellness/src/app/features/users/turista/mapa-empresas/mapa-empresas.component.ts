@@ -3,13 +3,14 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { Router } from '@angular/router';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { MapConfig, MapPoiComponent } from '../../../../shared/ui/components/map-poi/map-poi.component';
+import { RoutePoisShowComponent } from "../../../../shared/ui/components/route-pois-show/route-pois-show.component";
 import { UsuarioService } from '../../services/usuario.service';
 
 @Component({
   selector: 'app-mapa-empresas',
   templateUrl: './mapa-empresas.component.html',
   styleUrls: ['./mapa-empresas.component.css'],
-  imports: [CommonModule, MapPoiComponent],
+  imports: [CommonModule, MapPoiComponent, RoutePoisShowComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })

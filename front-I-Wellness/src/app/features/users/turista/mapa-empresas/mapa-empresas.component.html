@@ -26,3 +26,45 @@
     (mapInitialized)="onMapInitialized()">
   </app-map-poi>
 </div>
+
+<div class="mapa-empresas-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando proveedores...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <p class="error-message">{{ error }}</p>
+    <button (click)="retryLoad()" class="retry-button">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Map POI Component -->
+  <app-route-pois-show
+    *ngIf="!isLoading && !error"
+    [providers]="providers"
+    [config]="mapConfig"
+    [showRoutes]="true"
+    [showCarousel]="true"
+    [showProviderCard]="true"
+    mapId="mapa-pequenas-empresas"
+    (providerSelected)="onProviderSelected($event)"
+    (mapInitialized)="onMapInitialized()">
+  </app-route-pois-show>
+</div>
+
+ <app-route-pois-show
+    *ngIf="!isLoading && !error"
+    [providers]="providers"
+    [config]="mapConfig"
+    [showRoutes]="true"
+    [showCarousel]="true"
+    [showProviderCard]="true"
+    mapId="mapa-fuera-empresas"
+    (providerSelected)="onProviderSelected($event)"
+    (mapInitialized)="onMapInitialized()">
+  </app-route-pois-show>
+
