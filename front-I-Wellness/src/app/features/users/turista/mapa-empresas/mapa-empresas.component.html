@@ -13,58 +13,73 @@
     </button>
   </div>
 
-  <!-- Map POI Component -->
-  <app-map-poi
-    *ngIf="!isLoading && !error"
-    [providers]="providers"
-    [config]="mapConfig"
-    [showRoutes]="true"
-    [showCarousel]="true"
-    [showProviderCard]="true"
-    mapId="mapa-empresas"
-    (providerSelected)="onProviderSelected($event)"
-    (mapInitialized)="onMapInitialized()">
-  </app-map-poi>
-</div>
+  <!-- Contenido principal cuando los datos están cargados -->
+  <div *ngIf="!isLoading && !error" class="content-container">
 
-<div class="mapa-empresas-container">
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <div class="loading-spinner"></div>
-    <p>Cargando proveedores...</p>
+    <!-- Mapa general con todos los proveedores -->
+    <section class="map-section">
+      <h2 class="section-title">Mapa General de Proveedores</h2>
+      <app-route-pois-show
+        [providers]="providers"
+        [config]="mapConfig"
+        [showRoutes]="false"
+        [showCarousel]="true"
+        [showProviderCard]="true"
+        mapId="mapa-general-proveedores"
+        (providerSelected)="onProviderSelected($event)"
+        (mapInitialized)="onMapInitialized()">
+      </app-route-pois-show>
+    </section>
+
+    <!-- Separador visual -->
+    <div class="section-divider"></div>
+
+    <!-- Componente de rutas múltiples -->
+    <section class="routes-section">
+      <h2 class="section-title">Rutas Sugeridas</h2>
+      <p class="section-description">
+        Explora diferentes rutas curadas con múltiples proveedores para una experiencia completa de bienestar.
+      </p>
+
+      <app-show-routes-many-options
+        *ngIf="routes.length > 0"
+        [routes]="routes"
+        [displayOptions]="{
+          showRouteInfo: true,
+          showProviderCarousel: true,
+          showProviderCard: true,
+          showRouteLines: true,
+          compactMode: false,
+          allowRouteSelection: true
+        }"
+        [maxRoutesToShow]="8"
+        [showFilters]="true"
+        [showRouteStats]="true"
+        [layoutMode]="'accordion'"
+        (routeSelected)="onRouteSelected($event)"
+        (providerSelected)="onRouteProviderSelected($event.route, $event.provider)"
+        (filtersChanged)="onRouteFiltersChanged($event)">
+      </app-show-routes-many-options>
+
+      <!-- Mensaje cuando no hay rutas -->
+      <div *ngIf="routes.length === 0" class="no-routes-message">
+        <p>No hay rutas disponibles en este momento.</p>
+      </div>
+    </section>
+
+    <!-- Información de ruta seleccionada -->
+    <section *ngIf="selectedRoute" class="selected-route-section">
+      <div class="selected-route-content">
+        <div class="selected-route-info">
+          <h3 class="selected-route-title">Ruta Seleccionada: {{ selectedRoute.name }}</h3>
+          <p class="selected-route-description">{{ selectedRoute.description }}</p>
+        </div>
+        <div class="selected-route-actions">
+          <button class="vamos-button" (click)="navigateToRouteDetail()">
+            🚀 ¡Vamos!
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
-
-  <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="error-container">
-    <p class="error-message">{{ error }}</p>
-    <button (click)="retryLoad()" class="retry-button">
-      Reintentar
-    </button>
-  </div>
-
-  <!-- Map POI Component -->
-  <app-route-pois-show
-    *ngIf="!isLoading && !error"
-    [providers]="providers"
-    [config]="mapConfig"
-    [showRoutes]="true"
-    [showCarousel]="true"
-    [showProviderCard]="true"
-    mapId="mapa-pequenas-empresas"
-    (providerSelected)="onProviderSelected($event)"
-    (mapInitialized)="onMapInitialized()">
-  </app-route-pois-show>
 </div>
-
- <app-route-pois-show
-    *ngIf="!isLoading && !error"
-    [providers]="providers"
-    [config]="mapConfig"
-    [showRoutes]="true"
-    [showCarousel]="true"
-    [showProviderCard]="true"
-    mapId="mapa-fuera-empresas"
-    (providerSelected)="onProviderSelected($event)"
-    (mapInitialized)="onMapInitialized()">
-  </app-route-pois-show>
-

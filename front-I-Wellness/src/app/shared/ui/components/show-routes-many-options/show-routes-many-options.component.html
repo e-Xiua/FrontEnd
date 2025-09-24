@@ -1,0 +1,199 @@
+<!-- Container principal -->
+<div class="routes-container" [class]="'layout-' + layoutMode">
+
+  <!-- Header con estadísticas y filtros -->
+  <div class="routes-header" *ngIf="showRouteStats || showFilters">
+
+    <!-- Estadísticas -->
+    <div class="route-stats" *ngIf="showRouteStats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-value">{{ filteredRoutes.length }}</span>
+          <span class="stat-label">Rutas</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ totalProviders }}</span>
+          <span class="stat-label">Proveedores</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ averageRating.toFixed(1) }}</span>
+          <div class="stat-stars">
+            <span
+              *ngFor="let star of generateStarRating(averageRating)"
+              class="star"
+              [class]="'star-' + star">
+              ★
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles de filtros -->
+    <div class="route-filters" *ngIf="showFilters">
+      <div class="filter-controls">
+
+        <!-- Búsqueda por texto -->
+        <div class="filter-group">
+          <input
+            type="text"
+            class="filter-search"
+            placeholder="Buscar rutas..."
+            [value]="currentFilters.searchText || ''"
+            (input)="onSearchInput($event)">
+        </div>
+
+        <!-- Filtro por categoría -->
+        <div class="filter-group" *ngIf="categories.length > 0">
+          <select
+            class="filter-select"
+            title="Filtrar por categoría"
+            [value]="currentFilters.category || ''"
+            (change)="onCategoryChange($event)">
+            <option value="">Todas las categorías</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro por dificultad -->
+        <div class="filter-group">
+          <select
+            class="filter-select"
+            title="Filtrar por dificultad"
+            [value]="currentFilters.difficulty || ''"
+            (change)="onDifficultyChange($event)">
+            <option value="">Toda dificultad</option>
+            <option *ngFor="let difficulty of difficulties" [value]="difficulty">
+              {{ difficulty | titlecase }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <button
+          class="clear-filters-btn"
+          (click)="clearFilters()"
+          [disabled]="!hasFilters()">
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de rutas -->
+  <div class="routes-list" [class]="'routes-' + layoutMode">
+
+    <!-- Mensaje cuando no hay rutas -->
+    <div class="no-routes-message" *ngIf="filteredRoutes.length === 0">
+      <div class="no-routes-content">
+        <i class="no-routes-icon">🗺️</i>
+        <h3>No se encontraron rutas</h3>
+        <p *ngIf="hasFilters()">
+          Intenta ajustar los filtros para encontrar más opciones.
+        </p>
+        <p *ngIf="!hasFilters()">
+          No hay rutas disponibles en este momento.
+        </p>
+      </div>
+    </div>
+
+    <!-- Rutas disponibles -->
+    <div class="route-item"
+         *ngFor="let route of filteredRoutes; trackBy: trackByRouteId"
+         [class.route-active]="isRouteActive(route.id)"
+         [class.route-expanded]="isRouteExpanded(route.id)">
+
+      <!-- Header de la ruta -->
+      <button class="route-header"
+           type="button"
+           [attr.aria-expanded]="isRouteExpanded(route.id)"
+           (click)="layoutMode === 'accordion' ? toggleRouteExpansion(route.id) : selectRoute(route)">
+
+        <div class="route-title-section">
+          <h3 class="route-title">{{ route.name }}</h3>
+          <p class="route-description" *ngIf="route.description">
+            {{ route.description }}
+          </p>
+        </div>
+
+        <div class="route-meta-section">
+          <!-- Información básica -->
+          <div class="route-meta-grid">
+            <div class="meta-item" *ngIf="route.estimatedTime">
+              <i class="meta-icon">⏱️</i>
+              <span>{{ formatDuration(route.estimatedTime) }}</span>
+            </div>
+            <div class="meta-item" *ngIf="route.estimatedDistance">
+              <i class="meta-icon">📍</i>
+              <span>{{ formatDistance(route.estimatedDistance) }}</span>
+            </div>
+            <div class="meta-item" *ngIf="route.difficulty">
+              <i class="meta-icon">🏔️</i>
+              <span class="difficulty-badge" [class]="getDifficultyClass(route.difficulty)">
+                {{ route.difficulty | titlecase }}
+              </span>
+            </div>
+            <div class="meta-item" *ngIf="route.rating">
+              <div class="rating-display">
+                <span
+                  *ngFor="let star of generateStarRating(route.rating)"
+                  class="star"
+                  [class]="'star-' + star">
+                  ★
+                </span>
+                <span class="rating-value">({{ route.rating.toFixed(1) }})</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contador de proveedores -->
+          <div class="providers-count">
+            <i class="provider-icon">👥</i>
+            <span>{{ route.providers.length }} proveedor{{ route.providers.length !== 1 ? 'es' : '' }}</span>
+          </div>
+        </div>
+
+        <!-- Botón de expansión para accordion -->
+        <div class="route-expand-btn" *ngIf="layoutMode === 'accordion'">
+          <i class="expand-icon" [class.expanded]="isRouteExpanded(route.id)">
+            {{ isRouteExpanded(route.id) ? '▲' : '▼' }}
+          </i>
+        </div>
+      </button>
+
+      <!-- Contenido expandible de la ruta -->
+      <div class="route-content"
+           [class.content-expanded]="isRouteExpanded(route.id) || layoutMode !== 'accordion'">
+
+        <!-- Tags de la ruta -->
+        <div class="route-tags" *ngIf="route.tags && route.tags.length > 0">
+          <span class="tag" *ngFor="let tag of route.tags">{{ tag }}</span>
+        </div>
+
+        <!-- Información de proveedores usando route-pois-show -->
+        <div class="route-pois-container">
+          <app-route-pois-show
+            *ngIf="!isLoading && !error"
+            [providers]="route.providers"
+            [config]="mapConfig"
+            [showRoutes]="displayOptions.showRouteLines"
+            [showCarousel]="displayOptions.showProviderCarousel"
+            [showProviderCard]="displayOptions.showProviderCard"
+            [mapId]="getRouteMapId(route)"
+            (providerSelected)="onRouteProviderSelected(route, $event)"
+            (mapInitialized)="onRouteMapInitialized(route)">
+          </app-route-pois-show>
+        </div>
+
+        <!-- Acciones de la ruta -->
+        <div class="route-actions" *ngIf="displayOptions.allowRouteSelection">
+          <button class="route-action-btn primary" (click)="selectRoute(route)">
+            {{ isRouteActive(route.id) ? 'Ruta seleccionada' : 'Seleccionar ruta' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

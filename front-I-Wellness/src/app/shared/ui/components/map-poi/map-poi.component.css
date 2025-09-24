@@ -179,6 +179,7 @@
   background-color: #f8fafc;
   border-radius: 0.5rem;
   margin-top: 1rem;
+  z-index: 1000;
 }
 
 .nav-button {
