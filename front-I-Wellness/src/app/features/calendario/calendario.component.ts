@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -61,10 +61,14 @@ export class CalendarioComponent implements OnInit {
   
   eventoForm: FormGroup;
   showEventForm = false;
+  showEventTypeSelector = false;
+  showEventDetail = false;
   selectedDate: Date | null = null;
+  selectedEvent: Evento | null = null;
   selectedEventType: 'evento' | 'reunion' = 'evento';
   showYearSelector = false;
   showMonthSelector = false;
+  isEditing = false;
 
   availableYears: number[] = [];
   availableMonths = this.monthNames;
@@ -72,7 +76,8 @@ export class CalendarioComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.eventoForm = this.fb.group({
       titulo: ['', Validators.required],
@@ -88,7 +93,40 @@ export class CalendarioComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.addSampleEvents();
     this.generateCalendar();
+  }
+
+  addSampleEvents() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const sampleEvent: Evento = {
+      id: '1',
+      titulo: 'Evento de Prueba',
+      descripcion: 'Este es un evento de prueba para verificar la funcionalidad',
+      fecha: tomorrow,
+      duracion: 60,
+      costo: 50,
+      asistentes: ['test@ejemplo.com'],
+      tipo: 'evento',
+      color: '#4CAF50'
+    };
+    
+    const sampleMeeting: Evento = {
+      id: '2',
+      titulo: 'Reunión de Equipo',
+      descripcion: 'Reunión semanal del equipo de desarrollo',
+      fecha: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000),
+      duracion: 90,
+      costo: 0,
+      asistentes: ['dev1@ejemplo.com', 'dev2@ejemplo.com'],
+      tipo: 'reunion',
+      color: '#2196F3'
+    };
+    
+    this.eventos.push(sampleEvent, sampleMeeting);
   }
 
   generateAvailableYears() {
@@ -188,10 +226,31 @@ export class CalendarioComponent implements OnInit {
     });
   }
 
+  onDayClick(day: CalendarDay, event: Event) {
+    const target = event.target as HTMLElement;
+    const isEventClick = target.closest('.event-item');
+    
+    if (isEventClick) {
+      return;
+    }
+    
+    this.selectedDate = day.date;
+    this.showEventTypeSelector = true;
+    this.cdr.detectChanges();
+  }
+
+  onEventClick(evento: Evento, event: Event) {
+    event.stopPropagation();
+    this.selectedEvent = evento;
+    this.showEventDetail = true;
+    this.cdr.detectChanges();
+  }
+
   openEventForm(date: Date, eventType: 'evento' | 'reunion') {
     this.selectedDate = date;
     this.selectedEventType = eventType;
     this.showEventForm = true;
+    this.showEventTypeSelector = false;
     
     const fechaStr = date.toISOString().split('T')[0];
     this.eventoForm.patchValue({
@@ -201,14 +260,47 @@ export class CalendarioComponent implements OnInit {
     });
   }
 
+  openEventFormForEdit(evento: Evento) {
+    this.selectedEvent = evento;
+    this.selectedEventType = evento.tipo;
+    this.isEditing = true;
+    this.showEventDetail = false;
+    this.showEventForm = true;
+    
+    const fechaStr = evento.fecha.toISOString().split('T')[0];
+    const horaStr = evento.fecha.toTimeString().split(' ')[0].substring(0, 5);
+    
+    this.eventoForm.patchValue({
+      titulo: evento.titulo,
+      descripcion: evento.descripcion,
+      fecha: fechaStr,
+      hora: horaStr,
+      duracion: evento.duracion,
+      costo: evento.costo,
+      asistentes: evento.asistentes.join(', ')
+    });
+  }
+
   closeEventForm() {
     this.showEventForm = false;
     this.selectedDate = null;
+    this.selectedEvent = null;
+    this.isEditing = false;
     this.eventoForm.reset();
   }
 
+  closeEventTypeSelector() {
+    this.showEventTypeSelector = false;
+    this.selectedDate = null;
+  }
+
+  closeEventDetail() {
+    this.showEventDetail = false;
+    this.selectedEvent = null;
+  }
+
   onSubmit() {
-    if (this.eventoForm.valid && this.selectedDate) {
+    if (this.eventoForm.valid && (this.selectedDate || this.isEditing)) {
       const formData = this.eventoForm.value as EventoForm;
       const [year, month, day] = formData.fecha.split('-');
       const [hours, minutes] = formData.hora.split(':');
@@ -226,27 +318,50 @@ export class CalendarioComponent implements OnInit {
         .map(email => email.trim())
         .filter(email => email.length > 0);
 
-      const newEvent: Evento = {
-        id: Date.now().toString(),
-        titulo: formData.titulo,
-        descripcion: formData.descripcion,
-        fecha: eventDate,
-        duracion: formData.duracion,
-        costo: formData.costo || 0,
-        asistentes: asistentes,
-        tipo: this.selectedEventType,
-        color: this.selectedEventType === 'evento' ? '#4CAF50' : '#2196F3'
-      };
+      if (this.isEditing && this.selectedEvent) {
+        const eventIndex = this.eventos.findIndex(e => e.id === this.selectedEvent!.id);
+        if (eventIndex !== -1) {
+          this.eventos[eventIndex] = {
+            ...this.eventos[eventIndex],
+            titulo: formData.titulo,
+            descripcion: formData.descripcion,
+            fecha: eventDate,
+            duracion: formData.duracion,
+            costo: formData.costo || 0,
+            asistentes: asistentes,
+            tipo: this.selectedEventType,
+            color: this.selectedEventType === 'evento' ? '#4CAF50' : '#2196F3'
+          };
+        }
+        
+        this.snackBar.open(
+          `${this.selectedEventType === 'evento' ? 'Evento' : 'Reunión'} actualizado exitosamente`,
+          'Cerrar',
+          { duration: 3000, panelClass: 'snackbar-success' }
+        );
+      } else {
+        const newEvent: Evento = {
+          id: Date.now().toString(),
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          fecha: eventDate,
+          duracion: formData.duracion,
+          costo: formData.costo || 0,
+          asistentes: asistentes,
+          tipo: this.selectedEventType,
+          color: this.selectedEventType === 'evento' ? '#4CAF50' : '#2196F3'
+        };
 
-      this.eventos.push(newEvent);
+        this.eventos.push(newEvent);
+        
+        this.snackBar.open(
+          `${this.selectedEventType === 'evento' ? 'Evento' : 'Reunión'} creado exitosamente`,
+          'Cerrar',
+          { duration: 3000, panelClass: 'snackbar-success' }
+        );
+      }
+      
       this.eventos.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-      
-      this.snackBar.open(
-        `${this.selectedEventType === 'evento' ? 'Evento' : 'Reunión'} creado exitosamente`,
-        'Cerrar',
-        { duration: 3000 , panelClass: 'snackbar-success'}
-      );
-      
       this.closeEventForm();
       this.generateCalendar();
     }
@@ -256,6 +371,13 @@ export class CalendarioComponent implements OnInit {
     this.eventos = this.eventos.filter(evento => evento.id !== eventId);
     this.snackBar.open('Evento eliminado', 'Cerrar', { duration: 2000 });
     this.generateCalendar();
+  }
+
+  deleteEventFromDetail() {
+    if (this.selectedEvent) {
+      this.deleteEvent(this.selectedEvent.id);
+      this.closeEventDetail();
+    }
   }
 
   getMonthYearString(): string {
@@ -290,4 +412,5 @@ export class CalendarioComponent implements OnInit {
     
     return `${currentMonthEvents} eventos este mes (${totalEvents} total)`;
   }
+
 }
