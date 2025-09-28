@@ -32,6 +32,7 @@ import { ServiciosProveedorComponent } from './features/users/proveedor/servicio
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
 import { DashboardAdminComponent } from './features/users/administrador/dashboard-admin/dashboard-admin.component';
 import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
+import { CalendarioComponent } from './features/calendario/calendario.component';
 
 export const routes: Routes = [
     // Rutas públicas
@@ -46,6 +47,7 @@ export const routes: Routes = [
     
     // Rutas compartidas - accesibles a todos los usuarios autenticados
     { path: 'infoservicio/:id', component: InfoServicioComponent, canActivate: [authGuard] },
+    { path: 'calendario', component: CalendarioComponent },
    
     
     // Rutas específicas para Turistas

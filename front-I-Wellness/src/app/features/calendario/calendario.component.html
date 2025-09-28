@@ -1,0 +1,233 @@
+<div class="calendario-container">
+  <div class="calendario-header">
+    <div class="month-navigation">
+      <button mat-icon-button (click)="previousYear()" title="Año anterior">
+        <mat-icon>keyboard_double_arrow_left</mat-icon>
+      </button>
+      <button mat-icon-button (click)="previousMonth()" title="Mes anterior">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <div class="date-selectors">
+        <button mat-button (click)="toggleMonthSelector()" class="date-button">
+          {{ monthNames[currentMonth] }}
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+        <button mat-button (click)="toggleYearSelector()" class="date-button">
+          {{ currentYear }}
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+      </div>
+
+      <button mat-icon-button (click)="nextMonth()" title="Mes siguiente">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-icon-button (click)="nextYear()" title="Año siguiente">
+        <mat-icon>keyboard_double_arrow_right</mat-icon>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <div class="event-summary">{{ getEventSummary() }}</div>
+      <button mat-raised-button color="primary" (click)="goToToday()">
+        <mat-icon>today</mat-icon>
+        Hoy
+      </button>
+    </div>
+  </div>
+
+  <div class="month-selector" *ngIf="showMonthSelector">
+    <div class="month-grid">
+      <button
+        mat-button
+        *ngFor="let month of monthNames; let i = index"
+        (click)="selectMonth(i)"
+        [class.selected]="i === currentMonth"
+        class="month-button"
+      >
+        {{ month }}
+      </button>
+    </div>
+  </div>
+
+  <div class="year-selector" *ngIf="showYearSelector">
+    <div class="year-grid">
+      <button
+        mat-button
+        *ngFor="let year of availableYears"
+        (click)="selectYear(year)"
+        [class.selected]="year === currentYear"
+        class="year-button"
+      >
+        {{ year }}
+      </button>
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="weekday-header" *ngFor="let day of weekDays">
+      {{ day }}
+    </div>
+
+    <div
+      class="calendar-day"
+      *ngFor="let day of calendarDays"
+      [class.today]="day.isToday"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.past-day]="day.isPast"
+      (click)="openEventForm(day.date, 'evento')"
+      (keydown.enter)="openEventForm(day.date, 'evento')"
+      (keydown.space)="openEventForm(day.date, 'evento')"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="
+        'Crear evento el ' +
+        day.date.getDate() +
+        ' de ' +
+        monthNames[currentMonth]
+      "
+    >
+      <div class="day-number">{{ day.date.getDate() }}</div>
+      <div class="events-container">
+        <div
+          class="event-item"
+          *ngFor="let evento of day.events"
+          [style.background-color]="evento.color"
+          (click)="$event.stopPropagation()"
+          (keydown.enter)="$event.stopPropagation()"
+          (keydown.space)="$event.stopPropagation()"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Evento: ' + evento.titulo"
+        >
+          <span class="event-title">{{ evento.titulo }}</span>
+          <button
+            mat-icon-button
+            class="delete-btn"
+            (click)="deleteEvent(evento.id)"
+            title="Eliminar evento"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button mat-raised-button color="accent" (click)="createNewEvent()">
+      <mat-icon>event</mat-icon>
+      Nuevo Evento
+    </button>
+    <button mat-raised-button color="primary" (click)="createNewMeeting()">
+      <mat-icon>group</mat-icon>
+      Nueva Reunión
+    </button>
+  </div>
+</div>
+
+<div class="event-form-overlay" *ngIf="showEventForm">
+  <div class="event-form-container">
+    <mat-card class="event-form-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{
+            selectedEventType === "evento" ? "Nuevo Evento" : "Nueva Reunión"
+          }}
+        </mat-card-title>
+        <button mat-icon-button (click)="closeEventForm()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="eventoForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título</mat-label>
+            <input
+              matInput
+              formControlName="titulo"
+              placeholder="Ingrese el título"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción</mat-label>
+            <textarea
+              matInput
+              formControlName="descripcion"
+              rows="3"
+              placeholder="Descripción del evento"
+            ></textarea>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Fecha</mat-label>
+              <input matInput type="date" formControlName="fecha" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Hora</mat-label>
+              <input matInput type="time" formControlName="hora" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Duración (minutos)</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="duracion"
+                min="15"
+              />
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              class="half-width"
+              *ngIf="selectedEventType === 'evento'"
+            >
+              <mat-label>Costo</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="costo"
+                min="0"
+                step="0.01"
+              />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Asistentes (emails separados por comas)</mat-label>
+            <input
+              matInput
+              formControlName="asistentes"
+              placeholder="email1@ejemplo.com, email2@ejemplo.com"
+            />
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="closeEventForm()">
+              Cancelar
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="!eventoForm.valid"
+            >
+              {{
+                selectedEventType === "evento"
+                  ? "Crear Evento"
+                  : "Crear Reunión"
+              }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
