@@ -81,10 +81,7 @@
   background-color: #f0f0f0;
 }
 
-.month-button.selected, .year-button.selected {
-  background-color: #2196F3;
-  color: black;
-}
+
 
 .calendar-grid {
   display: grid;
@@ -538,4 +535,13 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+.month-button{
+  color: black;
+}
+
+.month-button.selected, .year-button.selected {
+  background-color: #2196F3;
+  color: white;
 }
