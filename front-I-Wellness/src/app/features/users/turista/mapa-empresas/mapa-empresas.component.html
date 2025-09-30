@@ -73,12 +73,153 @@
         <div class="selected-route-info">
           <h3 class="selected-route-title">Ruta Seleccionada: {{ selectedRoute.name }}</h3>
           <p class="selected-route-description">{{ selectedRoute.description }}</p>
+
+          <!-- Current Route Optimization Status -->
+          <div *ngIf="isOptimizing" class="optimization-status">
+            <div class="optimization-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="optimizationProgress"></div>
+              </div>
+              <p class="optimization-message">{{ optimizationMessage }}</p>
+              <p class="progress-text">{{ optimizationProgress }}%</p>
+            </div>
+          </div>
+
+          <!-- Optimization Results -->
+          <div *ngIf="optimizedResult && !isOptimizing" class="optimization-results">
+            <h4>✅ Optimización Completada</h4>
+            <div class="optimization-metrics">
+              <div class="metric">
+                <span class="metric-label">Distancia Total:</span>
+                <span class="metric-value">{{ optimizedResult.totalDistanceKm.toFixed(1) }} km</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Tiempo Estimado:</span>
+                <span class="metric-value">{{ Math.floor(optimizedResult.totalTimeMinutes / 60) }}h {{ optimizedResult.totalTimeMinutes % 60 }}m</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Puntuación:</span>
+                <span class="metric-value">{{ (optimizedResult.optimizationScore * 100).toFixed(1) }}%</span>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div class="selected-route-actions">
+          <!-- Standard Navigation Button -->
           <button class="vamos-button" (click)="navigateToRouteDetail()">
             🚀 ¡Vamos!
           </button>
+
+          <!-- Route Optimization Controls -->
+          <div class="optimization-controls">
+            <button
+              *ngIf="!isOptimizing && !optimizedResult"
+              class="optimize-button"
+              (click)="optimizeSelectedRoute()">
+              🧠 Optimizar Ruta con IA
+            </button>
+
+            <button
+              *ngIf="optimizedResult && !isOptimizing"
+              class="clear-optimization-button"
+              (click)="clearOptimizationResults()">
+              🔄 Nueva Optimización
+            </button>
+
+            <button
+              *ngIf="isOptimizing"
+              class="cancel-button"
+              disabled>
+              ⏳ Optimizando...
+            </button>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Multiple Active Optimizations Section -->
+    <section *ngIf="activeOptimizations.size > 0" class="active-optimizations-section">
+      <h3 class="section-title">🚀 Optimizaciones Activas</h3>
+      <div class="optimizations-grid">
+        <div
+          *ngFor="let entry of activeOptimizations | keyvalue; trackBy: trackOptimizationEntry"
+          class="optimization-card"
+          [class.completed]="!entry.value.isOptimizing && entry.value.result"
+          [class.error]="!entry.value.isOptimizing && !entry.value.result"
+        >
+          <div class="optimization-header">
+            <h4 class="optimization-route-name">{{ entry.value.routeName }}</h4>
+            <div class="optimization-status-badge">
+              <span *ngIf="entry.value.isOptimizing" class="status-running">🔄 En progreso</span>
+              <span *ngIf="!entry.value.isOptimizing && entry.value.result" class="status-completed">✅ Completado</span>
+              <span *ngIf="!entry.value.isOptimizing && !entry.value.result" class="status-error">❌ Error</span>
+            </div>
+          </div>
+
+          <div class="optimization-body">
+            <!-- Progress Bar -->
+            <div *ngIf="entry.value.isOptimizing" class="progress-container">
+              <div class="progress-bar small">
+                <div class="progress-fill" [style.width.%]="entry.value.progress"></div>
+              </div>
+              <p class="progress-text small">{{ entry.value.progress }}%</p>
+            </div>
+
+            <!-- Status Message -->
+            <p class="optimization-message small">{{ entry.value.message }}</p>
+
+            <!-- Results Summary (when completed) -->
+            <div *ngIf="entry.value.result && !entry.value.isOptimizing" class="results-summary">
+              <div class="result-metrics">
+                <span class="metric-item">
+                  📏 {{ entry.value.result.totalDistanceKm.toFixed(1) }} km
+                </span>
+                <span class="metric-item">
+                  ⏱️ {{ Math.floor(entry.value.result.totalTimeMinutes / 60) }}h {{ entry.value.result.totalTimeMinutes % 60 }}m
+                </span>
+                <span class="metric-item">
+                  ⭐ {{ (entry.value.result.optimizationScore * 100).toFixed(1) }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="optimization-actions">
+              <button
+                *ngIf="entry.value.isOptimizing"
+                class="cancel-optimization-btn"
+                (click)="cancelOptimization(entry.key)">
+                ⏹️ Cancelar
+              </button>
+              <button
+                *ngIf="!entry.value.isOptimizing"
+                class="remove-optimization-btn"
+                (click)="removeOptimization(entry.key)">
+                🗑️ Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clear All Button -->
+      <div class="clear-all-container">
+        <button
+          class="clear-all-optimizations-btn"
+          (click)="clearAllOptimizations()">
+          🧹 Limpiar Todas las Optimizaciones
+        </button>
+      </div>
+    </section>
+
+    <!-- Test Optimization Section (Development Only) -->
+    <section *ngIf="routes.length > 0 && !selectedRoute" class="test-section">
+      <div class="test-controls">
+        <h4>🧪 Prueba de Optimización</h4>
+        <button class="test-button" (click)="testRouteOptimization()">
+          Probar Optimización con Ruta Aleatoria
+        </button>
       </div>
     </section>
   </div>
