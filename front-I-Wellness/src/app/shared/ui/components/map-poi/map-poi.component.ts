@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../features/servicios/services/servicio.service';
 import { usuarios } from '../../../models/usuarios';
+import { LayoutAdapterService } from '../../../services/layout-adapter.service';
 import { MapDisplayData, MapStateManager } from '../../../services/map-state-manager.service';
 import { RouteTrackingService } from '../../../services/route-tracking.service';
 import { ProviderDisplayStrategy } from '../../animations/model/display-strategy';
@@ -70,6 +71,11 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   private subscriptions: Subscription[] = [];
+  private destroy$ = new Subject<void>();
+
+  // Layout adapter properties
+  containerStyles: any = {};
+  mapStyles: any = {};
 
   // Getters delegando al state manager
   get activeProvider(): any {
@@ -103,7 +109,8 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     private mapStateManager: MapStateManager,
     private routeTrackingService: RouteTrackingService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private layoutAdapter: LayoutAdapterService
   ) {
     // Suscribirse a cambios en el estado del mapa
     const displayDataSub = this.mapStateManager.displayData$.subscribe(data => {
@@ -140,6 +147,35 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.cdr.detectChanges();
     });
     this.subscriptions.push(providerChangeSub);
+
+    // Integrar layout adapter pattern
+    this.subscribeToLayoutAdapter();
+  }
+
+  private subscribeToLayoutAdapter(): void {
+    // Suscribirse a estilos del contenedor principal
+    this.layoutAdapter.mainContentStyle$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(styles => {
+        this.containerStyles = {
+          ...this.containerStyles,
+          ...styles
+        };
+        this.cdr.markForCheck();
+      });
+
+    // Suscribirse a cambios de estado para invalidar el mapa
+    this.layoutAdapter.layoutState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Invalidar tamaño del mapa cuando cambia el layout
+        setTimeout(() => {
+          const map = this.mapService.getMapInstance();
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 300);
+      });
   }
 
   @HostListener('window:resize')
@@ -152,6 +188,8 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewInit(): void {
