@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../features/servicios/services/servicio.service';
 import { usuarios } from '../../../models/usuarios';
+import { LayoutAdapterService } from '../../../services/layout-adapter.service';
 import { ProviderDisplayStrategy } from '../../animations/model/display-strategy';
 import { SlidePanelStrategy } from '../../animations/strategies/slide-panel-strategy';
 import { CarouselComponent } from '../carousel/carousel.component';
@@ -23,7 +25,7 @@ import { ProviderCardComponent } from "../provider-card/provider-card.component"
     }
   ],
 })
-export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
+export class RoutePoisShowComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   @Input() providers: usuarios[] = [];
   @Input() config: MapConfig = {
@@ -38,6 +40,7 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
   @Input() showCarousel: boolean = true;
   @Input() showProviderCard: boolean = true;
   @Input() mapId: string = 'map';
+  @Input() adaptToLayout: boolean = true;
 
   @Output() providerSelected = new EventEmitter<any>();
   @Output() mapInitialized = new EventEmitter<void>();
@@ -51,6 +54,11 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   @ViewChild(CarouselComponent) providerCarousel!: CarouselComponent;
+  private destroy$ = new Subject<void>();
+
+  // Layout adapter properties
+  containerStyles: any = {};
+  mapStyles: any = {};
 
   private postLayoutFix() {
     const map = this.mapService.getMapInstance();
@@ -63,7 +71,8 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
     private proveedorMapService: ProveedorMapService,
     private servicioService: ServicioService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private layoutAdapter: LayoutAdapterService
   ) {}
 
   @HostListener('window:resize')
@@ -76,6 +85,7 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
 
   ngAfterViewInit(): void {
     this.initMap();
+    this.subscribeToLayoutAdapter();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -237,6 +247,39 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges {
       this.reviews = data.reviews || [];
     }
     this.cdr.markForCheck();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private subscribeToLayoutAdapter(): void {
+    if (!this.adaptToLayout) return;
+
+    // Suscribirse a estilos del contenedor principal
+    this.layoutAdapter.mainContentStyle$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(styles => {
+        this.containerStyles = {
+          ...this.containerStyles,
+          ...styles
+        };
+        this.cdr.markForCheck();
+      });
+
+    // Suscribirse a cambios de estado para invalidar el mapa
+    this.layoutAdapter.layoutState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Invalidar tamaño del mapa cuando cambia el layout
+        setTimeout(() => {
+          const map = this.mapService.getMapInstance();
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 300);
+      });
   }
 
 }
