@@ -1,0 +1,101 @@
+<mat-card
+  class="contact-card"
+  [class.selected]="isSelected"
+  [class.compact]="compactMode"
+  [ngClass]="animationClass"
+  (click)="onCardClick()"
+  (keydown.enter)="onCardClick()"
+  (keydown.space)="onCardClick()"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="'Contacto de ' + provider.contactName">
+
+  <!-- Header con avatar y info básica -->
+  <div class="card-header">
+    <div class="avatar-container">
+      <img
+        title="Avatar de {{ provider.contactName }}"
+        [src]="provider.photo"
+        [alt]="provider.contactName"
+        [title]="provider.contactName"
+        class="provider-avatar"
+        loading="lazy">
+
+      <!-- Status indicator -->
+      <div
+        class="status-indicator"
+        [class.online]="provider.isOnline"
+        [class.offline]="!provider.isOnline"
+        [title]="statusText">
+      </div>
+    </div>
+
+    <div class="provider-info">
+      <h3 class="provider-name">{{ provider.nombre }}</h3>
+      <p class="contact-name">{{ provider.contactName }}</p>
+
+      <!-- Rating -->
+      <div class="rating-container">
+        <div class="stars">
+          <mat-icon
+            *ngFor="let star of ratingStars"
+            class="star-icon"
+            [class.filled]="star === 'star'"
+            [class.half]="star === 'star_half'"
+            [class.empty]="star === 'star_border'">{{ star }}</mat-icon>
+        </div>
+        <span class="rating-text">{{ provider.rating }} ({{ provider.totalReviews }})</span>
+      </div>
+
+      <!-- Status text -->
+      <p class="status-text">{{ statusText }}</p>
+    </div>
+  </div>
+
+  <!-- Services section -->
+  <div class="services-section" *ngIf="showServices && provider.services.length > 0">
+    <h4 class="services-title">Servicios</h4>
+
+    <div class="services-list">
+      <mat-chip
+        *ngFor="let service of visibleServices"
+        class="service-chip"
+        [title]="service.description">
+        <mat-icon class="service-icon">{{ getServiceIcon(service.category) }}</mat-icon>
+        <span class="service-name">{{ service.name }}</span>
+        <span class="service-price">{{ formatPrice(service.price, service.currency) }}</span>
+      </mat-chip>
+
+      <!-- More services indicator -->
+      <mat-chip
+        *ngIf="hasMoreServices"
+        class="more-services-chip"
+        color="accent">
+        +{{ moreServicesCount }} más
+      </mat-chip>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="card-actions">
+    <button
+      mat-button
+      color="primary"
+      class="chat-button"
+      (click)="onChatClick($event)"
+      [attr.aria-label]="'Iniciar chat con ' + provider.contactName">
+      <mat-icon>chat</mat-icon>
+      <span *ngIf="!compactMode">Chat</span>
+    </button>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      class="profile-button"
+      (click)="onProfileClick($event)"
+      [attr.aria-label]="'Ver perfil de ' + provider.contactName">
+      <mat-icon>person</mat-icon>
+      <span *ngIf="!compactMode">Perfil</span>
+    </button>
+  </div>
+</mat-card>
