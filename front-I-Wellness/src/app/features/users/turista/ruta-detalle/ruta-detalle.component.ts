@@ -125,7 +125,7 @@ export class RutaDetalleComponent implements OnInit {
     // Limpiar el servicio compartido
     this.routeDataService.clearSelectedRoute();
 
-    this.router.navigate(['/mapaempresas'], {
+    this.router.navigate(['/turista/mapa-empresas'], {
       queryParams: {},
       queryParamsHandling: 'merge'
     });
