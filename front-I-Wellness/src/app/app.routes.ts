@@ -33,6 +33,7 @@ import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-
 import { DashboardAdminComponent } from './features/users/administrador/dashboard-admin/dashboard-admin.component';
 import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 import { CalendarioComponent } from './features/calendario/calendario.component';
+import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 
 export const routes: Routes = [
     // Rutas públicas
@@ -78,6 +79,9 @@ export const routes: Routes = [
     { path: 'crearturista', component: CrearTuristaComponent, canActivate: [adminGuard] },
     { path: 'crearproveedor', component: CrearProveedorComponent, canActivate: [adminGuard] },
     { path: 'dashboard-admin', component: DashboardAdminComponent, canActivate: [adminGuard] },
+    
+    // Ruta de prueba del dashboard
+    { path: 'dashboard-test', component: DashboardTestComponent },
     
     // Ruta comodín - redirige a home
     { path: '**', redirectTo: ''}, 
