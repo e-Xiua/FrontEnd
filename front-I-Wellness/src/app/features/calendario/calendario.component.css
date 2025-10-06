@@ -538,7 +538,7 @@
 }
 
 .month-button{
-  color: black;
+  color: black  !important;
 }
 
 .month-button.selected, .year-button.selected {
