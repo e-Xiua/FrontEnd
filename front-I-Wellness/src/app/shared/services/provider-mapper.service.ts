@@ -52,7 +52,7 @@ export class ProviderMapperService {
 
       // Propiedades específicas del chat
       contactName: usuario.proveedorInfo?.nombreEmpresa || usuario.nombre,
-      photo: this.generateProviderAvatar(usuario),
+      photo: usuario.foto || this.generateProviderAvatar(usuario),
       rating: this.calculateProviderRating(usuario),
       totalReviews: this.generateRandomReviewCount(),
       services: this.mapProviderServices(usuario),
