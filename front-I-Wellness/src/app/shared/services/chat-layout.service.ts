@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ChatProvider, Conversation } from '../models/chat';
+import { ChatService } from './chat.service';
 import { PaginatedResult, PaginationOptions } from './provider-mapper.service';
 
 export type ModalTab = 'contacts' | 'messages';
@@ -37,8 +38,8 @@ export interface ChatLayoutState {
 export class ChatLayoutService {
   private stateSubject = new BehaviorSubject<ChatLayoutState>({
     // Sidebar state
-    sidebarVisible: true,
-    sidebarCollapsed: false,
+    sidebarVisible: false,
+    sidebarCollapsed: true,
 
     // Modal state
     modalVisible: false,
@@ -109,7 +110,58 @@ export class ChatLayoutService {
     map(([state, pagination]) => this.paginateConversations(state.activeConversations, pagination))
   );
 
-  constructor() {}
+  constructor(private chatService: ChatService) {
+    this.initializeChatData();
+  }
+
+  // Initialize chat data from ChatService
+  private initializeChatData(): void {
+    console.log('[ChatLayoutService] Inicializando datos del chat');
+
+    // Suscribirse al estado del ChatService para obtener providers y conversaciones
+    this.chatService.chatState$.subscribe(chatState => {
+      console.log('[ChatLayoutService] Estado del chat actualizado:', chatState);
+
+      // Actualizar providers
+      if (chatState.providers.length > 0) {
+        this.setProviders(chatState.providers);
+      }
+
+      // Actualizar conversaciones
+      if (chatState.conversations.length > 0) {
+        this.setConversations(chatState.conversations);
+      }
+
+      // Actualizar estado de carga y errores
+      this.setLoading(chatState.isLoading);
+      this.setError(chatState.error);
+    });
+  }
+
+  // Method to refresh data from ChatService
+  public refreshChatData(): void {
+    console.log('[ChatLayoutService] Refrescando datos del chat');
+    const chatState = this.chatService.currentState;
+    this.setProviders(chatState.providers);
+    this.setConversations(chatState.conversations);
+    this.setLoading(chatState.isLoading);
+    this.setError(chatState.error);
+  }
+
+  // Method to select a provider and start a conversation
+  public selectProvider(providerId: number): void {
+    console.log('[ChatLayoutService] Seleccionando proveedor:', providerId);
+    this.chatService.selectProvider(providerId);
+
+    // Switch to messages tab when a provider is selected
+    this.setActiveTab('messages');
+  }
+
+  // Method to send a message through ChatService
+  public sendMessage(content: string): Observable<any> {
+    console.log('[ChatLayoutService] Enviando mensaje:', content);
+    return this.chatService.sendMessage(content);
+  }
 
   // State getters
   get currentState(): ChatLayoutState {
@@ -158,6 +210,14 @@ export class ChatLayoutService {
     } else {
       this.showModal();
     }
+  }
+
+  // Forzar visibilidad (útil para depuración desde componentes)
+  forceShowModal(): void {
+    this.updateState({
+      modalVisible: true,
+      modalSlideDirection: 'up'
+    });
   }
 
   setActiveTab(tab: ModalTab): void {
@@ -255,6 +315,15 @@ export class ChatLayoutService {
   private updateState(updates: Partial<ChatLayoutState>): void {
     const currentState = this.currentState;
     const newState = { ...currentState, ...updates };
+    // Logging básico para depurar transiciones de visibilidad
+    if (updates.modalVisible !== undefined || updates.sidebarVisible !== undefined) {
+      console.log('[ChatLayoutService] updateState', {
+        modalVisible: updates.modalVisible ?? currentState.modalVisible,
+        sidebarVisible: updates.sidebarVisible ?? currentState.sidebarVisible,
+        from: currentState,
+        to: newState
+      });
+    }
     this.stateSubject.next(newState);
   }
 

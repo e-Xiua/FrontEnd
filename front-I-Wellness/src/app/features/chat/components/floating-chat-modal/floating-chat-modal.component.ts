@@ -9,10 +9,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Subject, takeUntil } from 'rxjs';
 
-import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
-// // import { ChatInterfaceComponent } from '../chat-interface/chat-interface.component';
 import { ChatProvider, Conversation } from '../../../../shared/models/chat';
 import { ChatLayoutService, ModalTab } from '../../../../shared/services/chat-layout.service';
+import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
 
 @Component({
   selector: 'app-floating-chat-modal',
@@ -145,12 +144,14 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   }
 
   onProviderSelect(provider: ChatProvider): void {
+    console.log('FloatingChatModal: Seleccionando proveedor', provider);
     this.selectedProvider = provider;
-    // Cambiar automáticamente al tab de mensajes
-    this.chatLayoutService.setActiveTab('messages');
 
-    // Crear o recuperar conversación con el provider
-    // TODO: Implementar lógica de conversación
+    // Usar el método integrado para seleccionar proveedor
+    this.chatLayoutService.selectProvider(provider.id);
+
+    // El ChatLayoutService ya cambió automáticamente al tab de mensajes
+    console.log('FloatingChatModal: Proveedor seleccionado y conversación iniciada');
   }
 
   onProviderChat(provider: ChatProvider): void {
@@ -163,8 +164,35 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   }
 
   onConversationSelect(conversation: Conversation): void {
+    console.log('FloatingChatModal: Seleccionando conversación', conversation);
     this.activeConversation = conversation;
-    // TODO: Cargar mensajes de la conversación
+
+    // Encontrar el proveedor correspondiente a esta conversación
+    const currentState = this.chatLayoutService.currentState;
+    const provider = currentState.allProviders.find(p => p.id === conversation.providerId);
+
+    if (provider) {
+      this.selectedProvider = provider;
+      this.chatLayoutService.selectProvider(provider.id);
+    }
+  }
+
+  // Método para enviar mensajes
+  onSendMessage(content: string): void {
+    if (!this.selectedProvider) {
+      console.warn('FloatingChatModal: No hay proveedor seleccionado para enviar mensaje');
+      return;
+    }
+
+    console.log('FloatingChatModal: Enviando mensaje:', content);
+    this.chatLayoutService.sendMessage(content).subscribe({
+      next: (response) => {
+        console.log('FloatingChatModal: Mensaje enviado exitosamente', response);
+      },
+      error: (error) => {
+        console.error('FloatingChatModal: Error enviando mensaje', error);
+      }
+    });
   }
 
   onContactsPageChange(event: PageEvent): void {

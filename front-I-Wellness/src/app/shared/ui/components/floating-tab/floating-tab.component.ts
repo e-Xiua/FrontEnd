@@ -34,6 +34,8 @@ export type TabOrientation = 'horizontal' | 'vertical';
     </button>
   `,
   styles: [`
+    :host { position: relative; }
+
     .floating-tab {
       position: fixed;
       z-index: 9999;
@@ -100,19 +102,7 @@ export type TabOrientation = 'horizontal' | 'vertical';
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Posicionamiento específico cuando se usa class externa */
-    :host-context(.chat-tab-bottom-right) .floating-tab {
-      position: fixed !important;
-      bottom: 20px !important;
-      right: 20px !important;
-      left: auto !important;
-      transform: none !important;
-      z-index: 99999 !important;
-    }
-
-    :host-context(.chat-tab-bottom-right) .floating-tab.visible {
-      transform: none !important;
-    }
+    /* La clase previa .floating-tab.chat-tab-bottom-right se reemplaza por estilos en :host */
 
     /* Orientación vertical */
     .floating-tab.vertical {

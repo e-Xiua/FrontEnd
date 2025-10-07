@@ -30,10 +30,8 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
   private usuarioService = inject(UsuarioService);
 
   @Input() enableSidebar: boolean = true;
-  @Input() enableModal: boolean = true;
   @Input() autoLoadProviders: boolean = true;
   @Input() sidebarDefaultVisible: boolean = false;
-  @Input() modalDefaultVisible: boolean = false;
 
   // State observables
   layoutState$ = this.chatLayoutService.state$;
@@ -45,6 +43,8 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeLayout();
+    setTimeout(() => this.debugTabVisibility(), 1000);
+
     if (this.autoLoadProviders) {
       this.loadProviders();
     }
@@ -58,20 +58,15 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
   private initializeLayout(): void {
     console.log('ChatLayout: Inicializando layout', {
       sidebarDefaultVisible: this.sidebarDefaultVisible,
-      modalDefaultVisible: this.modalDefaultVisible,
       enableSidebar: this.enableSidebar,
-      enableModal: this.enableModal
     });
 
-    // Configurar estado inicial del layout
-    if (!this.sidebarDefaultVisible) {
-      this.chatLayoutService.hideSidebar();
-    } else {
-      this.chatLayoutService.showSidebar();
-    }
-
-    if (!this.modalDefaultVisible) {
-      this.chatLayoutService.hideModal();
+    // Solo aplicar valores iniciales si son diferentes al estado actual (idempotencia)
+    const current = this.chatLayoutService.currentState;
+    if (this.enableSidebar) {
+      if (this.sidebarDefaultVisible !== current.sidebarVisible) {
+        this.sidebarDefaultVisible ? this.chatLayoutService.showSidebar() : this.chatLayoutService.hideSidebar();
+      }
     }
 
     // Subscribirse a cambios de estado si es necesario
@@ -85,12 +80,7 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
   }
 
   private handleLayoutStateChange(state: any): void {
-    // Coordinación entre sidebar y modal
-    // Por ejemplo, cerrar sidebar cuando se abre modal en móvil
-    if (state.modalVisible && window.innerWidth < 768) {
-      // En móvil, cerrar sidebar cuando se abre modal
-      this.chatLayoutService.hideSidebar();
-    }
+    console.log('ChatLayout: Manejo de cambio de estado', state);
   }
 
   private async loadProviders(): Promise<void> {
@@ -140,19 +130,9 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     this.chatLayoutService.hideSidebar();
   }
 
-  public toggleModal(): void {
-    console.log('ChatLayout: Toggleando modal');
-    this.chatLayoutService.toggleModal();
-  }
-
   public showModal(): void {
     console.log('ChatLayout: Mostrando modal');
     this.chatLayoutService.showModal();
-  }
-
-  public hideModal(): void {
-    console.log('ChatLayout: Ocultando modal');
-    this.chatLayoutService.hideModal();
   }
 
   public refreshProviders(): void {
@@ -179,11 +159,15 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     return this.enableSidebar;
   }
 
-  get isModalEnabled(): boolean {
-    return this.enableModal;
-  }
-
   get currentState() {
     return this.chatLayoutService.currentState;
   }
+
+  public debugTabVisibility(): void {
+  const state = this.chatLayoutService.currentState;
+  console.log('Modal Tab Visibility Debug:', {
+    modalVisible: state.modalVisible,
+    currentState: state
+  });
+}
 }

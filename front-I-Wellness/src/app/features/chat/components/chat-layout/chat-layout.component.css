@@ -53,26 +53,4 @@
   }
 }
 
-/* Posicionamiento específico para el tab de chat */
-.chat-tab-bottom-right {
-  position: fixed !important;
-  bottom: 20px !important;
-  right: 20px !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 99999 !important;
-  pointer-events: auto !important;
-}
-
-/* Override para el tab de chat cuando está visible */
-.chat-tab-bottom-right.visible {
-  transform: none !important;
-}
-
-/* Responsive para móvil */
-@media (max-width: 768px) {
-  .chat-tab-bottom-right {
-    bottom: 15px !important;
-    right: 15px !important;
-  }
-}
+/* Estilos del tab de chat movidos al componente FloatingTabComponent usando :host(.chat-tab-bottom-right) */

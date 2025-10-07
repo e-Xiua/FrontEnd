@@ -10,11 +10,12 @@ import { ChatLayoutService } from '../../../../shared/services/chat-layout.servi
 import { LayoutAdapterService } from '../../../../shared/services/layout-adapter.service';
 import { ResponsiveBreakpointService } from '../../../../shared/services/responsive-breakpoint.service';
 import { ChatLayoutComponent } from '../../../chat/components/chat-layout/chat-layout.component';
+import { ProveedorChatDemoComponent } from "../proveedor-chat-demo/proveedor-chat-demo.component";
 
 @Component({
   selector: 'app-proveedor-layout',
   standalone: true,
-  imports: [CommonModule, ChatLayoutComponent, RouterOutlet, UniversalHeaderComponent, LayoutAdapterComponent],
+  imports: [CommonModule, ChatLayoutComponent, RouterOutlet, UniversalHeaderComponent, LayoutAdapterComponent, ProveedorChatDemoComponent],
   template: `
     <div class="proveedor-layout-container">
       <!-- Header fijo en la parte superior -->
@@ -26,13 +27,13 @@ import { ChatLayoutComponent } from '../../../chat/components/chat-layout/chat-l
 
       <!-- Contenedor para chat layout y contenido principal debajo del header -->
       <div class="layout-body" [ngStyle]="bodyStyles">
+
+        <app-proveedor-chat-demo></app-proveedor-chat-demo>
         <!-- Chat layout con estilos adaptativos -->
         <app-chat-layout
           [enableSidebar]="true"
-          [enableModal]="true"
           [autoLoadProviders]="true"
-          [sidebarDefaultVisible]="true"
-          [modalDefaultVisible]="false"
+          [sidebarDefaultVisible]="false"
           [ngStyle]="chatLayoutStyles"
           class="layout-sidebar">
         </app-chat-layout>
@@ -162,6 +163,9 @@ export class ProveedorLayoutComponent implements OnInit, OnDestroy {
 
     // Inicializar chat para proveedores
     if (this.chatIntegrationService.initializeChatForProvider()) {
+      // Forzar la visibilidad del modal de chat al iniciar
+      this.chatLayoutService.showModal();
+
       // Suscribirse a cambios en el estado del sidebar y sincronizar con layout adapter
       this.chatLayoutService.state$
         .pipe(takeUntil(this.destroy$))
