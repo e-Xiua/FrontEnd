@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UsuarioService } from '../../../../features/users/services/usuario.service';
 import { ChatProvider } from '../../../../shared/models/chat';
 import { ChatLayoutService } from '../../../../shared/services/chat-layout.service';
+import { ChatService } from '../../../../shared/services/chat.service';
 import { ProviderMapperService } from '../../../../shared/services/provider-mapper.service';
 import { FloatingTabComponent } from '../../../../shared/ui/components/floating-tab/floating-tab.component';
 import { ChatSidebarComponent } from '../chat-sidebar/chat-sidebar.component';
@@ -28,6 +29,7 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
   private chatLayoutService = inject(ChatLayoutService);
   private providerMapperService = inject(ProviderMapperService);
   private usuarioService = inject(UsuarioService);
+  private chatService = inject(ChatService);
 
   @Input() enableSidebar: boolean = true;
   @Input() autoLoadProviders: boolean = true;
@@ -46,7 +48,8 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     setTimeout(() => this.debugTabVisibility(), 1000);
 
     if (this.autoLoadProviders) {
-      this.loadProviders();
+      this.chatLayoutService.initializeChatData();
+      // this.loadProviders(); --- IGNORE ---
     }
   }
 
@@ -83,6 +86,9 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     console.log('ChatLayout: Manejo de cambio de estado', state);
   }
 
+
+
+/*
   private async loadProviders(): Promise<void> {
     console.log('ChatLayout: Iniciando carga de proveedores');
     try {
@@ -114,7 +120,7 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
       console.log('ChatLayout: Carga de proveedores finalizada');
     }
   }
-
+*/
   // Métodos públicos para control desde componentes padre
   public toggleSidebar(): void {
     this.chatLayoutService.toggleSidebar();
@@ -137,7 +143,8 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
 
   public refreshProviders(): void {
     console.log('ChatLayout: Recargando proveedores manualmente');
-    this.loadProviders();
+    this.chatLayoutService.initializeChatData();
+    // this.loadProviders(); --- IGNORE ---
   }
 
   public setProviders(providers: ChatProvider[]): void {

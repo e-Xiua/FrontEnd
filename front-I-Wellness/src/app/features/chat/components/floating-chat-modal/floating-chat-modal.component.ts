@@ -11,6 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { ChatProvider, Conversation } from '../../../../shared/models/chat';
 import { ChatLayoutService, ModalTab } from '../../../../shared/services/chat-layout.service';
+import { ChatInterfaceComponent } from "../../../../shared/ui/components/contact/chatting/chat-interface/chat-interface.component";
 import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
 
 @Component({
@@ -23,9 +24,11 @@ import { ContactCardComponent } from '../../../../shared/ui/components/contact/c
     MatCardModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-        ContactCardComponent
+    ContactCardComponent
     // ChatInterfaceComponent
-  ],
+    ,
+    ChatInterfaceComponent
+],
   templateUrl: './floating-chat-modal.component.html',
   styleUrl: './floating-chat-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { delay, map, tap } from 'rxjs/operators';
 import {
-    ChatProvider,
-    ChatState,
-    Conversation,
-    Message,
-    SendMessageResponse
+  ChatProvider,
+  ChatState,
+  Conversation,
+  Message,
+  SendMessageResponse
 } from '../models/chat';
 
 @Injectable({
@@ -34,7 +34,7 @@ export class ChatService {
   }
 
   // Inicializar datos mock
-  private initializeMockData(): void {
+  public initializeMockData(): void {
     const mockProviders: ChatProvider[] = [
       {
         id: 1,

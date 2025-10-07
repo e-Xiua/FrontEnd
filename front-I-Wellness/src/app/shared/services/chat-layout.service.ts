@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ChatProvider, Conversation } from '../models/chat';
 import { ChatService } from './chat.service';
@@ -36,6 +36,7 @@ export interface ChatLayoutState {
   providedIn: 'root'
 })
 export class ChatLayoutService {
+
   private stateSubject = new BehaviorSubject<ChatLayoutState>({
     // Sidebar state
     sidebarVisible: false,
@@ -115,7 +116,10 @@ export class ChatLayoutService {
   }
 
   // Initialize chat data from ChatService
-  private initializeChatData(): void {
+  public initializeChatData(): void {
+
+    this.chatService.initializeMockData();
+
     console.log('[ChatLayoutService] Inicializando datos del chat');
 
     // Suscribirse al estado del ChatService para obtener providers y conversaciones
