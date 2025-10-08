@@ -1,0 +1,75 @@
+<div class="dashboard-main-card">
+  <div class="dashboard-title-row">
+    <h2 class="dashboard-title">Tus objetivos como administrador</h2>
+    <button class="btn-crear destacado" (click)="iniciarCreacion()">
+      <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">add_circle</span>
+      Crear objetivo
+    </button>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi-card objetivo-card" *ngFor="let obj of objetivos">
+  <div class="icon-objetivo" [ngClass]="obj.icon"></div>
+  <div class="kpi-title">{{ obj.nombre }}</div>
+  <button class="btn-editar" (click)="iniciarEdicion(obj)">Editar</button>
+      <div class="kpi-value">{{ obj.actual }} / {{ obj.meta }}</div>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" [style.width]="(obj.actual/obj.meta*100)+'%'"></div>
+      </div>
+      <div class="grafica-scroll-wrapper" *ngIf="obj.grafica">
+        <div class="grafica-scroll">
+          <ngx-charts-bar-vertical
+            [results]="obj.grafica"
+            scheme="vivid"
+            [xAxis]="true"
+            [yAxis]="true"
+            [showDataLabel]="true"
+            [barPadding]="8"
+            [roundEdges]="true"
+            [animations]="true"
+            [view]="[getGraficaWidth(220, obj), 90]"
+            style="height: 90px; min-width: 140px; margin: 0.5rem 0;"
+          ></ngx-charts-bar-vertical>
+        </div>
+      </div>
+      <div class="kpi-subvalue" *ngIf="obj.descripcion">{{ obj.descripcion }}</div>
+    </div>
+  </div>
+  </div>
+  <div *ngIf="modoEdicion" class="modal-edicion mejor-modal">
+    <div class="modal-header">
+      <span class="material-icons modal-icon">{{ objetivoEditando ? 'edit' : 'add_circle' }}</span>
+      <h3>{{ objetivoEditando ? 'Editar objetivo' : 'Crear objetivo' }}</h3>
+    </div>
+    <form (ngSubmit)="guardarObjetivo()" class="modal-form">
+      <div class="modal-form-row">
+        <label for="nombre">Nombre del objetivo:</label>
+        <input [(ngModel)]="nuevoObjetivo.nombre" name="nombre" required>
+      </div>
+      <div class="modal-form-row">
+        <label for="meta">Meta esperada:</label>
+        <input type="number" [(ngModel)]="nuevoObjetivo.meta" name="meta" required>
+      </div>
+      <div class="modal-form-row">
+        <label for="actual">Valor actual:</label>
+        <input type="number" [(ngModel)]="nuevoObjetivo.actual" name="actual" required>
+      </div>
+      <div class="modal-form-row">
+        <label for="descripcion">Descripción:</label>
+        <input [(ngModel)]="nuevoObjetivo.descripcion" name="descripcion">
+      </div>
+      <div class="modal-form-row">
+        <label for="icon">Icono (clase):</label>
+        <input [(ngModel)]="nuevoObjetivo.icon" name="icon">
+      </div>
+      <div class="acciones-modal">
+        <button type="submit" class="btn-guardar">
+          <span class="material-icons" style="vertical-align: middle; margin-right: 4px;">save</span>
+          Guardar
+        </button>
+        <button type="button" class="btn-cancelar" (click)="cancelarEdicion()">
+          <span class="material-icons" style="vertical-align: middle; margin-right: 4px;">cancel</span>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>

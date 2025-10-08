@@ -38,6 +38,13 @@ export const routes: Routes = [
     { path: '', component: HomeComponent},
     { path: 'temas', component: TemasComponent},
     { path: 'registro', component: RegistroComponent},
+    // Buscador web scrapping público
+    { path: 'buscador-web', loadComponent: () => import('./features/web-scrapping-buscador/web-scrapping-buscador.component').then(m => m.WebScrappingBuscadorComponent) },
+    // Rutas públicas para objetivos
+    { path: 'objetivos', loadComponent: () => import('./features/objetivos/objetivos.component').then(m => m.ObjetivosComponent) },
+    { path: 'objetivos/turista', loadComponent: () => import('./features/objetivos/objetivos-turista.component').then(m => m.ObjetivosTuristaComponent) },
+    { path: 'objetivos/proveedor', loadComponent: () => import('./features/objetivos/objetivos-proveedor.component').then(m => m.ObjetivosProveedorComponent) },
+    { path: 'objetivos/admin', loadComponent: () => import('./features/objetivos/objetivos-admin.component').then(m => m.ObjetivosAdminComponent) },
     { path: 'login', component: LoginComponent},
     { path: 'registroturista', component: RegistroTuristaComponent},
     { path: 'recuperar', component: RecuperarComponent},
