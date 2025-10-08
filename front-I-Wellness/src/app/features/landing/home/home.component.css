@@ -330,7 +330,15 @@ body {
     line-height: 1.6;
 }
 
-/* Botón */
+/* Botones */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
 .btn {
     background: #2973B2;
     color: white;
@@ -339,11 +347,35 @@ body {
     font-size: 20px;
     border-radius: 8px;
     cursor: pointer;
-    margin-top: 20px;
     transition: 0.3s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
+
 .btn:hover {
     background: #50a6d4;
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background: #34d399;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary:hover {
+    background: #10b981;
     transform: scale(1.05);
 }
 
