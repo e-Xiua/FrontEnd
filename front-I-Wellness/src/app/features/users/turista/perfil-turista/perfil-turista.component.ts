@@ -123,7 +123,7 @@ export class PerfilTuristaComponent implements OnInit {
             text: 'No tiene permisos para ver este perfil',
             confirmButtonColor: '#E82A3C'
           }).then(() => {
-            this.router.navigate(['/hometurista']);
+            this.router.navigate(['/turista/home']);
           });
         } else if (error.status === 401) {
           this.router.navigate(['/login']);
@@ -173,7 +173,7 @@ export class PerfilTuristaComponent implements OnInit {
 
   navigateTo() {
     if (this.authorizationService.isTurista()) {
-      this.router.navigate(['/hometurista']);
+      this.router.navigate(['/turista/home']);
     } else if (this.authorizationService.isAdmin()) {
       this.router.navigate(['/visitantes']);
     } else {

@@ -355,11 +355,11 @@ private addMarkerAndFetchAddress(): void {
     }).then(() => {
       // Redirigir según el rol
       if (this.authorizationService.isProveedor()) {
-        this.router.navigate(['/homeproveedor']);
+        this.router.navigate(['/proveedor/home']);
       } else if (this.authorizationService.isTurista()) {
-        this.router.navigate(['/hometurista']);
+        this.router.navigate(['/turista/home']);
       } else if (this.authorizationService.isAdmin()) {
-        this.router.navigate(['/homeadmin']);
+        this.router.navigate(['/admin/dashboard']);
       } else {
         this.router.navigate(['/']);
       }
@@ -368,7 +368,7 @@ private addMarkerAndFetchAddress(): void {
 
   navigateTo(): void {
     if (this.authorizationService.isProveedor()) {
-      this.router.navigate(['/homeproveedor']);
+      this.router.navigate(['/proveedor/home']);
     } else if (this.authorizationService.isAdmin()) {
       this.router.navigate(['/proveedores']);
     } else {

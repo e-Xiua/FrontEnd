@@ -293,7 +293,7 @@ hasErrors(): boolean {
           this.isLoading = false;          
           // El token ya está guardado por el servicio de auth
           // Redirigir directamente al home del proveedor
-          this.router.navigate(['/homeproveedor']);
+          this.router.navigate(['/proveedor/home']);
         },
         error: (error) => {
           this.isLoading = false;

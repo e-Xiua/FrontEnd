@@ -1,0 +1,31 @@
+<div class="map-poi-container">
+  <!-- Carousel (40% ancho) -->
+  <div class="carousel-column" *ngIf="showCarousel && providerItems.length > 0">
+    <app-carousel
+      mode="map-linked"
+      [showHeader]="false"
+      [itemsPerView]="1"
+      [linkedItems]="providerItems"
+      (linkedItemChange)="onCarouselProviderChange($event)">
+    </app-carousel>
+  </div>
+
+  <!-- Columna derecha: Mapa + Provider Card (60% ancho) -->
+  <div class="map-provider-column">
+    <!-- Mapa -->
+    <div class="map-container full">
+      <div [id]="mapId" class="map-leaflet-wrapper"></div>
+    </div>
+
+    <!-- Provider Card -->
+    <app-provider-card
+      *ngIf="showProviderCard && showProviderCardVisible"
+      class="provider-card-wrapper"
+      [@slideIn]="showProviderCardVisible ? 'visible' : 'hidden'"
+      [placeData]="placeData"
+      [reviews]="reviews"
+      [services]="services"
+      (submitReview)="onSubmitReview($event)">
+    </app-provider-card>
+  </div>
+</div>

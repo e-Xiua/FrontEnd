@@ -1,6 +1,6 @@
 // src/app/core/guards/auth.guard.ts
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 
 // Guard para rutas que requieren autenticación
@@ -31,10 +31,10 @@ export const turistaGuard: CanActivateFn = (route, state) => {
   if (authService.isAuthenticated()) {
     switch (authService.getCurrentUserRole()) {
       case 'Proveedor':
-        router.navigate(['/homeproveedor']);
+        router.navigate(['/proveedor/home']);
         break;
       case 'Admin':
-        router.navigate(['/homeadmin']);
+        router.navigate(['/admin/dashboard']);
         break;
       default:
         router.navigate(['/login']);
@@ -42,7 +42,7 @@ export const turistaGuard: CanActivateFn = (route, state) => {
   } else {
     router.navigate(['/login']);
   }
-  
+
   return false;
 };
 
@@ -60,10 +60,10 @@ export const proveedorGuard: CanActivateFn = (route, state) => {
   if (authService.isAuthenticated()) {
     switch (authService.getCurrentUserRole()) {
       case 'Turista':
-        router.navigate(['/hometurista']);
+        router.navigate(['/turista/home']);
         break;
       case 'Admin':
-        router.navigate(['/homeadmin']);
+        router.navigate(['/admin/dashboard']);
         break;
       default:
         router.navigate(['/login']);
@@ -71,7 +71,7 @@ export const proveedorGuard: CanActivateFn = (route, state) => {
   } else {
     router.navigate(['/login']);
   }
-  
+
   return false;
 };
 
@@ -88,10 +88,10 @@ export const adminGuard: CanActivateFn = (route, state) => {
   if (authService.isAuthenticated()) {
     switch (authService.getCurrentUserRole()) {
       case 'Turista':
-        router.navigate(['/hometurista']);
+        router.navigate(['/turista/home']);
         break;
       case 'Proveedor':
-        router.navigate(['/homeproveedor']);
+        router.navigate(['/proveedor/home']);
         break;
       default:
         router.navigate(['/login']);
@@ -99,6 +99,6 @@ export const adminGuard: CanActivateFn = (route, state) => {
   } else {
     router.navigate(['/login']);
   }
-  
+
   return false;
 };

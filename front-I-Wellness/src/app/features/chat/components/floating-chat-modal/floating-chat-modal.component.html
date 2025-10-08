@@ -1,0 +1,228 @@
+<div
+  class="floating-chat-modal"
+  [@slideToggle]="modalState"
+  [class.visible]="isVisible"
+  [class.minimized]="isMinimized">
+
+  <!-- Modal Header -->
+  <div class="modal-header" (click)="onMinimizeModal()" (keydown)="onMinimizeModal()">
+    <div class="header-content">
+      <mat-icon class="modal-icon">{{ getTabIcon(activeTab) }}</mat-icon>
+      <h3 class="modal-title">{{ modalTitle }}</h3>
+      <span class="provider-count" *ngIf="activeTab === 'contacts'">
+        {{ (paginatedContacts$ | async)?.totalItems || 0 }}
+      </span>
+    </div>
+
+    <div class="header-actions">
+      <button
+        mat-icon-button
+        class="minimize-button"
+        (click)="onMinimizeModal(); $event.stopPropagation()"
+        [attr.aria-label]="isMinimized ? 'Expandir chat' : 'Minimizar chat'">
+        <mat-icon>{{ isMinimized ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        class="close-button"
+        (click)="onCloseModal(); $event.stopPropagation()"
+        [attr.aria-label]="'Cerrar modal'">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Content -->
+  <div class="modal-content" *ngIf="showContent">
+    <!-- Tab Navigation -->
+    <mat-tab-group
+      [selectedIndex]="selectedTabIndex"
+      (selectedTabChange)="onTabChange(tabIndexToModalTab($event.index))"
+      class="modal-tabs"
+      animationDuration="200ms">
+
+      <!-- Contacts Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">contacts</mat-icon>
+          <span>Contactos</span>
+          <span class="tab-count" *ngIf="(paginatedContacts$ | async)?.totalItems">
+            ({{ (paginatedContacts$ | async)?.totalItems }})
+          </span>
+        </ng-template>
+
+        <div class="tab-content contacts-tab" [@tabSlide]>
+          <!-- Loading State -->
+          <div *ngIf="(layoutState$ | async)?.isLoading" class="loading-state">
+            <mat-spinner diameter="32"></mat-spinner>
+            <p>Cargando contactos...</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="(layoutState$ | async)?.error && !(layoutState$ | async)?.isLoading" class="error-state">
+            <mat-icon class="error-icon">error_outline</mat-icon>
+            <p>{{ (layoutState$ | async)?.error }}</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!(layoutState$ | async)?.isLoading && !(layoutState$ | async)?.error && ((paginatedContacts$ | async)?.items?.length || 0) === 0" class="empty-state">
+            <mat-icon class="empty-icon">person_search</mat-icon>
+            <p>No hay contactos disponibles</p>
+          </div>
+
+          <!-- Contacts List -->
+          <div *ngIf="!(layoutState$ | async)?.isLoading && !(layoutState$ | async)?.error && ((paginatedContacts$ | async)?.items?.length || 0) > 0" class="contacts-list">
+            <app-contact-card
+              *ngFor="let provider of (paginatedContacts$ | async)?.items; trackBy: trackByProvider"
+              [provider]="provider"
+              [isSelected]="selectedProvider?.id === provider.id"
+              [compactMode]="true"
+              [showServices]="false"
+              [animationClass]="'animate-fade-in'"
+              (cardClick)="onProviderSelect(provider)"
+              (chatClick)="onProviderChat(provider)"
+              (profileClick)="onProviderProfile(provider)">
+            </app-contact-card>
+          </div>
+
+          <!-- Contacts Pagination -->
+          <div *ngIf="((paginatedContacts$ | async)?.totalItems || 0) > ((paginatedContacts$ | async)?.pageSize || 10)" class="pagination-container">
+            <mat-paginator
+              [length]="(paginatedContacts$ | async)?.totalItems || 0"
+              [pageSize]="(paginatedContacts$ | async)?.pageSize || 10"
+              [pageIndex]="((paginatedContacts$ | async)?.currentPage || 1) - 1"
+              [pageSizeOptions]="[5, 10, 15, 20]"
+              [showFirstLastButtons]="false"
+              (page)="onContactsPageChange($event)"
+              aria-label="Seleccionar página de contactos">
+            </mat-paginator>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Messages Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">chat</mat-icon>
+          <span>Mensajes</span>
+          <span class="tab-count" *ngIf="(paginatedMessages$ | async)?.totalItems">
+            ({{ (paginatedMessages$ | async)?.totalItems }})
+          </span>
+        </ng-template>
+
+        <div class="tab-content messages-tab" [@tabSlide]>
+          <!-- Selected Provider Chat -->
+          <div *ngIf="hasSelectedProvider && selectedProvider" class="selected-chat">
+            <div class="chat-header">
+              <img
+                title="Proveedor"
+                [src]="selectedProvider.photo"
+                [alt]="selectedProvider.contactName"
+                class="provider-avatar">
+              <div class="provider-info">
+                <h4>{{ selectedProvider.contactName }}</h4>
+                <p>{{ selectedProvider.nombre }}</p>
+              </div>
+            </div>
+
+            <!-- Chat Interface will be integrated here -->
+            <div class="chat-placeholder">
+              <mat-icon class="chat-icon">chat_bubble_outline</mat-icon>
+              <app-chat-interface>
+              </app-chat-interface>
+            </div>
+          </div>
+
+          <!-- Conversations List -->
+          <div *ngIf="!hasSelectedProvider" class="conversations-list">
+            <!-- Loading State -->
+            <div *ngIf="(layoutState$ | async)?.isLoading" class="loading-state">
+              <mat-spinner diameter="32"></mat-spinner>
+              <p>Cargando conversaciones...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!(layoutState$ | async)?.isLoading && ((paginatedMessages$ | async)?.items?.length || 0) === 0" class="empty-state">
+              <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+              <p>No hay conversaciones activas</p>
+              <p class="empty-subtitle">Selecciona un contacto para iniciar una conversación</p>
+            </div>
+
+            <!-- Conversations Items -->
+            <div *ngIf="!(layoutState$ | async)?.isLoading && ((paginatedMessages$ | async)?.items?.length || 0) > 0" class="conversations-items">
+              <button
+                *ngFor="let conversation of (paginatedMessages$ | async)?.items; trackBy: trackByConversation"
+                type="button"
+                class="conversation-item"
+                (click)="onConversationSelect(conversation)"
+                aria-label="Seleccionar conversación">
+<button
+                *ngFor="let conversation of (paginatedMessages$ | async)?.items; trackBy: trackByConversation"
+                type="button"
+                class="conversation-item"
+                (click)="onConversationSelect(conversation)"
+                aria-label="Seleccionar conversación">
+
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=provider{{ conversation.providerId }}"
+                  alt="Proveedor"
+                  class="conversation-avatar">
+
+                <div class="conversation-info">
+                  <h4 class="conversation-name">Proveedor #{{ conversation.providerId }}</h4>
+                  <p class="last-message">{{ conversation.lastMessage?.content || 'Sin mensajes' }}</p>
+                </div>
+
+                <div class="conversation-meta">
+                  <span class="timestamp">{{ conversation.lastMessage?.timestamp | date:'short' }}</span>
+                  <span *ngIf="conversation.unreadCount > 0" class="unread-count">{{ conversation.unreadCount }}</span>
+                </div>
+              </button>
+
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=provider{{ conversation.providerId }}"
+                  alt="Proveedor"
+                  class="conversation-avatar">
+
+                <div class="conversation-info">
+                  <h4 class="conversation-name">Proveedor #{{ conversation.providerId }}</h4>
+                  <p class="last-message">{{ conversation.lastMessage?.content || 'Sin mensajes' }}</p>
+                </div>
+
+                <div class="conversation-meta">
+                  <span class="timestamp">{{ conversation.lastMessage?.timestamp | date:'short' }}</span>
+                  <span *ngIf="conversation.unreadCount > 0" class="unread-count">{{ conversation.unreadCount }}</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Messages Pagination -->
+            <div *ngIf="((paginatedMessages$ | async)?.totalItems || 0) > ((paginatedMessages$ | async)?.pageSize || 10)" class="pagination-container">
+              <mat-paginator
+                [length]="(paginatedMessages$ | async)?.totalItems || 0"
+                [pageSize]="(paginatedMessages$ | async)?.pageSize || 10"
+                [pageIndex]="((paginatedMessages$ | async)?.currentPage || 1) - 1"
+                [pageSizeOptions]="[5, 10, 15, 20]"
+                [showFirstLastButtons]="false"
+                (page)="onMessagesPageChange($event)"
+                aria-label="Seleccionar página de mensajes">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+
+  <!-- Toggle Button (when hidden) -->
+  <button
+    *ngIf="!isVisible"
+    mat-fab
+    color="primary"
+    class="toggle-button"
+    (click)="onToggleModal()"
+    [attr.aria-label]="'Abrir chat'">
+    <mat-icon>chat</mat-icon>
+  </button>
+</div>
