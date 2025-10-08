@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, interval, map, switchMap, takeWhile } from 'rxjs';
+import { EMPTY, Observable, catchError, interval, map, mergeMap, of, switchMap, takeWhile } from 'rxjs';
 
 export interface OptimizationPOI {
   id: number;
@@ -132,8 +132,8 @@ export class RouteOptimizationService {
   /**
    * Poll for job completion using Request-Response with Status Polling pattern
    */
-  pollForCompletion(jobId: string, maxAttempts: number = 60): Observable<JobStatusResponse> {
-    return interval(2000) // Poll every 2 seconds
+  pollForCompletion(jobId: string, maxAttempts: number = 10000): Observable<JobStatusResponse> {
+    return interval(2000) // Poll every 7 seconds
       .pipe(
         switchMap(() => this.getJobStatus(jobId)),
         takeWhile((status, index) => {
@@ -154,6 +154,7 @@ export class RouteOptimizationService {
   /**
    * Complete optimization workflow: submit request and poll for completion
    */
+
   optimizeRouteComplete(request: RouteOptimizationRequest): Observable<OptimizationResult> {
     return this.submitOptimizationRequest(request).pipe(
       switchMap(submission => {
@@ -162,19 +163,32 @@ export class RouteOptimizationService {
 
         return this.pollForCompletion(submission.job_id);
       }),
-      map(finalStatus => {
+      // Usa mergeMap para transformar el valor en un nuevo stream
+      mergeMap(finalStatus => {
         if (finalStatus.status === 'COMPLETED' && finalStatus.result) {
           console.log('Route optimization completed successfully!');
-          return finalStatus.result;
-        } else if (finalStatus.status === 'FAILED') {
+          // Devuelve un observable que emite el resultado y se completa
+          return of(finalStatus.result);
+        }
+
+        if (finalStatus.status === 'FAILED') {
           const errorMsg = finalStatus.error ?
             `${finalStatus.error.message}: ${finalStatus.error.details}` :
             'Unknown error occurred';
+          // Lanza un error que será propagado por el observable
           throw new Error(`Route optimization failed: ${errorMsg}`);
-        } else {
-          throw new Error(`Route optimization ended with unexpected status: ${finalStatus.status}`);
         }
+
+        if (finalStatus.status === 'PROCESSING' || finalStatus.status === 'PENDING') {
+          console.warn(`Client timeout: The optimization is still processing on the server. Job ID: ${finalStatus.job_id}`);
+          // Devuelve un observable que se completa inmediatamente sin emitir nada
+          return EMPTY;
+        }
+
+        // Para cualquier otro caso, lanza un error
+        throw new Error(`Route optimization ended with unexpected status: ${finalStatus.status}`);
       })
+
     );
   }
 
@@ -202,4 +216,19 @@ export class RouteOptimizationService {
   healthCheck(): Observable<{status: string, service: string, timestamp: string}> {
     return this.http.get<{status: string, service: string, timestamp: string}>(`${this.baseUrl}/health`);
   }
+
+  /**
+   * Get all routes completed so far
+   */
+  getAllRoutes(): Observable<OptimizationResult> {
+    return this.http.get<OptimizationResult>(`${this.baseUrl}/routes/completed`);
+  }
+
+  /**
+   * Get all routes completed so far by user ID
+   */
+  getAllRoutesByUser(userId: string): Observable<OptimizationResult> {
+    return this.http.get<OptimizationResult>(`${this.baseUrl}/routes/completed?userId=${userId}`);
+  }
+
 }

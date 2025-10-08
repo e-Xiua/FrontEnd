@@ -224,3 +224,19 @@
     </section>
   </div>
 </div>
+
+
+    <section class="map-section"
+    *ngFor="let optimizedResult of optimizedResults">
+      <h2 class="section-title">Mapa General de Proveedores</h2>
+      <app-route-pois-show
+        [providers]="this.poiAdapter.adaptAll(optimizedResult.optimizedSequence)"
+        [config]="mapConfig"
+        [showRoutes]="false"
+        [showCarousel]="true"
+        [showProviderCard]="true"
+        mapId="{{optimizedResult.optimizedRouteId}}"
+        (providerSelected)="onProviderSelected($event)"
+        (mapInitialized)="onMapInitialized()">
+      </app-route-pois-show>
+    </section>

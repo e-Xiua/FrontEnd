@@ -27,6 +27,8 @@ import { ProviderCardComponent } from "../provider-card/provider-card.component"
 })
 export class RoutePoisShowComponent implements AfterViewInit, OnChanges, OnDestroy {
 
+  private map!: L.Map;
+
   @Input() providers: usuarios[] = [];
   @Input() config: MapConfig = {
     center: [10.501005998543437, -84.6972559489806],
@@ -280,6 +282,17 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges, OnDestr
           }
         }, 300);
       });
+  }
+
+  public invalidateMapSize(): void {
+    if (this.map) {
+      // El timeout asegura que la operación ocurra en el siguiente ciclo de renderizado,
+      // después de que el DOM se haya actualizado completamente.
+      setTimeout(() => {
+        this.map.invalidateSize();
+        console.log(`Mapa ${this.mapId} invalidado y reajustado.`);
+      }, 0);
+    }
   }
 
 }

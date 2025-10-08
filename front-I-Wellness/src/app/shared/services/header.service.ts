@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth/auth.service';
-import { BaseHeader, HeaderAction, HeaderConfig, NavigationItem } from '../models/header';
+import { HeaderConfig } from '../models/header';
 
 /**
  * Servicio para gestión centralizada de headers
@@ -86,6 +86,8 @@ export class HeaderService {
           { label: 'Usuarios', route: '/admin/visitantes', icon: 'people' },
           { label: 'Proveedores', route: '/admin/proveedores', icon: 'business' },
           { label: 'Servicios', route: '/admin/servicios', icon: 'room_service' },
+          { label: 'Rutas', route: '/admin/rutas', icon: 'map' },
+          { label: 'Reportes', route: '/admin/reportes', icon: 'bar_chart' },
         ],
         actions: [
           {
@@ -117,6 +119,7 @@ export class HeaderService {
           { label: 'Servicios', route: '/proveedor/home', icon: 'room_service' },
           { label: 'Agregar Servicio', route: '/proveedor/agregar-servicio', icon: 'add_business' },
           { label: 'Chat', route: '/proveedor/chat-demo', icon: 'chat' },
+          { label: 'Rutas', route: '/proveedor/rutas', icon: 'map' },
         ],
         actions: [
           {
@@ -145,7 +148,7 @@ export class HeaderService {
         theme: 'light',
         navigationItems: [
           { label: 'Inicio', route: '/turista/home', icon: 'home' },
-          { label: 'Mapa', route: '/turista/mapa-empresas', icon: 'map' },
+          { label: 'Reservar Rutas', route: '/turista/reservar-rutas', icon: 'map' },
           { label: 'Reservas', route: '/turista/reservas', icon: 'event' },
           { label: 'Preferencias', route: '/turista/preferencias', icon: 'tune' },
         ],

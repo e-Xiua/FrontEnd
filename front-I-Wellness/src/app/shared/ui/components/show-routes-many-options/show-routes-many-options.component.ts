@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { Route, RouteDisplayOptions, RouteSelectionEvent } from '../../../models/route';
 import { usuarios } from '../../../models/usuarios';
 import { RoutePoisShowComponent } from "../route-pois-show/route-pois-show.component";
@@ -22,6 +22,9 @@ export interface RouteFilter {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShowRoutesManyOptionsComponent implements OnInit, OnChanges {
+
+  @ViewChildren(RoutePoisShowComponent) mapComponents!: QueryList<RoutePoisShowComponent>;
+
   @Input() routes: Route[] = [];
   @Input() displayOptions: RouteDisplayOptions = {
     showRouteInfo: true,
@@ -321,5 +324,20 @@ export class ShowRoutesManyOptionsComponent implements OnInit, OnChanges {
     }
 
     return stars;
+  }
+
+  ngAfterViewInit(): void {
+    // Cuando los componentes del mapa cambian (por ejemplo, al expandir un nuevo acordeón),
+    // necesitamos encontrar el nuevo y refrescarlo.
+    this.mapComponents.changes.subscribe((comps: QueryList<RoutePoisShowComponent>) => {
+      // Pequeño retraso para asegurar que el contenedor del acordeón sea visible
+      setTimeout(() => {
+        comps.forEach(mapComp => {
+          if (mapComp && typeof mapComp.invalidateMapSize === 'function') {
+            mapComp.invalidateMapSize();
+          }
+        });
+      }, 10);
+    });
   }
 }

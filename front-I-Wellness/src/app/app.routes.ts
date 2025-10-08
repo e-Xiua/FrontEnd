@@ -45,6 +45,7 @@ import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
 
 // Shared/Common components
+import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
 import { InfoServicioComponent } from './features/users/proveedor/info-servicio/info-servicio.component';
 
 export const routes: Routes = [
@@ -71,11 +72,10 @@ export const routes: Routes = [
             { path: 'home', component: HomeTuristaComponent },
             { path: 'formulariogustos', component: FormulariogustosComponent },
             { path: 'perfil/:id', component: PerfilTuristaComponent },
-            { path: 'mapa-empresas', component: MapaEmpresasComponent },
-            { path: 'ruta-detalle', component: RutaDetalleComponent },
             { path: 'edit-preferencias/:id', component: EditPreferenciasComponent },
             { path: 'proveedor/:id', component: ServiciosProveedorComponent },
             { path: 'reservas', component: VerReservasComponent },
+            { path: 'ver-rutas', component: ProveedorChatDemoComponent},
         ]
     },
 
@@ -92,6 +92,8 @@ export const routes: Routes = [
             { path: 'editar-servicio/:id', component: EditarServicioComponent },
             { path: 'dashboard', component: DashboardComponent },
             { path: 'perfil/:id', component: PerfilProveedorComponent },
+            { path: 'rutas', component: MapaEmpresasComponent },
+            { path: 'ruta/:id', component: RutaDetalleComponent }, // Detalle de ruta para proveedores
         ]
     },
 
@@ -110,6 +112,8 @@ export const routes: Routes = [
             { path: 'proveedores', component: ProveedoresComponent },
             { path: 'crear-turista', component: CrearTuristaComponent },
             { path: 'crear-proveedor', component: CrearProveedorComponent },
+            { path: 'rutas', component: CreadorDeRutasComponent},
+            { path: 'ruta/:id', component: RutaDetalleComponent }, // Detalle de ruta para administradores
         ]
     },
 

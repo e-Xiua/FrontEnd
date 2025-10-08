@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { OptimizedPoiAdapterService } from '../../../../shared/models/adapters/optimized-poi-adapter';
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteDataService } from '../../../../shared/services/route-data.service';
@@ -46,6 +47,8 @@ export class MapaEmpresasComponent implements OnInit {
   optimizationProgress: number = 0;
   optimizationMessage: string = '';
   optimizedResult: OptimizationResult | null = null;
+  optimizedResults: OptimizationResult[] = [];
+  providerResults: usuarios[] = []; // Created to store providers from optimization results
 
   mapConfig: MapConfig = {
     center: [10.501005998543437, -84.6972559489806],
@@ -61,7 +64,8 @@ export class MapaEmpresasComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private routeDataService: RouteDataService,
-    private routeOptimizationService: RouteOptimizationService
+    private routeOptimizationService: RouteOptimizationService,
+    public poiAdapter: OptimizedPoiAdapterService
   ) {}
 
   ngOnInit(): void {
@@ -88,6 +92,17 @@ export class MapaEmpresasComponent implements OnInit {
         this.error = 'Error al cargar los proveedores';
         this.isLoading = false;
         this.cdr.markForCheck();
+      }
+    });
+
+    this.routeOptimizationService.getAllRoutes().subscribe({
+      next: (allRoutes) => {
+        console.log('Rutas optimizadas obtenidas del servicio:', allRoutes);
+        this.optimizedResults = allRoutes ? (Array.isArray(allRoutes) ? allRoutes : [allRoutes]) : [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error al obtener rutas optimizadas', err);
       }
     });
   }
@@ -223,6 +238,7 @@ export class MapaEmpresasComponent implements OnInit {
 
         // Update the selected route with optimized data
         this.updateRouteWithOptimizedData(result);
+        this.handleOptimizationComplete(routeKey, result);
       },
       error: (error) => {
         console.error('Route optimization failed for key:', routeKey, error);
@@ -241,6 +257,9 @@ export class MapaEmpresasComponent implements OnInit {
         this.updateLegacyOptimizingStatus();
         this.optimizationProgress = 0;
         this.cdr.markForCheck();
+
+        this.resetOptimizationState(routeKey);
+        this.showError(this.optimizationMessage);
       }
     });
 
