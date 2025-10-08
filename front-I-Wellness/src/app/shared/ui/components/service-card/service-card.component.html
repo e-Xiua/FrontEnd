@@ -1,0 +1,39 @@
+<div class="group relative bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+  <!-- Image Container -->
+  <div class="relative h-48 overflow-hidden">
+    <img
+      alt="Service"
+      [src]="image"
+      [alt]="title"
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="p-6 space-y-4">
+    <div>
+      <h3 class="text-xl font-semibold text-foreground mb-2">{{ title }}</h3>
+      <p class="text-muted-foreground text-sm leading-relaxed">{{ description }}</p>
+    </div>
+
+    <!-- Schedule -->
+    <div class="flex items-center gap-2 text-service-schedule">
+      <i class="fa-regular fa-clock text-sm"></i>
+      <span class="text-sm font-medium">{{ schedule }}</span>
+      <span *ngIf="duration" class="text-xs text-muted-foreground">• {{ duration }}</span>
+    </div>
+
+    <!-- Price -->
+    <div class="flex items-center justify-between pt-2 border-t border-border">
+      <div class="flex items-center gap-2 text-service-price">
+        <i class="fa-solid fa-dollar-sign"></i>
+        <span class="text-2xl font-bold">{{ price }}</span>
+      </div>
+
+      <button class="px-4 py-2 bg-gradient-primary text-white rounded-lg font-medium hover:shadow-glow transition-all duration-300 hover:scale-105">
+        Book Now
+      </button>
+    </div>
+  </div>
+</div>

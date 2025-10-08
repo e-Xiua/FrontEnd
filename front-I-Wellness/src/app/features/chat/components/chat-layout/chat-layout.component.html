@@ -1,0 +1,33 @@
+<div class="chat-layout-container">
+  <app-chat-sidebar *ngIf="isSidebarEnabled"
+    class="chat-sidebar-wrapper">
+  </app-chat-sidebar>
+
+  <!-- Floating Modal Component -->
+  <app-floating-chat-modal
+    class="chat-modal-wrapper">
+  </app-floating-chat-modal>
+
+  <!-- Sidebar Tab - Vertical "Proveedores" (Lista para filtrar/seleccionar) -->
+  <app-floating-tab
+    *ngIf="isSidebarEnabled && !(layoutState$ | async)?.sidebarVisible"
+    label="Proveedores"
+    orientation="vertical"
+    position="left"
+    [visible]="true"
+    iconClass="fas fa-store"
+    customAriaLabel="Mostrar lista de proveedores para seleccionar"
+    (tabClick)="showSidebar()">
+  </app-floating-tab>
+
+  <!-- Overlay for mobile when sidebar is open -->
+  <button
+    *ngIf="(layoutState$ | async)?.sidebarVisible && isMobileView"
+    class="mobile-overlay"
+    (click)="hideSidebar()"
+    type="button"
+    tabindex="0"
+    aria-label="Cerrar barra lateral"
+  ></button>
+
+</div>

@@ -1,0 +1,227 @@
+.map-poi-container {
+  width: 100%;
+  display: flex; /* Fallback para browsers antiguos */
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 32rem; /* Add to ensure baseline height for the entire container */
+}
+
+.carousel-column {
+  width: 100%; /* Por defecto, full width en mobile */
+}
+
+.map-provider-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.map-container {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 1rem;
+  position: relative;
+  overflow: hidden;
+  display: block;
+  min-height: 32rem; /* Move min-height here to enforce baseline while allowing stretch */
+}
+
+.map-container.full {
+  height: 100%; /* Change to 100% to fill available space */
+}
+
+#map,
+.map-leaflet-wrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.provider-card-wrapper {
+  margin-top: 1.25rem;
+  height: 100%; /* Add to stretch and match the map's height */
+}
+
+/* Media query para pantallas grandes: Layout horizontal */
+@media (min-width: 1100px) {
+  .map-poi-container {
+    display: grid;
+    grid-template-columns: 30% 70%; /* Carrusel 40%, Mapa+Provider 60% */
+    gap: 1.2rem;
+    align-items: stretch; /* Change to stretch (default is start) for explicit height matching */
+  }
+
+  .carousel-column {
+    position: sticky;
+    top: 70px; /* Similar a la provider-card actual */
+    /* Remove height: fit-content; to allow stretching to match the row height */
+  }
+
+  .map-provider-column {
+    display: grid;
+    grid-template-columns: 1fr 380px; /* Dentro de la derecha: Mapa flexible, Provider fija en 380px */
+    gap: 1.2rem;
+    align-items: stretch; /* Ensure internal grid items stretch */
+  }
+
+  .provider-card-wrapper {
+    position: sticky;
+    top: 70px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .map-poi-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .carousel-column,
+  .map-provider-column {
+    width: 100%;
+  }
+}
+
+/* Carousel-specific updates for filling height */
+.map-linked-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* Remove max-width: 340px; to allow full 40% width */
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: .75rem .85rem .9rem;
+  box-shadow: 0 4px 10px -2px rgba(0,0,0,.08);
+  gap: .65rem;
+  height: 100%; /* Add to fill the column's height */
+}
+
+.map-linked-track-wrapper {
+  overflow: hidden;
+  border-radius: 8px;
+  flex: 1; /* Add to expand and take most of the available height */
+}
+
+.map-linked-track {
+  display: flex;
+  transition: transform .45s ease;
+  width: 100%;
+  height: 100%; /* Add to fill the track wrapper */
+}
+
+.map-linked-slide {
+  flex: 0 0 100%;
+  display: grid;
+  gap: .65rem;
+  height: 100%; /* Add to fill the track */
+  align-content: center; /* Center content vertically if not filling entirely */
+}
+
+.linked-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: .55rem .6rem .65rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: .25s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%; /* Change min-height to height: 100% to fill the slide (text centers naturally) */
+  color: #333;
+}
+
+::ng-deep .leaflet-popup-content {
+  margin: 0;
+  padding: 0 !important;
+  width: auto !important;
+  overflow: hidden;
+}
+
+::ng-deep .popup-card {
+  width: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background-color: #fff;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+::ng-deep .popup-img-container {
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+::ng-deep .popup-img {
+  height: 100%;
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+::ng-deep .popup-title {
+  margin: 10px 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  padding: 0 8px;
+}
+
+::ng-deep a.leaflet-popup-close-button {
+  background-color: white !important;
+  border: 1px solid #bbb !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 26px !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  color: #333 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+  top: 8px !important;
+  right: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+  z-index: 1000 !important;
+  display: inline-block !important;
+}
+
+::ng-deep a.leaflet-popup-close-button:hover {
+  background-color: #f0f0f0 !important;
+  color: #000 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer !important;
+}
+
+::ng-deep .custom-tooltip {
+  background-color: #fff;
+  color: #333;
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+::ng-deep .leaflet-tooltip-bottom::before {
+  display: none !important;
+}
+
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+::ng-deep .leaflet-container {
+  font: inherit;
+}

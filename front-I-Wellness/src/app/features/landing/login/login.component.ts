@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -50,24 +50,24 @@ export class LoginComponent {
       });
       return;
     }
-  
+
     this.isLoading = true;
     this.errorMessage = '';
-  
+
     this.authService.login(this.correo, this.password).subscribe({
       next: () => {
         // Login exitoso, ahora obtenemos el rol del usuario
         this.authService.getUsuarioActual().subscribe({
           next: (rol: string) => {
             localStorage.setItem('rol', rol); // Guardamos el rol en localStorage si quieres
-  
+
             // Redirigir según el rol
             if (rol === 'Turista') {
-              this.router.navigate(['/hometurista']);
+              this.router.navigate(['/turista/home']);
             } else if (rol === 'Proveedor') {
-              this.router.navigate(['/homeproveedor']);
+              this.router.navigate(['/proveedor/home']);
             } else if (rol === 'Admin') {
-              this.router.navigate(['/homeadmin']);
+              this.router.navigate(['/admin/dashboard']);
             } else {
               Swal.fire({
                 icon: 'error',
@@ -76,7 +76,7 @@ export class LoginComponent {
                 confirmButtonText: 'OK'
               });
             }
-  
+
             this.isLoading = false;
           },
           error: (err) => {
@@ -103,5 +103,5 @@ export class LoginComponent {
       }
     });
   }
-  
+
 }
