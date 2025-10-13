@@ -1,0 +1,274 @@
+<div class="min-h-screen bg-background">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="min-h-screen flex items-center justify-center">
+    <div class="text-center animate-fade-in">
+      <div class="spinner-border text-primary mb-4" role="status">
+        <span class="sr-only">Cargando...</span>
+      </div>
+      <p class="text-muted-foreground">Cargando información del proveedor...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="min-h-screen flex items-center justify-center">
+    <div class="text-center animate-fade-in">
+      <h1 class="text-2xl font-bold text-foreground mb-2">Error al cargar el perfil</h1>
+      <p class="text-muted-foreground mb-4">{{ error }}</p>
+      <button
+        class="btn btn-primary"
+        (click)="goBack()">
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- Provider Not Found -->
+  <div *ngIf="!provider && !isLoading && !error" class="min-h-screen flex items-center justify-center">
+    <div class="text-center animate-fade-in">
+      <h1 class="text-2xl font-bold text-foreground mb-2">Proveedor no encontrado</h1>
+      <p class="text-muted-foreground mb-4">El proveedor que buscas no existe.</p>
+      <button
+        class="btn btn-primary"
+        (click)="goBack()">
+        Volver al inicio
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="provider && !isLoading && !error">
+    <!-- Header -->
+    <header class="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
+      <div class="container mx-auto px-4 py-4">
+        <button
+          class="btn btn-ghost gap-2"
+          (click)="goBack()">
+          <i class="fas fa-arrow-left w-4 h-4"></i>
+          Volver
+        </button>
+      </div>
+    </header>
+
+    <!-- Profile Content -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+      <!-- LinkedIn-style Profile Header -->
+      <div class="bg-card rounded-2xl shadow-card overflow-hidden mb-6 animate-fade-in">
+        <!-- Cover/Header Banner -->
+        <div class="h-32 bg-gradient-primary"></div>
+
+        <div class="px-8 pb-6">
+          <!-- Profile Photo & Basic Info -->
+          <div class="flex flex-col md:flex-row gap-6 -mt-16 mb-6">
+            <img
+              title="Avatar de {{ provider.contactName }}"
+              [src]="provider.foto"
+              [alt]="provider.contactName"
+              class="w-32 h-32 rounded-full ring-4 ring-card bg-card object-cover">
+
+            <div class="flex-1 mt-16 md:mt-20">
+              <h1 class="text-3xl font-bold text-foreground mb-1">{{ provider.contactName }}</h1>
+              <p class="text-xl text-muted-foreground mb-2">{{ provider.cargoContacto }}</p>
+              <p class="text-lg font-semibold text-foreground mb-3">{{ provider.name }}</p>
+
+              <div class="flex items-center gap-4 mb-4">
+                <div class="flex items-center gap-1">
+                  <i
+                    *ngFor="let filled of getStarArray(provider.rating)"
+                    class="fas fa-star w-5 h-5"
+                    [class.text-amber-400]="filled"
+                    [class.text-muted-foreground]="!filled">
+                  </i>
+                  <span class="ml-2 font-semibold">{{ provider.rating }}</span>
+                  <span class="text-muted-foreground">({{ provider.totalReviews }} reseñas)</span>
+                </div>
+              </div>
+
+              <!-- Categories as Bubble Badges -->
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
+                  {{ provider.category }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2 text-muted-foreground">
+                <i class="fas fa-map-marker-alt w-4 h-4"></i>
+                <span class="text-sm">{{ provider.address }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-1">
+        <h2 class="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <i class="fas fa-briefcase w-6 h-6 text-primary"></i>
+          Acerca de
+        </h2>
+        <p class="text-muted-foreground leading-relaxed">{{ provider.description }}</p>
+      </div>
+
+      <!-- Contact & Business Information -->
+      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-2">
+        <h2 class="text-2xl font-bold text-foreground mb-6">Información de Contacto</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <i class="fas fa-envelope w-5 h-5 text-primary flex-shrink-0"></i>
+            <div class="min-w-0">
+              <p class="text-sm text-muted-foreground">Email</p>
+              <p class="font-medium text-foreground truncate">{{ provider.email }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <i class="fas fa-phone w-5 h-5 text-primary flex-shrink-0"></i>
+            <div>
+              <p class="text-sm text-muted-foreground">Teléfono</p>
+              <p class="font-medium text-foreground">{{ provider.phone }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <i class="fas fa-phone-alt w-5 h-5 text-primary flex-shrink-0"></i>
+            <div>
+              <p class="text-sm text-muted-foreground">Teléfono Empresa</p>
+              <p class="font-medium text-foreground">{{ provider.companyPhone }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <i class="fas fa-clock w-5 h-5 text-primary flex-shrink-0"></i>
+            <div>
+              <p class="text-sm text-muted-foreground">Horarios</p>
+              <p class="font-medium text-foreground">{{ provider.hours }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Certifications & Licenses -->
+        <div *ngIf="provider.certificadosCalidad && provider.certificadosCalidad.length > 0" class="mt-6">
+          <h3 class="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <i class="fas fa-award w-5 h-5 text-primary"></i>
+            Certificaciones y Estándares de Calidad
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let cert of provider.certificadosCalidad"
+              class="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-sm border border-green-200">
+              {{ cert }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="provider.licenciasPermisos && provider.licenciasPermisos.length > 0" class="mt-6">
+          <h3 class="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <i class="fas fa-file-alt w-5 h-5 text-primary"></i>
+            Licencias y Permisos
+          </h3>
+          <div class="space-y-2">
+            <p *ngFor="let license of provider.licenciasPermisos" class="text-muted-foreground text-sm flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              {{ license }}
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="provider.identificacionFiscal" class="mt-6 p-4 bg-muted/30 rounded-lg">
+          <p class="text-sm text-muted-foreground">
+            ID Fiscal: <span class="font-mono font-medium text-foreground">{{ provider.identificacionFiscal }}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Services Section -->
+      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
+        <h2 class="text-2xl font-bold text-foreground mb-6">Servicios Ofrecidos</h2>
+
+        <div *ngIf="services.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div *ngFor="let service of services" class="bg-muted/30 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <h3 class="text-lg font-semibold text-foreground mb-2">{{ service.nombre || 'Servicio sin nombre' }}</h3>
+            <p class="text-muted-foreground text-sm mb-3">{{ service.descripcion || 'Sin descripción disponible' }}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-primary font-semibold">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="text-xs text-muted-foreground">{{ service.categoria || 'General' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="services.length === 0" class="text-center py-8">
+          <i class="fas fa-box-open text-4xl text-muted-foreground mb-4"></i>
+          <p class="text-muted-foreground">No hay servicios disponibles para mostrar.</p>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div *ngIf="reviews && reviews.length > 0" class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-4">
+        <h2 class="text-2xl font-bold text-foreground mb-6">
+          Reseñas ({{ reviews.length }})
+        </h2>
+        <div class="space-y-6">
+          <div *ngFor="let review of reviews" class="pb-6 border-b border-border last:border-0 last:pb-0">
+            <div class="flex gap-4">
+              <img
+                title="Avatar de {{ review.author }}"
+                [src]="review.avatar"
+                [alt]="review.author"
+                class="w-12 h-12 rounded-full object-cover">
+
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                  <div>
+                    <h4 class="font-semibold text-foreground">{{ review.author }}</h4>
+                    <p class="text-xs text-muted-foreground">{{ formatDate(review.date) }}</p>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <i
+                      *ngFor="let filled of getStarArray(review.rating)"
+                      class="fas fa-star w-4 h-4"
+                      [class.text-amber-400]="filled"
+                      [class.text-muted-foreground]="!filled">
+                    </i>
+                  </div>
+                </div>
+                <p class="text-muted-foreground leading-relaxed mb-3">{{ review.comment }}</p>
+                <div class="flex items-center gap-4 text-sm">
+                  <button class="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+                    <i class="fas fa-thumbs-up w-4 h-4"></i>
+                    <span>{{ review.helpful }}</span>
+                  </button>
+                  <button class="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors">
+                    <i class="fas fa-thumbs-down w-4 h-4"></i>
+                    <span>{{ review.notHelpful }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placeholder for Future Routes -->
+      <div class="bg-card rounded-2xl shadow-card p-12 mb-6 text-center animate-fade-in-5 border-2 border-dashed border-muted">
+        <div class="max-w-md mx-auto">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-file-alt w-8 h-8 text-primary"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-foreground mb-2">Características Adicionales Próximamente</h3>
+          <p class="text-muted-foreground mb-4">
+            Próximamente implementaremos rutas. Estamos trabajando para traerte más funcionalidades.
+          </p>
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+            <i class="fas fa-clock w-4 h-4"></i>
+            En Desarrollo
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="text-center animate-fade-in-6">
+        <button
+          class="btn btn-primary btn-lg px-8 py-3 text-lg"
+          (click)="startConversation()">
+          Iniciar Conversación
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
