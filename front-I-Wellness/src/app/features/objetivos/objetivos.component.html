@@ -1,0 +1,8 @@
+<div>
+  <h2>Módulo de Objetivos</h2>
+  <ng-container [ngSwitch]="rol">
+    <app-objetivos-turista *ngSwitchCase="'turista'"></app-objetivos-turista>
+    <app-objetivos-proveedor *ngSwitchCase="'proveedor'"></app-objetivos-proveedor>
+    <app-objetivos-admin *ngSwitchCase="'admin'"></app-objetivos-admin>
+  </ng-container>
+</div>

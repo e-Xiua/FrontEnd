@@ -1,0 +1,31 @@
+    <section class="routes-section">
+      <h2 class="section-title">Rutas Sugeridas</h2>
+      <p class="section-description">
+        Explora diferentes rutas curadas con múltiples proveedores para una experiencia completa de bienestar.
+      </p>
+
+      <app-show-routes-many-options
+        *ngIf="adaptedRoutes.length > 0"
+        [routes]="this.adaptedRoutes"
+        [displayOptions]="{
+          showRouteInfo: true,
+          showProviderCarousel: true,
+          showProviderCard: true,
+          showRouteLines: true,
+          compactMode: false,
+          allowRouteSelection: true
+        }"
+        [maxRoutesToShow]="8"
+        [showFilters]="true"
+        [showRouteStats]="true"
+        [layoutMode]="'accordion'"
+        (routeSelected)="onRouteSelected($event)"
+        (providerSelected)="onRouteProviderSelected($event.route, $event.provider)"
+        (filtersChanged)="onRouteFiltersChanged($event)">
+      </app-show-routes-many-options>
+
+      <!-- Mensaje cuando no hay rutas -->
+      <div *ngIf="this.adaptedRoutes.length === 0" class="no-routes-message">
+        <p>No hay rutas disponibles en este momento.</p>
+      </div>
+    </section>

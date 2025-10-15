@@ -1,0 +1,45 @@
+<form (ngSubmit)="onSubmit($event)" class="chat-input-container">
+  <div class="input-wrapper">
+    <div class="textarea-container">
+      <textarea
+        [(ngModel)]="message"
+        name="message"
+        (keydown)="onKeyDown($event)"
+        placeholder="Type a message..."
+        [disabled]="disabled"
+        class="message-textarea"
+        rows="1"
+        #messageTextarea></textarea>
+
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="action-button"
+          (click)="onEmojiClick()"
+          aria-label="Add emoji"
+          mat-icon-button>
+          <mat-icon>sentiment_satisfied</mat-icon>
+        </button>
+
+        <button
+          type="button"
+          class="action-button"
+          (click)="onAttachClick()"
+          aria-label="Attach file"
+          mat-icon-button>
+          <mat-icon>attach_file</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      class="send-button"
+      [disabled]="!message.trim() || disabled"
+      mat-fab
+      color="primary"
+      aria-label="Send message">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</form>

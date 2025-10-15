@@ -1,0 +1,123 @@
+
+<div class="ruta-detalle-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando ruta...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <p class="error-message">{{ error }}</p>
+    <button (click)="goBack()" class="back-button">
+      Volver
+    </button>
+  </div>
+
+  <!-- Route Detail Content -->
+  <div *ngIf="!isLoading && !error && selectedRoute" class="route-content">
+
+    <!-- Header con información de la ruta -->
+    <section class="route-header">
+      <div class="route-header-content">
+        <div class="route-title-section">
+          <h1 class="route-main-title">{{ selectedRoute.name }}</h1>
+          <p class="route-main-description" *ngIf="selectedRoute.description">
+            {{ selectedRoute.description }}
+          </p>
+        </div>
+
+        <div class="route-badges">
+          <span class="category-badge" *ngIf="selectedRoute.category">
+            {{ selectedRoute.category }}
+          </span>
+          <span class="difficulty-badge"
+                [style.background-color]="getDifficultyColor()"
+                *ngIf="selectedRoute.difficulty">
+            {{ selectedRoute.difficulty | titlecase }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Route Metadata -->
+    <section class="route-metadata">
+      <div class="metadata-grid">
+        <div class="metadata-item" *ngIf="selectedRoute.estimatedTime">
+          <div class="metadata-icon">⏱️</div>
+          <div class="metadata-content">
+            <span class="metadata-label">Duración</span>
+            <span class="metadata-value">{{ formatDuration(selectedRoute.estimatedTime) }}</span>
+          </div>
+        </div>
+
+        <div class="metadata-item" *ngIf="selectedRoute.estimatedDistance">
+          <div class="metadata-icon">📍</div>
+          <div class="metadata-content">
+            <span class="metadata-label">Distancia</span>
+            <span class="metadata-value">{{ formatDistance(selectedRoute.estimatedDistance) }}</span>
+          </div>
+        </div>
+
+        <div class="metadata-item" *ngIf="selectedRoute.providers">
+          <div class="metadata-icon">👥</div>
+          <div class="metadata-content">
+            <span class="metadata-label">Proveedores</span>
+            <span class="metadata-value">{{ selectedRoute.providers.length }}</span>
+          </div>
+        </div>
+
+          <div class="metadata-item" *ngIf="selectedRoute.providers">
+          <div class="metadata-icon">👥</div>
+          <div class="metadata-content">
+            <span class="metadata-label">Costo</span>
+            <span class="metadata-value">{{ 500 }}</span>
+          </div>
+        </div>
+
+        <div class="metadata-item" *ngIf="selectedRoute.rating">
+          <div class="metadata-icon">⭐</div>
+          <div class="metadata-content">
+            <span class="metadata-label">Calificación</span>
+            <div class="rating-display">
+              <span
+                *ngFor="let star of generateStarRating(selectedRoute.rating)"
+                class="star"
+                [class]="'star-' + star">
+                ★
+              </span>
+              <span class="rating-value">({{ selectedRoute.rating.toFixed(1) }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tags -->
+    <section class="route-tags-section" *ngIf="selectedRoute.tags && selectedRoute.tags.length > 0">
+      <h3 class="tags-title">Etiquetas</h3>
+      <div class="tags-container">
+        <span class="tag" *ngFor="let tag of selectedRoute.tags">{{ tag }}</span>
+      </div>
+    </section>
+
+    <!-- Mapa interactivo con proveedores -->
+    <section class="route-map-section">
+      <h3 class="map-title">Explora los Proveedores de esta Ruta</h3>
+      <div class="map-container">
+        <app-map-poi
+          [providers]="providers"
+          [config]="mapConfig"
+          [showRoutes]="true"
+          [showCarousel]="true"
+          [showProviderCard]="true"
+          [autoSelectFirst]="true"
+          mapId="ruta-detalle-map"
+          (providerSelected)="onProviderSelected($event)"
+          (mapInitialized)="onMapInitialized()">
+        </app-map-poi>
+      </div>
+    </section>
+
+  </div>
+</div>
