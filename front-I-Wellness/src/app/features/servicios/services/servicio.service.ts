@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 
@@ -8,6 +8,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 export class ServicioService {
 
   private baseUrl = 'http://localhost:8080/api/servicio';  // Ajusta la URL si usas otro puerto o contexto
+  //private baseUrl = 'http://localhost:8765/api/providers';
 
   constructor(private http: HttpClient) {}
 
@@ -31,12 +32,12 @@ export class ServicioService {
     );
   }
   guardar(servicio: any): Observable<any> {
-    const headers = this.obtenerHeaders(); 
+    const headers = this.obtenerHeaders();
     return this.http.post<any>(`${this.baseUrl}/save`, servicio, { headers }).pipe(
       catchError(this.handleError),
     );
   }
-  
+
 
   actualizar(id: number, servicio: any): Observable<any> {
   const headers = this.obtenerHeaders();
@@ -54,7 +55,7 @@ export class ServicioService {
       catchError(this.handleError)
     );
   }
-  
+
 
   obtenerServiciosPorProveedor(idProveedor: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${idProveedor}/servicios`).pipe(

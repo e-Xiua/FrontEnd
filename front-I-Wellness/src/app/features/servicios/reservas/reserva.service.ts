@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 export class ReservaService {
 
   private baseUrl = 'http://localhost:8080/api/reserva';
+  //private baseUrl = 'http://localhost:8765/api/reservas';
 
   constructor(private http: HttpClient) { }
 
