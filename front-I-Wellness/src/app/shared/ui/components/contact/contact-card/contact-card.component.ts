@@ -7,10 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ChatProvider } from '../../../../models/chat';
 import { AnimationContext } from '../../../../services/animation-strategy.service';
+import { ContactMenuComponent } from '../contact-menu/contact-menu.component';
 
 @Component({
   selector: 'app-contact-card',
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatChipsModule, MatCardModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatChipsModule, MatCardModule, ContactMenuComponent],
   templateUrl: './contact-card.component.html',
   styleUrl: './contact-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,8 +29,8 @@ export class ContactCardComponent {
   @Output() profileClick = new EventEmitter<ChatProvider>();
 
   constructor(
-    private router: Router,
-    private animationContext: AnimationContext
+    private readonly router: Router,
+    private readonly animationContext: AnimationContext
   ) {}
 
   onCardClick(): void {

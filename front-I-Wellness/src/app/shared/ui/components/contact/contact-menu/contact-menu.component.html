@@ -1,0 +1,37 @@
+<button
+  mat-stroked-button
+  color="primary"
+  class="contact-button"
+  [class.compact]="compactMode"
+  [matMenuTriggerFor]="contactMenu"
+  (click)="$event.stopPropagation()"
+  [attr.aria-label]="'Opciones de contacto para ' + provider.contactName">
+  <mat-icon>contact_phone</mat-icon>
+  <span *ngIf="!compactMode">Contacto</span>
+</button>
+
+<mat-menu #contactMenu="matMenu" class="contact-menu" [overlapTrigger]="false">
+  <button
+    mat-menu-item
+    (click)="openWhatsApp(provider)"
+    class="menu-item whatsapp-item">
+    <mat-icon class="menu-icon whatsapp-icon">message</mat-icon>
+    <span>WhatsApp</span>
+  </button>
+
+  <button
+    mat-menu-item
+    (click)="openTelegram(provider)"
+    class="menu-item telegram-item">
+    <mat-icon class="menu-icon telegram-icon">send</mat-icon>
+    <span>Telegram</span>
+  </button>
+
+  <button
+    mat-menu-item
+    (click)="openEmail(provider)"
+    class="menu-item email-item">
+    <mat-icon class="menu-icon email-icon">email</mat-icon>
+    <span>Correo</span>
+  </button>
+</mat-menu>
