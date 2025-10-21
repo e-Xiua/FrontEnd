@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { AuthService } from '../../core/services/auth/auth.service';
+import { UsuarioService } from '../../features/users/services/usuario.service';
 import {
-  ChatProvider,
-  ChatState,
-  Conversation,
-  Message,
-  SendMessageResponse
+    ChatProvider,
+    ChatState,
+    Conversation,
+    ConversationSummary,
+    Message,
+    SendMessageResponse,
+    UsuarioDTO
 } from '../models/chat';
+import { ConversationApiService } from './conversation-api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,301 +22,344 @@ export class ChatService {
     providers: [],
     conversations: [],
     selectedProviderId: null,
-    currentUserId: 1, // Usuario actual mock
+    currentUserId: 1, // Will be updated from auth service
     isLoading: false,
     error: null
   });
 
   public chatState$ = this.chatStateSubject.asObservable();
 
-  constructor() {
-    this.initializeMockData();
+  constructor(
+    private conversationApi: ConversationApiService,
+    private authService: AuthService,
+    private userService: UsuarioService
+  ) {
+    this.initializeCurrentUser();
   }
 
-  // Estado actual
+  private initializeCurrentUser(): void {
+    const currentUserId = this.authService.getCurrentUserIdSynchronous();
+    this.updateState({
+      ...this.currentState,
+      currentUserId: currentUserId ?? this.currentState.currentUserId
+    });
+  }
+
   get currentState(): ChatState {
     return this.chatStateSubject.value;
   }
 
-  // Inicializar datos mock
-  public initializeMockData(): void {
-    const mockProviders: ChatProvider[] = [
-      {
-        id: 1,
-        nombre: 'Spa Wellness Centro',
-        email: 'contact@spawellness.com',
-        telefono: '+506 2222-3333',
-        cedula: '123456789',
-        proveedorInfo: {
-          nombreEmpresa: 'Spa Wellness Centro',
-          descripcion: 'Centro de relajación y bienestar',
-          latitud: 10.001,
-          longitud: -84.001,
-          telefono: '+506 2222-3333',
-          email: 'contact@spawellness.com',
-          sitioWeb: 'https://spawellness.com'
-        },
-        contactName: 'María González',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria',
-        rating: 4.8,
-        totalReviews: 125,
-        isOnline: true,
-        services: [
-          {
-            id: 1,
-            name: 'Masaje Relajante',
-            description: 'Masaje de cuerpo completo para relajación total',
-            price: 45000,
-            currency: 'CRC',
-            duration: 60,
-            category: 'Spa',
-            available: true
-          },
-          {
-            id: 2,
-            name: 'Tratamiento Facial',
-            description: 'Limpieza facial profunda con productos naturales',
-            price: 35000,
-            currency: 'CRC',
-            duration: 45,
-            category: 'Belleza',
-            available: true
-          }
-        ]
-      },
-      {
-        id: 2,
-        nombre: 'Aventura Tours CR',
-        email: 'info@aventuracr.com',
-        telefono: '+506 2333-4444',
-        cedula: '987654321',
-        proveedorInfo: {
-          nombreEmpresa: 'Aventura Tours CR',
-          descripcion: 'Tours de aventura y naturaleza',
-          latitud: 10.002,
-          longitud: -84.002,
-          telefono: '+506 2333-4444',
-          email: 'info@aventuracr.com',
-          sitioWeb: 'https://aventuracr.com'
-        },
-        contactName: 'Carlos Ramírez',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos',
-        rating: 4.9,
-        totalReviews: 98,
-        isOnline: false,
-        lastSeen: new Date(Date.now() - 15 * 60 * 1000), // 15 minutos atrás
-        services: [
-          {
-            id: 3,
-            name: 'Tour Canopy',
-            description: 'Aventura en las copas de los árboles',
-            price: 25000,
-            currency: 'CRC',
-            duration: 120,
-            category: 'Aventura',
-            available: true
-          }
-        ]
-      }
-    ];
-
-    const mockConversations: Conversation[] = [
-      {
-        id: '1',
-        providerId: 1,
-        messages: [
-          {
-            id: '1',
-            senderId: 1,
-            content: '¡Hola! Bienvenido a Spa Wellness Centro. ¿En qué podemos ayudarte hoy?',
-            timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hora atrás
-            type: 'text',
-            status: 'read'
-          },
-          {
-            id: '2',
-            senderId: 0,
-            content: 'Hola, me interesa saber sobre sus servicios de masajes.',
-            timestamp: new Date(Date.now() - 55 * 60 * 1000), // 55 minutos atrás
-            type: 'text',
-            status: 'read'
-          },
-          {
-            id: '3',
-            senderId: 1,
-            content: 'Perfecto! Tenemos varios tipos de masajes disponibles. Nuestro masaje relajante de cuerpo completo es muy popular. ¿Te gustaría conocer más detalles?',
-            timestamp: new Date(Date.now() - 50 * 60 * 1000), // 50 minutos atrás
-            type: 'text',
-            status: 'read'
-          }
-        ],
-        unreadCount: 0,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
-        updatedAt: new Date(Date.now() - 50 * 60 * 1000)
-      },
-      {
-        id: '2',
-        providerId: 2,
-        messages: [
-          {
-            id: '4',
-            senderId: 2,
-            content: '¡Hola! Gracias por contactar Aventura Tours CR. ¿Buscas alguna aventura específica?',
-            timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutos atrás
-            type: 'text',
-            status: 'delivered'
-          }
-        ],
-        unreadCount: 1,
-        createdAt: new Date(Date.now() - 60 * 60 * 1000), // 1 hora atrás
-        updatedAt: new Date(Date.now() - 30 * 60 * 1000)
-      }
-    ];
-
-    this.updateState({
-      ...this.currentState,
-      providers: mockProviders,
-      conversations: mockConversations
-    });
+  private updateState(newState: Partial<ChatState>): void {
+    this.chatStateSubject.next({ ...this.currentState, ...newState });
   }
 
-  // Actualizar estado
-  private updateState(newState: ChatState): void {
-    this.chatStateSubject.next(newState);
+  public loadInitialConversations(): Observable<any> {
+    const { currentUserId } = this.currentState;
+    if (!currentUserId) {
+      return throwError(() => new Error('Usuario no autenticado.'));
+    }
+
+    this.updateState({ isLoading: true, error: null });
+
+    return this.conversationApi.getConversationSummaries(currentUserId).pipe(
+      tap(summaries => {
+        const conversations: Conversation[] = summaries.map(summary =>
+          this.mapSummaryToConversation(summary, currentUserId)
+        );
+
+        this.updateState({
+          conversations,
+          isLoading: false
+        });
+      }),
+      catchError(err => {
+        this.updateState({
+          error: 'Error al cargar conversaciones.',
+          isLoading: false
+        });
+        return throwError(() => err);
+      })
+    );
   }
 
-  // Seleccionar provider
+  private mapSummaryToConversation(summary: ConversationSummary, currentUserId: number): Conversation {
+    // Determine which participant is the other user (not current user)
+    const otherParticipant = summary.otherParticipant || summary.participant;
+
+    if (!otherParticipant) {
+      throw new Error('No other participant found in conversation summary');
+    }
+
+    // Mapear el último mensaje si existe
+    const lastMessage = summary.lastMessage ? this.mapToMessage(summary.lastMessage) : null;
+
+    return {
+      id: summary.id,
+      createdAt: summary.lastMessageAt, // You might want to get this from API
+      updatedAt: summary.lastMessageAt,
+      participant1: this.userService.obtenerPorIdPublico(currentUserId).pipe(
+        map(userData => this.mapToUsuarioDTO(userData))
+      ) as unknown as UsuarioDTO, // Current user
+      participant2: this.mapToUsuarioDTO(otherParticipant), // Other participant
+      messages: lastMessage ? [lastMessage] : [], // Solo agregar si no es null
+      providerId: otherParticipant.id, // For service compatibility
+      participant: this.mapToUsuarioDTO(otherParticipant), // For service compatibility
+      lastMessage: lastMessage ?? undefined,
+      unreadCount: summary.unreadCount
+    };
+  }
+
+  private mapToUsuarioDTO(userData: any): UsuarioDTO {
+    return {
+      id: userData.id,
+      nombre: userData.nombre || userData.name || '',
+      apellido: userData.apellido || userData.lastName || '',
+      correo: userData.correo || userData.email || '',
+      urlFotoPerfil: userData.urlFotoPerfil || userData.photo || userData.profilePicture || ''
+    };
+  }
+
+  /**
+   * Mapea los datos de un mensaje desde el formato del backend al formato del frontend.
+   * Si messageData es null o undefined, retorna null.
+   */
+  private mapToMessage(messageData: any): Message | null {
+    if (!messageData) {
+      return null;
+    }
+
+    const status: Message['status'] = (messageData.status as Message['status']) ?? (messageData.isRead ? 'read' : 'delivered');
+    const timestamp: Date = messageData.timestamp
+      ? new Date(messageData.timestamp)
+      : (messageData.sentAt ? new Date(messageData.sentAt) : new Date());
+
+    return {
+      id: messageData.id,
+      conversationId: messageData.conversationId,
+      senderId: messageData.senderId,
+      receiverId: messageData.receiverId,
+      content: messageData.content,
+      isRead: !!messageData.isRead,
+      readAt: messageData.readAt || '',
+      sentAt: messageData.sentAt || (messageData.timestamp ? new Date(messageData.timestamp).toISOString() : new Date().toISOString()),
+      // Frontend-specific properties
+      timestamp,
+      type: (messageData.type as Message['type']) || 'text',
+      status
+    };
+  }
+
   selectProvider(providerId: number | null): void {
-    this.updateState({
-      ...this.currentState,
-      selectedProviderId: providerId
-    });
+  // Actualizar el estado inmediatamente para UI responsiva
+  this.updateState({
+    selectedProviderId: providerId
+  });
 
-    // Marcar mensajes como leídos si hay una conversación
-    if (providerId) {
+  if (!providerId) return;
+
+  // 1. Verificar si ya existe una conversación
+  const existingConversation = this.currentState.conversations.find(
+    c => c.providerId === providerId
+  );
+
+  if (existingConversation) {
+    console.log('[ChatService] Conversación existente encontrada:', existingConversation);
+
+    // Si existe pero solo tiene 1 mensaje o menos (solo el lastMessage del summary),
+    // cargar todos los mensajes desde el backend
+    if (existingConversation.messages.length <= 1 && existingConversation.id) {
+      this.loadFullConversation(existingConversation.id, providerId);
+    } else {
+      // Ya tiene todos los mensajes, simplemente marcar como leídos
       this.markMessagesAsRead(providerId);
     }
+  } else {
+    // Si no existe, crear o recuperar la conversación del backend
+    this.createOrFetchConversation(providerId);
+  }
+}
+
+  /**
+   * Carga todos los mensajes de una conversación existente
+   */
+  private loadFullConversation(conversationId: number, providerId: number): void {
+    const { currentUserId } = this.currentState;
+    if (!currentUserId) return;
+
+    this.updateState({ isLoading: true });
+
+    this.conversationApi.getConversationDetails(conversationId).pipe(
+      tap(conversationDetail => {
+        console.log('[ChatService] Conversación completa cargada:', conversationDetail);
+
+        // Mapear todos los mensajes
+        const allMessages = conversationDetail.messages
+          .map(msg => this.mapToMessage(msg))
+          .filter(m => m !== null) as Message[];
+
+        // Actualizar la conversación existente con todos los mensajes
+        const conversations = this.currentState.conversations.map(conv => {
+          if (conv.id === conversationId) {
+            return {
+              ...conv,
+              messages: allMessages
+            };
+          }
+          return conv;
+        });
+
+        this.updateState({
+          conversations,
+          isLoading: false
+        });
+
+        // Marcar mensajes como leídos
+        this.markMessagesAsRead(providerId);
+      }),
+      catchError(error => {
+        console.error('[ChatService] Error cargando conversación completa:', error);
+        this.updateState({
+          error: 'No se pudieron cargar los mensajes',
+          isLoading: false
+        });
+        return of(null);
+      })
+    ).subscribe();
   }
 
-  // Enviar mensaje
-  sendMessage(content: string): Observable<SendMessageResponse> {
+  /**
+   * Crea una nueva conversación o recupera una existente desde el backend.
+   * Este método llama al endpoint POST /api/conversations que busca o crea
+   * la conversación entre el usuario actual y el proveedor seleccionado.
+   */
+  private createOrFetchConversation(providerId: number): void {
+    const { currentUserId } = this.currentState;
+    if (!currentUserId) return;
+
+    this.updateState({ isLoading: true });
+
+    // Paso 1: Crear o recuperar la conversación (obtiene solo el summary con último mensaje)
+    this.conversationApi.createOrGetConversation(currentUserId, providerId).pipe(
+      switchMap(conversationSummary => {
+        console.log('[ChatService] Conversación creada/encontrada:', conversationSummary);
+
+        // Paso 2: Obtener los detalles completos con todos los mensajes
+        return this.conversationApi.getConversationDetails(conversationSummary.id).pipe(
+          map(conversationDetail => ({ summary: conversationSummary, detail: conversationDetail }))
+        );
+      }),
+      tap(({ summary, detail }) => {
+        console.log('[ChatService] Detalles de conversación cargados:', detail);
+
+        // Mapear los detalles a una conversación con todos los mensajes
+        const allMessages = detail.messages.map(msg => this.mapToMessage(msg)).filter(m => m !== null) as Message[];
+
+        // Convertir el resumen en conversación y actualizar con todos los mensajes
+        const newConversation = this.mapSummaryToConversation(summary, currentUserId);
+        newConversation.messages = allMessages; // Reemplazar el array de mensajes con todos los mensajes
+
+        // Agregar al estado
+        const conversations = [...this.currentState.conversations, newConversation];
+        this.updateState({
+          conversations,
+          isLoading: false
+        });
+      }),
+      catchError(error => {
+        console.error('Error al crear o recuperar conversación:', error);
+        this.updateState({
+          error: 'No se pudo iniciar la conversación',
+          isLoading: false
+        });
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+sendMessage(content: string): Observable<SendMessageResponse> {
     const { selectedProviderId, currentUserId } = this.currentState;
 
     if (!selectedProviderId || !content.trim()) {
       return throwError(() => new Error('Provider no seleccionado o mensaje vacío'));
     }
 
+    // Get or create conversation ID
+    const conversationId = this.getOrCreateConversationId(selectedProviderId);
+
+    // Create the message object for the API
     const newMessage: Message = {
-      id: this.generateMessageId(),
+      id: 0, // Temporary ID, will be set by backend
+      conversationId: conversationId,
       senderId: currentUserId,
+      receiverId: selectedProviderId,
       content: content.trim(),
+      isRead: false,
+      readAt: '',
+      sentAt: new Date().toISOString(),
       timestamp: new Date(),
       type: 'text',
       status: 'sending'
     };
 
-    // Agregar mensaje a la conversación
-    this.addMessageToConversation(selectedProviderId, newMessage);
+    // Send message via API
+    return this.conversationApi.sendMessage(newMessage).pipe(
+      switchMap(serverMessage => {
+        // Update the message with server data
+        this.updateMessageWithServerResponse(newMessage.id, serverMessage);
 
-    // Simular envío y respuesta automática del provider
-    return of({ success: true, message: newMessage }).pipe(
-      delay(500),
-      tap(() => {
-        // Marcar como enviado
-        this.updateMessageStatus(newMessage.id, 'sent');
+        return of({
+          success: true,
+          message: serverMessage
+        });
       }),
-      delay(1000),
-      tap(() => {
-        // Marcar como entregado
-        this.updateMessageStatus(newMessage.id, 'delivered');
-
-        // Simular respuesta automática del provider (solo para demo)
-        if (Math.random() > 0.5) {
-          this.simulateProviderResponse(selectedProviderId);
-        }
+      catchError(error => {
+        // Mark message as failed
+        this.updateMessageStatus(newMessage.id, undefined);
+        return of({
+          success: false,
+          error: error.message || 'Error al enviar el mensaje'
+        });
       })
     );
   }
 
-  // Agregar mensaje a conversación
-  private addMessageToConversation(providerId: number, message: Message): void {
-    const conversations = [...this.currentState.conversations];
-    const conversationIndex = conversations.findIndex(c => c.providerId === providerId);
+    private updateMessageWithServerResponse(temporaryMessageId: number, serverMessage: Message): void {
+    const conversations = this.currentState.conversations.map(conversation => ({
+      ...conversation,
+      messages: conversation.messages.map(message =>
+        message.id === temporaryMessageId
+          ? { ...serverMessage, status: 'delivered' as Message['status'] }
+          : message
+      ),
+      lastMessage: conversation.lastMessage?.id === temporaryMessageId
+        ? { ...serverMessage, status: 'delivered' as Message['status'] }
+        : conversation.lastMessage
+    }));
 
-    if (conversationIndex >= 0) {
-      conversations[conversationIndex] = {
-        ...conversations[conversationIndex],
-        messages: [...conversations[conversationIndex].messages, message],
-        lastMessage: message,
-        updatedAt: new Date()
-      };
-    } else {
-      // Crear nueva conversación
-      const newConversation: Conversation = {
-        id: this.generateConversationId(),
-        providerId,
-        messages: [message],
-        lastMessage: message,
-        unreadCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      conversations.push(newConversation);
-    }
-
-    this.updateState({
-      ...this.currentState,
-      conversations
-    });
+    this.updateState({ conversations });
   }
 
-  // Actualizar estado del mensaje
-  private updateMessageStatus(messageId: string, status: Message['status']): void {
+  private getOrCreateConversationId(providerId: number): number {
+    const existingConversation = this.currentState.conversations.find(
+      c => c.providerId === providerId
+    );
+    return existingConversation?.id || this.generateConversationId();
+  }
+
+  private updateMessageStatus(messageId: number, status: Message['status']): void {
     const conversations = this.currentState.conversations.map(conversation => ({
       ...conversation,
       messages: conversation.messages.map(message =>
         message.id === messageId ? { ...message, status } : message
-      )
+      ),
+      lastMessage: conversation.lastMessage?.id === messageId
+        ? { ...conversation.lastMessage, status }
+        : conversation.lastMessage
     }));
 
-    this.updateState({
-      ...this.currentState,
-      conversations
-    });
+    this.updateState({ conversations });
   }
 
-  // Simular respuesta automática del provider
-  private simulateProviderResponse(providerId: number): void {
-    const responses = [
-      '¡Gracias por tu mensaje! Te responderemos pronto.',
-      '¿Hay algo más en lo que pueda ayudarte?',
-      'Perfecto, estaremos en contacto contigo.',
-      '¡Excelente pregunta! Déjame conseguir esa información para ti.',
-      'Apreciamos tu interés en nuestros servicios.'
-    ];
-
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-
-    const providerMessage: Message = {
-      id: this.generateMessageId(),
-      senderId: providerId,
-      content: randomResponse,
-      timestamp: new Date(),
-      type: 'text',
-      status: 'sent'
-    };
-
-    setTimeout(() => {
-      this.addMessageToConversation(providerId, providerMessage);
-
-      // Incrementar contador de no leídos si no es el provider seleccionado
-      if (this.currentState.selectedProviderId !== providerId) {
-        this.incrementUnreadCount(providerId);
-      }
-    }, 2000 + Math.random() * 3000); // Entre 2-5 segundos
-  }
-
-  // Marcar mensajes como leídos
   private markMessagesAsRead(providerId: number): void {
     const conversations = this.currentState.conversations.map(conversation => {
       if (conversation.providerId === providerId) {
@@ -320,78 +368,74 @@ export class ChatService {
           unreadCount: 0,
           messages: conversation.messages.map(message =>
             message.senderId !== this.currentState.currentUserId && message.status !== 'read'
-              ? { ...message, status: 'read' as const }
+              ? { ...message, status: 'read', isRead: true, readAt: new Date().toISOString() }
               : message
-          )
+          ),
+          lastMessage: conversation.lastMessage &&
+            conversation.lastMessage.senderId !== this.currentState.currentUserId
+            ? { ...conversation.lastMessage, status: 'read', isRead: true, readAt: new Date().toISOString() }
+            : conversation.lastMessage
         };
       }
       return conversation;
     });
 
-    this.updateState({
-      ...this.currentState,
-      conversations
-    });
+    this.updateState({ conversations: conversations as Conversation[] });
   }
 
-  // Incrementar contador de no leídos
-  private incrementUnreadCount(providerId: number): void {
-    const conversations = this.currentState.conversations.map(conversation =>
-      conversation.providerId === providerId
-        ? { ...conversation, unreadCount: conversation.unreadCount + 1 }
-        : conversation
-    );
-
-    this.updateState({
-      ...this.currentState,
-      conversations
-    });
-  }
-
-  // Obtener conversación por provider ID
   getConversation(providerId: number): Observable<Conversation | undefined> {
     return this.chatState$.pipe(
       map(state => state.conversations.find(c => c.providerId === providerId))
     );
   }
 
-  // Obtener provider seleccionado
   getSelectedProvider(): Observable<ChatProvider | null> {
     return this.chatState$.pipe(
       map(state => {
         if (!state.selectedProviderId) return null;
-        return state.providers.find(p => p.id === state.selectedProviderId) || null;
+
+        // Primero buscar en el array de providers
+        const provider = state.providers.find(p => p.id === state.selectedProviderId);
+        if (provider) return provider;
+
+        // Si no está en providers, buscar en las conversaciones y construir un ChatProvider temporal
+        const conversation = state.conversations.find(c => c.providerId === state.selectedProviderId);
+        if (conversation) {
+          const participant = conversation.participant || conversation.participant2;
+
+          if (participant) {
+            // Crear un ChatProvider temporal desde los datos de la conversación
+            return {
+              id: state.selectedProviderId,
+              nombre: participant.nombre,
+              email: participant.correo,
+              telefono: '',
+              cedula: '',
+              contactName: `${participant.nombre} ${participant.apellido || ''}`.trim(),
+              photo: participant.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + state.selectedProviderId,
+              rating: 0,
+              totalReviews: 0,
+              services: [],
+              isOnline: false,
+              lastSeen: conversation.updatedAt ? new Date(conversation.updatedAt) : undefined
+            };
+          }
+        }
+
+        return null;
       })
     );
   }
 
-  // Generar ID único para mensaje
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  private generateConversationId(): number {
+    return Date.now();
   }
 
-  // Generar ID único para conversación
-  private generateConversationId(): string {
-    return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  // Obtener total de mensajes no leídos
   getTotalUnreadCount(): Observable<number> {
     return this.chatState$.pipe(
-      map(state => state.conversations.reduce((total, conv) => total + conv.unreadCount, 0))
+      map(state => state.conversations.reduce((total, conv) => total + (conv.unreadCount || 0), 0))
     );
   }
 
-  // Limpiar conversación
-  clearConversation(providerId: number): void {
-    const conversations = this.currentState.conversations.filter(c => c.providerId !== providerId);
-
-    this.updateState({
-      ...this.currentState,
-      conversations,
-      selectedProviderId: this.currentState.selectedProviderId === providerId
-        ? null
-        : this.currentState.selectedProviderId
-    });
-  }
 }

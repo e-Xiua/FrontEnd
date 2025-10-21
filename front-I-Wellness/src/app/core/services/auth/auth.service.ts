@@ -32,17 +32,23 @@ export class AuthService {
         }
       }),
       switchMap((token: string) => {
-        // Una vez que tenemos el token, obtenemos el rol del usuario
-        return this.getUsuarioActual().pipe(
-          map((rol: string) => {
-            // Guardamos el rol
-            localStorage.setItem('rol', rol);
-
-            // Devolvemos un objeto con el token y el rol
-            return { token, rol };
-          })
-        );
-      }),
+      // Once we have the token, get the user info including ID
+      return this.getUserInfo().pipe(
+        tap((userInfo: any) => {
+          // Store the user ID in localStorage
+          localStorage.setItem('USER_ID', userInfo.id.toString());
+          // Store the role as well
+          localStorage.setItem('rol', userInfo.role || ''); // Adjust based on your userInfo structure
+        }),
+        map((userInfo: any) => {
+          return {
+            token,
+            rol: userInfo.role, // Adjust based on your userInfo structure
+            userInfo
+          };
+        })
+      );
+    }),
       catchError(error => {
         console.error('Error en login:', error);
         return throwError(() => new Error(error.error || 'Error en el inicio de sesión'));
@@ -220,6 +226,11 @@ export class AuthService {
       map(userInfo => userInfo.id)
     );
   }
+
+  public getCurrentUserIdSynchronous(): number | null {
+  const id = localStorage.getItem('USER_ID');
+  return id ? +id : null;
+}
 
   getCurrentUserRole(): string | null {
     return localStorage.getItem('rol');

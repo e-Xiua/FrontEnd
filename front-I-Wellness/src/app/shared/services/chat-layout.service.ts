@@ -118,29 +118,26 @@ export class ChatLayoutService {
   // Initialize chat data from ChatService
   public initializeChatData(): void {
 
-    this.chatService.initializeMockData();
+  console.log('[ChatLayoutService] Inicializando datos del chat');
 
-    console.log('[ChatLayoutService] Inicializando datos del chat');
+  // Cargar conversaciones reales
+  this.chatService.loadInitialConversations().subscribe({
+    next: () => console.log('[ChatLayoutService] Conversaciones cargadas correctamente'),
+    error: err => console.error('[ChatLayoutService] Error cargando conversaciones:', err)
+  });
 
-    // Suscribirse al estado del ChatService para obtener providers y conversaciones
-    this.chatService.chatState$.subscribe(chatState => {
-      console.log('[ChatLayoutService] Estado del chat actualizado:', chatState);
+  // Suscripción al estado del ChatService (mantener esta parte)
+  this.chatService.chatState$.subscribe(chatState => {
+    console.log('[ChatLayoutService] Estado del chat actualizado:', chatState);
 
-      // Actualizar providers
-      if (chatState.providers.length > 0) {
-        this.setProviders(chatState.providers);
-      }
+    if (chatState.conversations.length > 0) {
+      this.setConversations(chatState.conversations);
+    }
 
-      // Actualizar conversaciones
-      if (chatState.conversations.length > 0) {
-        this.setConversations(chatState.conversations);
-      }
-
-      // Actualizar estado de carga y errores
-      this.setLoading(chatState.isLoading);
-      this.setError(chatState.error);
-    });
-  }
+    this.setLoading(chatState.isLoading);
+    this.setError(chatState.error);
+  });
+}
 
   // Method to refresh data from ChatService
   public refreshChatData(): void {

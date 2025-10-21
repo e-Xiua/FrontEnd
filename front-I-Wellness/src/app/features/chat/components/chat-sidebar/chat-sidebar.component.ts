@@ -9,13 +9,14 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { combineLatest, debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, debounceTime, distinctUntilChanged, of, Subject, takeUntil } from 'rxjs';
+import { catchError, finalize, map, startWith, switchMap, tap } from 'rxjs/operators';
 
+import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth/auth.service';
 import { UsuarioService } from '../../../../features/users/services/usuario.service';
 import { ChatProvider } from '../../../../shared/models/chat';
-import { usuarios } from '../../../../shared/models/usuarios';
-import { AnimationContext } from '../../../../shared/services/animation-strategy.service';
+import { AnimationContext, AnimationStrategyFactory } from '../../../../shared/services/animation-strategy.service';
 import { ChatLayoutService } from '../../../../shared/services/chat-layout.service';
 import { ProviderMapperService } from '../../../../shared/services/provider-mapper.service';
 import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
@@ -46,7 +47,10 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   private chatLayoutService = inject(ChatLayoutService);
   private providerMapperService = inject(ProviderMapperService);
   private usuarioService = inject(UsuarioService);
+  private router = inject(Router);
+  private animationFactory = inject(AnimationStrategyFactory);
   private animationContext = inject(AnimationContext);
+  private authService = inject(AuthService);
 
   // State observables
   layoutState$ = this.chatLayoutService.state$;
@@ -90,7 +94,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupAnimations();
     this.setupFilters();
-    this.loadProviders();
+    this.loadContacts();
   }
 
   ngOnDestroy(): void {
@@ -99,10 +103,9 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   }
 
   private setupAnimations(): void {
-    // Configurar estrategia de animación para las tarjetas
-    // Simplificamos por ahora sin usar factory
-    // const strategy = this.animationFactory.createStrategy('slide');
-    // this.animationContext.setStrategy(strategy);
+
+    const strategy = this.animationFactory.createStrategy('slide');
+    this.animationContext.setStrategy(strategy);
   }
 
   private setupFilters(): void {
@@ -122,58 +125,61 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async loadProviders(): Promise<void> {
-    // Evitar cargas múltiples simultáneas
-    if (this.isLoading) {
-      console.log('ChatSidebar: Carga de proveedores ya en progreso');
-      return;
-    }
+  private loadContacts(): void {
+    if (this.isLoading) return;
 
     this.isLoading = true;
     this.error = null;
+    console.log('ChatSidebar: Iniciando carga de contactos con RxJS');
 
-    console.log('ChatSidebar: Iniciando carga de proveedores');
-
-    try {
-      // Obtener proveedores del servicio
-      const usuarios = await this.usuarioService.obtenerProveedores().toPromise();
-      console.log('ChatSidebar: Proveedores obtenidos:', usuarios?.length || 0);
-
-      if (usuarios && usuarios.length > 0) {
-        // Mapear usuarios a ChatProvider
-        const mappedProviders = usuarios.map((usuario: usuarios) =>
-          this.providerMapperService.mapUsuarioToChatProvider(usuario)
+    this.authService.getCurrentUserId().pipe(
+      // 1. Una vez que tenemos el ID del usuario, cambiamos al siguiente observable.
+      switchMap(currentUserId => {
+        if (!currentUserId) {
+          // Si no hay ID, lanzamos un error para que lo capture el catchError.
+          throw new Error('No se pudo obtener el ID del usuario autenticado.');
+        }
+        // 2. Usamos el ID para obtener la lista de contactos.
+        return this.usuarioService.getContacts(currentUserId);
+      }),
+      // 3. (Opcional pero recomendado) Usamos tap para efectos secundarios como logging.
+      tap(contacts => console.log('ChatSidebar: Contactos obtenidos:', contacts?.length || 0)),
+      // 4. Manejamos cualquier error que ocurra en la cadena de observables.
+      catchError(error => {
+        console.error('ChatSidebar: Error loading contacts:', error);
+        this.error = 'Error al cargar tus contactos. Intenta nuevamente.';
+        // Devolvemos un observable con una lista vacía para que el flujo no se rompa.
+        return of([]);
+      }),
+      // 5. Este bloque se ejecuta siempre, al final, sin importar si hubo éxito o error.
+      finalize(() => {
+        this.isLoading = false;
+        console.log('ChatSidebar: Carga de contactos finalizada');
+      })
+    ).subscribe(contacts => {
+      // 6. El bloque de subscribe ahora solo se encarga de procesar el resultado final.
+      if (contacts && contacts.length > 0) {
+        const mappedProviders = contacts.map((contact: any) =>
+          this.providerMapperService.mapUsuarioToChatProvider(contact)
         );
 
         this.allProviders = mappedProviders;
-        console.log('ChatSidebar: Proveedores mapeados:', mappedProviders.length);
+        console.log('ChatSidebar: Contactos mapeados:', mappedProviders.length);
 
-        // Aplicar filtros iniciales solo si no hay filtros activos
-        const currentSearch = this.searchControl.value || '';
-        const currentSort = this.sortControl.value || 'name';
-        const currentFilter = this.filterControl.value || 'all';
-
-        this.applyFilters(currentSearch, currentSort, currentFilter);
-
-        console.log('ChatSidebar: Filtros aplicados, proveedores filtrados:', this.filteredProviders.length);
+        this.applyFilters(
+          this.searchControl.value || '',
+          this.sortControl.value || 'name',
+          this.filterControl.value || 'all'
+        );
       } else {
-        console.warn('ChatSidebar: No se encontraron proveedores');
+        // Esto se ejecutará si no hay contactos o si hubo un error (gracias a catchError).
+        console.warn('ChatSidebar: No se encontraron contactos o hubo un error en la carga.');
         this.allProviders = [];
         this.filteredProviders = [];
         this.paginatedProviders = [];
         this.totalProviders = 0;
       }
-    } catch (error) {
-      console.error('ChatSidebar: Error loading providers:', error);
-      this.error = 'Error al cargar proveedores. Intenta nuevamente.';
-      this.allProviders = [];
-      this.filteredProviders = [];
-      this.paginatedProviders = [];
-      this.totalProviders = 0;
-    } finally {
-      this.isLoading = false;
-      console.log('ChatSidebar: Carga de proveedores finalizada');
-    }
+    });
   }
 
   private applyFilters(search: string, sort: string, filter: string): void {
@@ -267,8 +273,8 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
   onProviderProfile(provider: ChatProvider): void {
     // Navegar al perfil del proveedor
-    // Implementar navegación según la arquitectura existente
     console.log('Navigate to provider profile:', provider);
+    this.router.navigate(['/proveedor/ver-perfil/', provider.id]);
   }
 
   onToggleSidebar(): void {
@@ -287,7 +293,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     }
 
     console.log('ChatSidebar: Iniciando refresh manual de proveedores');
-    this.loadProviders();
+    this.loadContacts();
   }
 
   getAnimationClass(index: number): string {

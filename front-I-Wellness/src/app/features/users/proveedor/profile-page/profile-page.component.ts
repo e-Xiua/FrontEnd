@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 
+import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ServicioService } from '../../../servicios/services/servicio.service';
 
 interface PlaceData {
@@ -51,6 +52,9 @@ export class ProfilePageComponent implements OnInit {
   reviews: Review[] = [];
   isLoading: boolean = true;
   error: string | null = null;
+  isAddingContact = false;
+  isContact = false;
+  currentUserId: number | null = null;
 
   // Mock reviews data (since we don't have this in the backend yet)
   mockReviews: Review[] = [
@@ -90,10 +94,16 @@ export class ProfilePageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private usuarioService: UsuarioService,
-    private servicioService: ServicioService
+    private servicioService: ServicioService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+
+    this.authService.getCurrentUserId().subscribe(id => {
+      this.currentUserId = id;
+    });
+
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id) {
@@ -102,11 +112,31 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
+    addContact(): void {
+    if (!this.currentUserId || !this.provider) {
+      console.error('No se puede añadir contacto: falta el ID del usuario actual o del proveedor.');
+      return;
+    }
+
+    this.isAddingContact = true;
+    this.usuarioService.addContact(this.currentUserId, this.provider.id).subscribe({
+      next: () => {
+        console.log('Contacto añadido con éxito');
+        this.isContact = true; // Marcar como contacto
+        this.isAddingContact = false;
+      },
+      error: (err) => {
+        console.error('Error al añadir contacto:', err);
+        this.isAddingContact = false;
+      }
+    });
+  }
+
   private loadProviderData(id: number): void {
     this.isLoading = true;
     this.error = null;
 
-    this.usuarioService.obtenerPorId(id).subscribe({
+    this.usuarioService.obtenerPorIdPublico(id).subscribe({
       next: (userData) => {
         console.log('Datos del usuario obtenidos:', userData);
         this.provider = this.mapUserToPlaceData(userData);

@@ -96,7 +96,7 @@ export const routes: Routes = [
             { path: 'rutas', component: MapaEmpresasComponent },
             { path: 'ruta/:id', component: RutaDetalleComponent },
             { path: 'servicio/:id', component: InfoServicioComponent },
-            { path: 'perfil-otro/:id', component: ProfilePageComponent },
+            { path: 'ver-perfil/:id', component: ProfilePageComponent },
         ]
     },
 

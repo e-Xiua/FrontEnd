@@ -200,20 +200,34 @@ export class HeaderService {
   }
 
   private navigateToProfile(role: string): void {
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      switch (role) {
-        case 'admin':
-          this.router.navigate(['/admin/perfil', userId]);
-          break;
-        case 'proveedor':
-          this.router.navigate(['/proveedor/perfil', userId]);
-          break;
-        case 'turista':
-          this.router.navigate(['/turista/perfil', userId]);
-          break;
+
+    this.authService.getCurrentUserId().subscribe({
+
+      next: (userId) => {
+
+        console.log('Navegando al perfil del usuario con ID:', userId);
+
+        if (userId) {
+
+          switch (role) {
+            case 'admin':
+              this.router.navigate(['/admin/perfil', userId]);
+              break;
+            case 'proveedor':
+              this.router.navigate(['/proveedor/perfil', userId]);
+              break;
+            case 'turista':
+              this.router.navigate(['/turista/perfil', userId]);
+              break;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('No se pudo obtener el ID del usuario para navegar al perfil:', err);
+
+        this.router.navigate(['/home']);
       }
-    }
+    });
   }
 
   private logout(): void {

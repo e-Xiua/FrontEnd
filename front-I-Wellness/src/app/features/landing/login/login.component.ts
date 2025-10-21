@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { ConversationApiService } from '../../../shared/services/conversation-api.service';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,8 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private conversationApi: ConversationApiService
   ) {}
 
   validateEmail() {
@@ -56,6 +58,9 @@ export class LoginComponent {
 
     this.authService.login(this.correo, this.password).subscribe({
       next: () => {
+
+        const userID = this.authService.getCurrentUserIdSynchronous();
+        if(userID != null) this.conversationApi.getConversationSummaries(userID).subscribe();
         // Login exitoso, ahora obtenemos el rol del usuario
         this.authService.getUsuarioActual().subscribe({
           next: (rol: string) => {

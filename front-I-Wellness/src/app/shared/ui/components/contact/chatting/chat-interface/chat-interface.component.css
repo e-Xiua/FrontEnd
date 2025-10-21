@@ -56,6 +56,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 400px; /* Altura mínima para asegurar visibilidad */
 }
 
 /* Header del Chat */
@@ -140,9 +141,75 @@
 .messages-area {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px;
   background-color: var(--mat-background-background, #fafafa);
   position: relative;
+  min-height: 200px; /* Altura mínima para el área de mensajes */
+  max-height: calc(100vh - 300px); /* Altura máxima para forzar scroll */
+  scroll-behavior: smooth;
+}
+
+/* Mejoras para el scroll */
+.messages-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-area::-webkit-scrollbar-track {
+  background: var(--mat-background-card, #ffffff);
+  border-radius: 4px;
+}
+
+.messages-area::-webkit-scrollbar-thumb {
+  background: var(--mat-primary-300, #90caf9);
+  border-radius: 4px;
+}
+
+.messages-area::-webkit-scrollbar-thumb:hover {
+  background: var(--mat-primary-500, #2196f3);
+}
+
+/* Botón flotante para scroll to bottom */
+.scroll-to-bottom-button {
+  position: absolute;
+  bottom: 80px;
+  right: 24px;
+  z-index: 100;
+  background-color: var(--mat-primary-color, #1976d2);
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.scroll-to-bottom-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-bottom-button.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+.loading-conversation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--mat-foreground-secondary-text, rgba(0, 0, 0, 0.6));
+  min-height: 150px;
+}
+
+.loading-conversation .loading-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+  animation: rotate 1.5s linear infinite;
 }
 
 .messages-container {
@@ -150,6 +217,7 @@
   flex-direction: column;
   gap: 8px;
   padding-bottom: 16px;
+  min-height: 150px; /* Asegurar altura mínima incluso sin mensajes */
 }
 
 .message-wrapper {
@@ -164,6 +232,7 @@
   padding: 48px 24px;
   text-align: center;
   color: var(--mat-foreground-secondary-text, rgba(0, 0, 0, 0.6));
+  min-height: 150px; /* Altura mínima para el estado vacío */
 }
 
 .empty-icon {
@@ -213,6 +282,48 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Animaciones para mensajes */
+.message-wrapper {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animación de escritura */
+@keyframes typingDots {
+  0%, 20% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* Animación de pulso para nuevo mensaje */
+@keyframes newMessagePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(25, 118, 210, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0);
   }
 }
 

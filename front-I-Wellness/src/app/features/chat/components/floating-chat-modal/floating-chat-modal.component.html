@@ -113,25 +113,21 @@
 
         <div class="tab-content messages-tab" [@tabSlide]>
           <!-- Selected Provider Chat -->
-          <div *ngIf="hasSelectedProvider && selectedProvider" class="selected-chat">
+          <div *ngIf="hasSelectedProvider && activeConversation" class="selected-chat">
             <div class="chat-header">
               <img
-                title="Proveedor"
-                [src]="selectedProvider.photo"
-                [alt]="selectedProvider.contactName"
+                title="Participante"
+                [src]="activeConversation.participant?.urlFotoPerfil || activeConversation.participant2?.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'"
+                [alt]="activeConversation.participant?.nombre || activeConversation.participant2?.nombre || 'Usuario'"
                 class="provider-avatar">
               <div class="provider-info">
-                <h4>{{ selectedProvider.contactName }}</h4>
-                <p>{{ selectedProvider.nombre }}</p>
+                <h4>{{ activeConversation.participant?.nombre || activeConversation.participant2?.nombre || 'Usuario' }}</h4>
+                <p>{{ activeConversation.participant?.correo || activeConversation.participant2?.correo || '' }}</p>
               </div>
             </div>
 
-            <!-- Chat Interface will be integrated here -->
-            <div class="chat-placeholder">
-              <mat-icon class="chat-icon">chat_bubble_outline</mat-icon>
-              <app-chat-interface>
-              </app-chat-interface>
-            </div>
+            <!-- Chat Interface -->
+            <app-chat-interface></app-chat-interface>
           </div>
 
           <!-- Conversations List -->
@@ -157,42 +153,20 @@
                 class="conversation-item"
                 (click)="onConversationSelect(conversation)"
                 aria-label="Seleccionar conversación">
-<button
-                *ngFor="let conversation of (paginatedMessages$ | async)?.items; trackBy: trackByConversation"
-                type="button"
-                class="conversation-item"
-                (click)="onConversationSelect(conversation)"
-                aria-label="Seleccionar conversación">
 
                 <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=provider{{ conversation.providerId }}"
-                  alt="Proveedor"
+                  [src]="conversation.participant?.urlFotoPerfil || conversation.participant2?.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + conversation.providerId"
+                  [alt]="conversation.participant?.nombre || conversation.participant2?.nombre || 'Proveedor'"
                   class="conversation-avatar">
 
                 <div class="conversation-info">
-                  <h4 class="conversation-name">Proveedor #{{ conversation.providerId }}</h4>
+                  <h4 class="conversation-name">{{ conversation.participant?.nombre || conversation.participant2?.nombre || 'Proveedor #' + conversation.providerId }}</h4>
                   <p class="last-message">{{ conversation.lastMessage?.content || 'Sin mensajes' }}</p>
                 </div>
 
                 <div class="conversation-meta">
                   <span class="timestamp">{{ conversation.lastMessage?.timestamp | date:'short' }}</span>
-                  <span *ngIf="conversation.unreadCount > 0" class="unread-count">{{ conversation.unreadCount }}</span>
-                </div>
-              </button>
-
-                <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=provider{{ conversation.providerId }}"
-                  alt="Proveedor"
-                  class="conversation-avatar">
-
-                <div class="conversation-info">
-                  <h4 class="conversation-name">Proveedor #{{ conversation.providerId }}</h4>
-                  <p class="last-message">{{ conversation.lastMessage?.content || 'Sin mensajes' }}</p>
-                </div>
-
-                <div class="conversation-meta">
-                  <span class="timestamp">{{ conversation.lastMessage?.timestamp | date:'short' }}</span>
-                  <span *ngIf="conversation.unreadCount > 0" class="unread-count">{{ conversation.unreadCount }}</span>
+                  <span *ngIf="(conversation?.unreadCount || 0) > 0" class="unread-count">{{ conversation.unreadCount }}</span>
                 </div>
               </button>
             </div>

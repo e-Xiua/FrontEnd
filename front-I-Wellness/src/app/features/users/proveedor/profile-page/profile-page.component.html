@@ -81,6 +81,17 @@
                   <span class="ml-2 font-semibold">{{ provider.rating }}</span>
                   <span class="text-muted-foreground">({{ provider.totalReviews }} reseñas)</span>
                 </div>
+                <div *ngIf="currentUserId && provider && currentUserId !== provider.id" class="my-4">
+                <button
+                  class="btn btn-outline btn-primary gap-2"
+                  (click)="addContact()"
+                  [disabled]="isAddingContact || isContact">
+                  <i *ngIf="!isAddingContact && !isContact" class="fas fa-user-plus w-4 h-4"></i>
+                  <span *ngIf="isAddingContact" class="loading loading-spinner"></span>
+                  <span *ngIf="!isContact">Seguir</span>
+                  <span *ngIf="isContact">Siguiendo</span>
+                </button>
+              </div>
               </div>
 
               <!-- Categories as Bubble Badges -->

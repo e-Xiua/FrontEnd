@@ -1,22 +1,49 @@
 
+export interface UsuarioDTO {
+    id: number;
+    nombre: string;
+    apellido: string;
+    correo: string;
+    urlFotoPerfil: string;
+}
+
 export interface Message {
-  id: string;
-  senderId: number; // 0 para usuario actual, id del provider para mensajes del provider
-  content: string;
-  timestamp: Date;
-  type: 'text' | 'image' | 'file';
-  status: 'sending' | 'sent' | 'delivered' | 'read';
+  id: number;
+    conversationId: number;
+    senderId: number;
+    receiverId: number;
+    content: string;
+    isRead: boolean;
+    readAt: string;
+    sentAt: string;
+    timestamp?: Date; // For frontend usage
+    type?: 'text' | 'image' | 'file'; // For frontend usage
+    status?: 'sending' | 'sent' | 'delivered' | 'read'; // For frontend usage
 }
 
 export interface Conversation {
-  id: string;
-  providerId: number;
-  messages: Message[];
-  lastMessage?: Message;
-  unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    participant1: UsuarioDTO;
+    participant2: UsuarioDTO;
+    messages: Message[];
+    providerId?: number; // For service mapping
+    participant?: UsuarioDTO; // For service mapping
+    lastMessage?: Message; // For service mapping
+    unreadCount?: number;
 }
+
+export interface ConversationSummary {
+    id: number;
+    lastMessageAt: string;
+    otherParticipant: UsuarioDTO;
+    lastMessage: Message;
+    unreadCount: number;
+     // Add for service compatibility:
+    participant?: UsuarioDTO; // Alias for otherParticipant
+}
+
 
 export interface ChatService {
   id: number;
