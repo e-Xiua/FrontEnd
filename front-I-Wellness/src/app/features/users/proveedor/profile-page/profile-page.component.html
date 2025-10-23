@@ -72,12 +72,6 @@
 
               <div class="flex items-center gap-4 mb-4">
                 <div class="flex items-center gap-1">
-                  <i
-                    *ngFor="let filled of getStarArray(provider.rating)"
-                    class="fas fa-star w-5 h-5"
-                    [class.text-amber-400]="filled"
-                    [class.text-muted-foreground]="!filled">
-                  </i>
                   <span class="ml-2 font-semibold">{{ provider.rating }}</span>
                   <span class="text-muted-foreground">({{ provider.totalReviews }} reseñas)</span>
                 </div>
@@ -210,49 +204,16 @@
       </div>
 
       <!-- Reviews Section -->
-      <div *ngIf="reviews && reviews.length > 0" class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-4">
-        <h2 class="text-2xl font-bold text-foreground mb-6">
-          Reseñas ({{ reviews.length }})
-        </h2>
-        <div class="space-y-6">
-          <div *ngFor="let review of reviews" class="pb-6 border-b border-border last:border-0 last:pb-0">
-            <div class="flex gap-4">
-              <img
-                title="Avatar de {{ review.author }}"
-                [src]="review.avatar"
-                [alt]="review.author"
-                class="w-12 h-12 rounded-full object-cover">
+      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-4">
 
-              <div class="flex-1">
-                <div class="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 class="font-semibold text-foreground">{{ review.author }}</h4>
-                    <p class="text-xs text-muted-foreground">{{ formatDate(review.date) }}</p>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    <i
-                      *ngFor="let filled of getStarArray(review.rating)"
-                      class="fas fa-star w-4 h-4"
-                      [class.text-amber-400]="filled"
-                      [class.text-muted-foreground]="!filled">
-                    </i>
-                  </div>
-                </div>
-                <p class="text-muted-foreground leading-relaxed mb-3">{{ review.comment }}</p>
-                <div class="flex items-center gap-4 text-sm">
-                  <button class="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-                    <i class="fas fa-thumbs-up w-4 h-4"></i>
-                    <span>{{ review.helpful }}</span>
-                  </button>
-                  <button class="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors">
-                    <i class="fas fa-thumbs-down w-4 h-4"></i>
-                    <span>{{ review.notHelpful }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <app-review-form
+              [entityType]="'proveedor'"
+              [entityId]="provider.id">
+            </app-review-form>
+        <app-review-display
+                [entityType]="'proveedor'"
+                [entityId]="provider.id">
+        </app-review-display>
       </div>
 
       <!-- Placeholder for Future Routes -->

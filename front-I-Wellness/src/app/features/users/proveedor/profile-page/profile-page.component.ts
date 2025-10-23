@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
+import { ReviewFormComponent } from "../../../../shared/ui/components/review-form/review-form.component";
 import { ServicioService } from '../../../servicios/services/servicio.service';
 
 interface PlaceData {
@@ -41,8 +43,10 @@ interface Review {
   selector: 'app-profile-page',
   standalone: true,
   imports: [
-    CommonModule
-  ],
+    CommonModule,
+    ReviewDisplayComponent,
+    ReviewFormComponent
+],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css'
 })
@@ -190,22 +194,7 @@ export class ProfilePageComponent implements OnInit {
     };
   }
 
-  getStarArray(rating: number): boolean[] {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(i <= rating);
-    }
-    return stars;
-  }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
 
   goBack(): void {
     this.router.navigate(['/proveedor/home']);

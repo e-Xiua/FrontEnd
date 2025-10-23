@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, S
 import { FormsModule } from '@angular/forms';
 import { CarouselItemDirective } from '../carousel/carousel-item.directive';
 import { CarouselComponent } from '../carousel/carousel.component';
+import { ReviewDisplayComponent } from '../review-display/review-display.component';
+import { ReviewFormComponent, ReviewSubmission } from '../review-form/review-form.component';
 import { ServiceCardComponent } from '../service-card/service-card.component';
 
 interface PlaceData {
@@ -38,7 +40,15 @@ interface Review {
 
 @Component({
   selector: 'app-provider-card',
-  imports: [ServiceCardComponent, CarouselComponent, CarouselItemDirective, FormsModule, CommonModule],
+  imports: [
+    ServiceCardComponent,
+    CarouselComponent,
+    CarouselItemDirective,
+    FormsModule,
+    CommonModule,
+    ReviewDisplayComponent,
+    ReviewFormComponent
+  ],
   templateUrl: './provider-card.component.html',
   styleUrl: './provider-card.component.css',
   standalone: true
@@ -48,10 +58,7 @@ export class ProviderCardComponent implements OnChanges {
   @Input() reviews: Review[] = [];
   @Input() services: any[] = [];
 
-  userRating: number = 0;
-  userReview: string = '';
-
-  @Output() submitReview = new EventEmitter<{ rating: number, review: string }>();
+  @Output() submitReview = new EventEmitter<ReviewSubmission>();
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -62,29 +69,9 @@ export class ProviderCardComponent implements OnChanges {
     }
   }
 
-  handleSubmitReview(): void {
-    if (this.userRating > 0 && this.userReview.trim()) {
-      this.submitReview.emit({
-        rating: this.userRating,
-        review: this.userReview
-      });
-      this.userRating = 0;
-      this.userReview = '';
-      this.cdr.markForCheck(); // Ensure view updates after resetting
-    }
-  }
-
-  setUserRating(rating: number): void {
-    this.userRating = rating;
-    this.cdr.markForCheck(); // Ensure view updates after rating change
-  }
-
-  getStarArray(rating: number): boolean[] {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(i <= rating);
-    }
-    return stars;
+  handleSubmitReview(reviewData: ReviewSubmission): void {
+    this.submitReview.emit(reviewData);
+    this.cdr.markForCheck(); // Ensure view updates after review submission
   }
 
   ngOnInit() {
