@@ -48,6 +48,10 @@ export class HomeTuristaComponent {
   }
 
 ngOnInit(): void {
+  // Initialize scroll states for known containers
+  this.scrollStates['para-ti'] = { canScrollLeft: false, canScrollRight: false };
+  this.scrollStates['busqueda'] = { canScrollLeft: false, canScrollRight: false };
+  
   // Ejecutar las peticiones de manera concurrente
   forkJoin({
     servicios: this.servicioService.obtenerTodos(),
@@ -70,9 +74,11 @@ ngOnInit(): void {
       // Esperar a que el DOM se actualice
       setTimeout(() => {
         this.onScroll('para-ti');
-        this.serviciosAgrupadosPorPreferencia.forEach((_: any, i: number) =>
-          this.onScroll('grupo-' + i)
-        );
+        this.serviciosAgrupadosPorPreferencia.forEach((_: any, i: number) => {
+          // Initialize scroll state for each group
+          this.scrollStates['grupo-' + i] = { canScrollLeft: false, canScrollRight: false };
+          this.onScroll('grupo-' + i);
+        });
       }, 500);
     },
     error: (err) => {
@@ -178,6 +184,14 @@ filtrarServiciosPorPreferenciasUsuario(): void {
         canScrollLeft: container.scrollLeft > 0,
         canScrollRight: container.scrollLeft + container.offsetWidth < container.scrollWidth
       };
+    } else {
+      // Initialize with default values if container not found
+      if (!this.scrollStates[containerId]) {
+        this.scrollStates[containerId] = {
+          canScrollLeft: false,
+          canScrollRight: false
+        };
+      }
     }
   }
 
