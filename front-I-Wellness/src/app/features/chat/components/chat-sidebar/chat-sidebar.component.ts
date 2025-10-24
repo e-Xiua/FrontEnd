@@ -18,6 +18,7 @@ import { UsuarioService } from '../../../../features/users/services/usuario.serv
 import { ChatProvider } from '../../../../shared/models/chat';
 import { AnimationContext, AnimationStrategyFactory } from '../../../../shared/services/animation-strategy.service';
 import { ChatLayoutService } from '../../../../shared/services/chat-layout.service';
+import { ChatRealtimeService } from '../../../../shared/services/chat-realtime.service';
 import { ProviderMapperService } from '../../../../shared/services/provider-mapper.service';
 import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
 
@@ -45,6 +46,7 @@ import { ContactCardComponent } from '../../../../shared/ui/components/contact/c
 export class ChatSidebarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private chatLayoutService = inject(ChatLayoutService);
+  private chatRealtimeService = inject(ChatRealtimeService);
   private providerMapperService = inject(ProviderMapperService);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
@@ -55,6 +57,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   // State observables
   layoutState$ = this.chatLayoutService.state$;
   isVisible$ = this.chatLayoutService.state$.pipe(map(state => state.sidebarVisible));
+  realtimeState$ = this.chatRealtimeService.state$;
 
   // Provider data
   allProviders: ChatProvider[] = [];
@@ -95,11 +98,13 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     this.setupAnimations();
     this.setupFilters();
     this.loadContacts();
+    this.setupRealtimeUpdates();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.chatRealtimeService.disconnect();
   }
 
   private setupAnimations(): void {
@@ -293,7 +298,82 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     }
 
     console.log('ChatSidebar: Iniciando refresh manual de proveedores');
-    this.loadContacts();
+
+    // Forzar actualización en tiempo real
+    this.chatRealtimeService.forceRefresh().subscribe({
+      next: () => {
+        console.log('ChatSidebar: Actualización en tiempo real completada');
+        // Recargar contactos locales
+        this.loadContacts();
+      },
+      error: (err) => {
+        console.error('ChatSidebar: Error en refresh en tiempo real:', err);
+        // Fallback a carga normal
+        this.loadContacts();
+      }
+    });
+  }
+
+  /**
+   * Configura actualizaciones en tiempo real
+   * Similar a como review-display carga datos automáticamente
+   */
+  private setupRealtimeUpdates(): void {
+    console.log('ChatSidebar: Configurando actualizaciones en tiempo real');
+
+    // Verificar que hay usuario autenticado antes de conectar
+    const userId = this.authService.getCurrentUserIdSynchronous();
+    if (!userId) {
+      console.warn('ChatSidebar: No hay usuario autenticado, saltando setup de tiempo real');
+      return;
+    }
+
+    // Inicializar ChatLayoutService (lazy initialization)
+    this.chatLayoutService.initializeChatData();
+
+    // Conectar al servicio de tiempo real (ahora con usuario autenticado)
+    this.chatRealtimeService.connect();
+
+    // Escuchar nuevos contactos (cuando se agregue un contacto)
+    this.chatRealtimeService.newContacts$.pipe(
+      takeUntil(this.destroy$),
+      tap(newContacts => {
+        if (newContacts.length > 0) {
+          console.log('ChatSidebar: 🔔 Nuevos contactos detectados:', newContacts.length);
+          // Recargar contactos automáticamente
+          this.loadContacts();
+        }
+      })
+    ).subscribe();
+
+    // Escuchar cambios en conversaciones (puede indicar nuevo contacto activo)
+    this.chatRealtimeService.newMessages$.pipe(
+      takeUntil(this.destroy$),
+      tap(conversations => {
+        if (conversations.length > 0) {
+          console.log('ChatSidebar: 🔔 Nuevas conversaciones detectadas:', conversations.length);
+          // Opcional: Actualizar contactos si hay conversaciones nuevas
+          // (puede indicar que alguien te envió mensaje por primera vez)
+          this.checkForNewContacts(conversations);
+        }
+      })
+    ).subscribe();
+  }
+
+  /**
+   * Verifica si hay nuevos contactos basado en conversaciones
+   */
+  private checkForNewContacts(conversations: any[]): void {
+    const currentContactIds = new Set(this.allProviders.map(p => p.id));
+
+    conversations.forEach(conv => {
+      const otherParticipant = conv.otherParticipant || conv.participant;
+      if (otherParticipant && !currentContactIds.has(otherParticipant.id)) {
+        console.log('ChatSidebar: Nuevo contacto detectado de conversación:', otherParticipant);
+        // Recargar contactos para incluir el nuevo
+        this.loadContacts();
+      }
+    });
   }
 
   getAnimationClass(index: number): string {

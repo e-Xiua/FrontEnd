@@ -12,6 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ChatProvider, ChatState, Conversation } from '../../../../shared/models/chat';
 import { AnimationContext, AnimationStrategyFactory } from '../../../../shared/services/animation-strategy.service';
 import { ChatLayoutService, ModalTab } from '../../../../shared/services/chat-layout.service';
+import { ChatRealtimeService } from '../../../../shared/services/chat-realtime.service';
 import { ChatService } from '../../../../shared/services/chat.service';
 import { ChatInterfaceComponent } from "../../../../shared/ui/components/contact/chatting/chat-interface/chat-interface.component";
 import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
@@ -71,12 +72,14 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private chatLayoutService = inject(ChatLayoutService);
   private chatService = inject(ChatService);
+  private chatRealtimeService = inject(ChatRealtimeService);
   private animationFactory = inject(AnimationStrategyFactory);
   private animationContext = inject(AnimationContext);
 
   // State observables
   layoutState$ = this.chatLayoutService.state$;
   chatState$ = this.chatService.chatState$;
+  realtimeState$ = this.chatRealtimeService.state$;
   public selectedTabIndex: number = 0;
   paginatedMessages$ = this.chatLayoutService.paginatedMessages$;
   paginatedContacts$ = this.chatLayoutService.paginatedContacts$;
@@ -101,11 +104,13 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     this.setupAnimations();
     this.subscribeToLayoutState();
     this.subscribeToChatState();
+    this.setupRealtimeUpdates();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.chatRealtimeService.disconnect();
   }
 
   private setupAnimations(): void {
@@ -299,5 +304,63 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
 
   getAnimationClass(): string {
     return this.animationContext.applyAnimation();
+  }
+
+  /**
+   * Configura actualizaciones en tiempo real para mensajes
+   * Similar al patrón de smart components de reviews
+   */
+  private setupRealtimeUpdates(): void {
+    console.log('FloatingChatModal: Configurando actualizaciones en tiempo real');
+
+    // Ya conectado por el ChatSidebarComponent, solo escuchar eventos
+
+    // Escuchar nuevos mensajes
+    this.chatRealtimeService.newMessages$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(conversations => {
+      if (conversations.length > 0) {
+        console.log('FloatingChatModal: 🔔 Nuevos mensajes detectados:', conversations.length);
+
+        // Actualizar conversaciones automáticamente
+        this.chatService.loadInitialConversations().subscribe({
+          next: () => {
+            console.log('FloatingChatModal: Conversaciones actualizadas automáticamente');
+
+            // Si el modal está en el tab de mensajes, mostrar notificación visual
+            if (this.activeTab === 'messages') {
+              this.showNewMessageIndicator();
+            }
+          },
+          error: (err) => console.error('FloatingChatModal: Error actualizando conversaciones:', err)
+        });
+      }
+    });
+
+    // Escuchar estado de conexión
+    this.chatRealtimeService.state$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(state => {
+      if (state.error) {
+        console.warn('FloatingChatModal: Error en tiempo real:', state.error);
+      }
+
+      if (!state.isConnected && state.error) {
+        // Mostrar indicador de desconexión si es necesario
+        console.error('FloatingChatModal: Desconectado del servicio en tiempo real');
+      }
+    });
+  }
+
+  /**
+   * Muestra un indicador visual de nuevo mensaje
+   * (puede ser un badge, notificación, etc.)
+   */
+  private showNewMessageIndicator(): void {
+    // TODO: Implementar indicador visual
+    console.log('FloatingChatModal: 💬 Nuevos mensajes disponibles');
+
+    // Ejemplo: Podría emitir un evento al header para mostrar badge
+    // o simplemente hacer scroll al último mensaje automáticamente
   }
 }

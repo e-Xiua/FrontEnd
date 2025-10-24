@@ -111,33 +111,43 @@ export class ChatLayoutService {
     map(([state, pagination]) => this.paginateConversations(state.activeConversations, pagination))
   );
 
+  private isInitialized = false;
+
   constructor(private chatService: ChatService) {
-    this.initializeChatData();
+    // NO auto-inicializar aquí para evitar dependencia circular
+    console.log('[ChatLayoutService] Servicio creado (sin auto-inicialización)');
   }
 
   // Initialize chat data from ChatService
   public initializeChatData(): void {
-
-  console.log('[ChatLayoutService] Inicializando datos del chat');
-
-  // Cargar conversaciones reales
-  this.chatService.loadInitialConversations().subscribe({
-    next: () => console.log('[ChatLayoutService] Conversaciones cargadas correctamente'),
-    error: err => console.error('[ChatLayoutService] Error cargando conversaciones:', err)
-  });
-
-  // Suscripción al estado del ChatService (mantener esta parte)
-  this.chatService.chatState$.subscribe(chatState => {
-    console.log('[ChatLayoutService] Estado del chat actualizado:', chatState);
-
-    if (chatState.conversations.length > 0) {
-      this.setConversations(chatState.conversations);
+    if (this.isInitialized) {
+      console.log('[ChatLayoutService] Ya inicializado');
+      return;
     }
 
-    this.setLoading(chatState.isLoading);
-    this.setError(chatState.error);
-  });
-}
+    console.log('[ChatLayoutService] Inicializando datos del chat');
+
+    // Cargar conversaciones reales
+    this.chatService.loadInitialConversations().subscribe({
+      next: () => console.log('[ChatLayoutService] Conversaciones cargadas correctamente'),
+      error: err => console.error('[ChatLayoutService] Error cargando conversaciones:', err)
+    });
+
+    // Suscripción al estado del ChatService (mantener esta parte)
+    this.chatService.chatState$.subscribe(chatState => {
+      console.log('[ChatLayoutService] Estado del chat actualizado:', chatState);
+
+      if (chatState.conversations.length > 0) {
+        this.setConversations(chatState.conversations);
+      }
+
+      this.setLoading(chatState.isLoading);
+      this.setError(chatState.error);
+    });
+
+    this.isInitialized = true;
+    console.log('[ChatLayoutService] ✅ Inicialización completada');
+  }
 
   // Method to refresh data from ChatService
   public refreshChatData(): void {
@@ -151,6 +161,9 @@ export class ChatLayoutService {
 
   // Method to select a provider and start a conversation
   public selectProvider(providerId: number): void {
+    // Asegurar que está inicializado antes de usar
+    this.initializeChatData();
+
     console.log('[ChatLayoutService] Seleccionando proveedor:', providerId);
     this.chatService.selectProvider(providerId);
 
@@ -390,5 +403,24 @@ export class ChatLayoutService {
       isLoading: false,
       error: null
     });
+  }
+
+  /**
+   * Limpia todos los datos del chat (conversaciones, contactos, mensajes)
+   * Usado al cerrar sesión para prevenir que otro usuario vea datos del usuario anterior
+   */
+  clearAllData(): void {
+    console.log('[ChatLayoutService] 🧹 Limpiando todos los datos del chat...');
+
+    // 1. Limpiar estado del layout (UI)
+    this.reset();
+
+    // 2. Resetear flag de inicialización
+    this.isInitialized = false;
+
+    // 3. Limpiar estado del ChatService (datos y conexiones)
+    this.chatService.clearData();
+
+    console.log('[ChatLayoutService] ✅ Datos del chat limpiados completamente');
   }
 }

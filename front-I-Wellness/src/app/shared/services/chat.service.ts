@@ -4,14 +4,15 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { UsuarioService } from '../../features/users/services/usuario.service';
 import {
-    ChatProvider,
-    ChatState,
-    Conversation,
-    ConversationSummary,
-    Message,
-    SendMessageResponse,
-    UsuarioDTO
+  ChatProvider,
+  ChatState,
+  Conversation,
+  ConversationSummary,
+  Message,
+  SendMessageResponse,
+  UsuarioDTO
 } from '../models/chat';
+import { ChatRealtimeService } from './chat-realtime.service';
 import { ConversationApiService } from './conversation-api.service';
 
 @Injectable({
@@ -29,12 +30,17 @@ export class ChatService {
 
   public chatState$ = this.chatStateSubject.asObservable();
 
+  private isInitialized = false;
+
   constructor(
     private conversationApi: ConversationApiService,
     private authService: AuthService,
-    private userService: UsuarioService
+    private userService: UsuarioService,
+    private realtimeService: ChatRealtimeService
   ) {
-    this.initializeCurrentUser();
+    // NO auto-conectar aquí para evitar requests sin autenticación
+    // El chat se inicializará cuando el usuario lo necesite
+    console.log('[ChatService] Servicio creado (sin auto-conexión)');
   }
 
   private initializeCurrentUser(): void {
@@ -43,6 +49,124 @@ export class ChatService {
       ...this.currentState,
       currentUserId: currentUserId ?? this.currentState.currentUserId
     });
+  }
+
+  /**
+   * Inicializa el servicio de chat (lazy initialization)
+   * Solo se llama cuando hay un usuario autenticado
+   */
+  private initialize(): void {
+    if (this.isInitialized) {
+      console.log('[ChatService] Ya inicializado');
+      return;
+    }
+
+    // Verificar que hay usuario autenticado
+    const currentUserId = this.authService.getCurrentUserIdSynchronous();
+    if (!currentUserId) {
+      console.warn('[ChatService] No se puede inicializar sin usuario autenticado');
+      return;
+    }
+
+    console.log('[ChatService] Inicializando para usuario:', currentUserId);
+
+    // Actualizar userId en el estado
+    this.initializeCurrentUser();
+
+    // Configurar actualizaciones en tiempo real
+    this.setupRealtimeUpdates();
+
+    this.isInitialized = true;
+    console.log('[ChatService] ✅ Inicialización completada');
+  }
+
+  /**
+   * Configura las actualizaciones en tiempo real usando STOMP
+   * Escucha nuevos mensajes y actualiza el estado automáticamente
+   */
+  private setupRealtimeUpdates(): void {
+    // Conectar al servicio de tiempo real
+    this.realtimeService.connect();
+
+    // Suscribirse a nuevos mensajes
+    this.realtimeService.newMessages$.subscribe(summaries => {
+      if (summaries.length > 0) {
+        console.log('[ChatService] Nuevos mensajes recibidos vía STOMP:', summaries);
+        this.handleRealtimeMessages(summaries);
+      }
+    });
+
+    // Suscribirse al estado de conexión
+    this.realtimeService.state$.subscribe(state => {
+      console.log('[ChatService] Estado de conexión:', state.connectionType, 'Connected:', state.isConnected);
+    });
+  }
+
+  /**
+   * Maneja mensajes recibidos en tiempo real vía STOMP
+   */
+  private handleRealtimeMessages(summaries: ConversationSummary[]): void {
+    const { currentUserId } = this.currentState;
+    if (!currentUserId) return;
+
+    const updatedConversations = [...this.currentState.conversations];
+
+    summaries.forEach(summary => {
+      const existingIndex = updatedConversations.findIndex(c => c.id === summary.id);
+
+      if (existingIndex >= 0) {
+        // Actualizar conversación existente
+        const existingConv = updatedConversations[existingIndex];
+        const lastMessage = summary.lastMessage ? this.mapToMessage(summary.lastMessage) : null;
+
+        // Verificar si el mensaje ya existe en el array (evitar duplicados)
+        const messageExists = lastMessage && existingConv.messages.some(m =>
+          m.id === lastMessage.id ||
+          (m.content === lastMessage.content &&
+           Math.abs(new Date(m.sentAt).getTime() - new Date(lastMessage.sentAt).getTime()) < 1000)
+        );
+
+        updatedConversations[existingIndex] = {
+          ...existingConv,
+          lastMessage: lastMessage ?? undefined,
+          unreadCount: summary.unreadCount,
+          updatedAt: summary.lastMessageAt
+        };
+
+        // Si el mensaje es nuevo y la conversación está seleccionada, agregarlo a los mensajes
+        if (lastMessage && this.currentState.selectedProviderId === existingConv.providerId && !messageExists) {
+          // Reemplazar mensaje temporal si existe (enviado vía STOMP)
+          const tempMessageIndex = existingConv.messages.findIndex(m =>
+            (m.status === 'sending' || m.status === 'delivered') &&
+            m.content === lastMessage.content &&
+            m.senderId === lastMessage.senderId
+          );
+
+          if (tempMessageIndex >= 0) {
+            // Reemplazar mensaje temporal con el mensaje real del servidor
+            console.log('[ChatService] 🔄 Reemplazando mensaje temporal ID:', existingConv.messages[tempMessageIndex].id, 'con mensaje del servidor ID:', lastMessage.id);
+            updatedConversations[existingIndex].messages = [
+              ...existingConv.messages.slice(0, tempMessageIndex),
+              lastMessage,
+              ...existingConv.messages.slice(tempMessageIndex + 1)
+            ];
+          } else {
+            // Agregar mensaje nuevo al final
+            console.log('[ChatService] ➕ Agregando mensaje nuevo al final ID:', lastMessage.id);
+            updatedConversations[existingIndex].messages = [
+              ...existingConv.messages,
+              lastMessage
+            ];
+          }
+        }
+      } else {
+        // Nueva conversación
+        const newConversation = this.mapSummaryToConversation(summary, currentUserId);
+        updatedConversations.push(newConversation);
+      }
+    });
+
+    this.updateState({ conversations: updatedConversations });
   }
 
   get currentState(): ChatState {
@@ -54,6 +178,9 @@ export class ChatService {
   }
 
   public loadInitialConversations(): Observable<any> {
+    // Asegurar que el servicio está inicializado
+    this.initialize();
+
     const { currentUserId } = this.currentState;
     if (!currentUserId) {
       return throwError(() => new Error('Usuario no autenticado.'));
@@ -150,6 +277,9 @@ export class ChatService {
   }
 
   selectProvider(providerId: number | null): void {
+  // Asegurar que el servicio está inicializado
+  this.initialize();
+
   // Actualizar el estado inmediatamente para UI responsiva
   this.updateState({
     selectedProviderId: providerId
@@ -276,7 +406,15 @@ export class ChatService {
     ).subscribe();
   }
 
-sendMessage(content: string): Observable<SendMessageResponse> {
+  /**
+   * Envía un mensaje. Intenta usar STOMP si está conectado, sino usa HTTP
+   * @param content Contenido del mensaje
+   * @returns Observable con la respuesta del envío
+   */
+  sendMessage(content: string): Observable<SendMessageResponse> {
+    // Asegurar que el servicio está inicializado
+    this.initialize();
+
     const { selectedProviderId, currentUserId } = this.currentState;
 
     if (!selectedProviderId || !content.trim()) {
@@ -286,9 +424,12 @@ sendMessage(content: string): Observable<SendMessageResponse> {
     // Get or create conversation ID
     const conversationId = this.getOrCreateConversationId(selectedProviderId);
 
-    // Create the message object for the API
+    // Create the message object with a unique temporary ID
+    // Usar timestamp + random para evitar colisiones con mensajes rápidos
+    const tempId = Date.now() + Math.random();
+
     const newMessage: Message = {
-      id: 0, // Temporary ID, will be set by backend
+      id: tempId,
       conversationId: conversationId,
       senderId: currentUserId,
       receiverId: selectedProviderId,
@@ -301,26 +442,90 @@ sendMessage(content: string): Observable<SendMessageResponse> {
       status: 'sending'
     };
 
-    // Send message via API
-    return this.conversationApi.sendMessage(newMessage).pipe(
-      switchMap(serverMessage => {
-        // Update the message with server data
-        this.updateMessageWithServerResponse(newMessage.id, serverMessage);
+    // Agregar mensaje optimísticamente a la UI
+    this.addMessageToConversation(selectedProviderId, newMessage);
 
-        return of({
-          success: true,
-          message: serverMessage
-        });
+    // Intentar enviar vía STOMP primero
+    const sentViaStompSuccessfully = this.realtimeService.sendMessageViaStompIfConnected({
+      conversationId: newMessage.conversationId,
+      senderId: newMessage.senderId,
+      receiverId: newMessage.receiverId,
+      content: newMessage.content
+    });
+
+    if (sentViaStompSuccessfully) {
+      console.log('[ChatService] 📤 Mensaje enviado vía STOMP, esperando confirmación del servidor');
+
+      // Marcar como enviado (el servidor enviará confirmación vía WebSocket)
+      this.updateMessageStatus(tempId, 'delivered');
+
+      return of({
+        success: true,
+        message: newMessage
+      });
+    }
+
+    // Fallback a HTTP si STOMP no está disponible
+    console.log('[ChatService] 📤 Enviando mensaje vía HTTP (fallback)');
+
+    return this.conversationApi.sendMessage(newMessage).pipe(
+      tap(serverMessage => {
+        // Reemplazar el mensaje temporal con el del servidor (evita duplicados)
+        this.replaceTemporaryMessage(tempId, serverMessage);
       }),
+      map(serverMessage => ({
+        success: true,
+        message: serverMessage
+      })),
       catchError(error => {
-        // Mark message as failed
-        this.updateMessageStatus(newMessage.id, undefined);
+        // Marcar mensaje como enviado pero con error en consola
+        this.updateMessageStatus(tempId, 'sent');
+        console.error('[ChatService] Error enviando mensaje vía HTTP:', error);
         return of({
           success: false,
           error: error.message || 'Error al enviar el mensaje'
         });
       })
     );
+  }
+
+  /**
+   * Reemplaza un mensaje temporal con el mensaje real del servidor
+   * Esto evita duplicados y superposiciones
+   */
+  private replaceTemporaryMessage(tempId: number, serverMessage: Message): void {
+    const conversations = this.currentState.conversations.map(conversation => ({
+      ...conversation,
+      messages: conversation.messages.map(message =>
+        message.id === tempId
+          ? { ...serverMessage, status: 'delivered' as Message['status'], timestamp: new Date(serverMessage.sentAt) }
+          : message
+      ),
+      lastMessage: conversation.lastMessage?.id === tempId
+        ? { ...serverMessage, status: 'delivered' as Message['status'], timestamp: new Date(serverMessage.sentAt) }
+        : conversation.lastMessage
+    }));
+
+    this.updateState({ conversations });
+  }
+
+  /**
+   * Agrega un mensaje a la conversación especificada (actualización optimista)
+   */
+  private addMessageToConversation(providerId: number, message: Message): void {
+    const conversations = this.currentState.conversations.map(conversation => {
+      if (conversation.providerId === providerId) {
+        return {
+          ...conversation,
+          messages: [...conversation.messages, message],
+          lastMessage: message,
+          updatedAt: message.sentAt
+        };
+      }
+      return conversation;
+    });
+
+    this.updateState({ conversations });
   }
 
     private updateMessageWithServerResponse(temporaryMessageId: number, serverMessage: Message): void {
@@ -361,6 +566,28 @@ sendMessage(content: string): Observable<SendMessageResponse> {
   }
 
   private markMessagesAsRead(providerId: number): void {
+    const conversation = this.currentState.conversations.find(c => c.providerId === providerId);
+
+    if (!conversation) return;
+
+    // Intentar marcar como leídos usando STOMP para cada mensaje no leído
+    const unreadMessages = conversation.messages.filter(
+      msg => msg.senderId !== this.currentState.currentUserId && msg.status !== 'read'
+    );
+
+    unreadMessages.forEach(message => {
+      const sentViaStompSuccessfully = this.realtimeService.markMessageAsReadViaStompIfConnected(message.id);
+
+      if (sentViaStompSuccessfully) {
+        console.log('[ChatService] 📖 Mensaje marcado como leído vía STOMP:', message.id);
+      } else {
+        // Fallback a HTTP si STOMP no está disponible
+        // TODO: Implementar endpoint HTTP para marcar como leído si es necesario
+        console.log('[ChatService] 📖 Marcando como leído localmente (sin STOMP/HTTP)');
+      }
+    });
+
+    // Actualizar estado local inmediatamente (actualización optimista)
     const conversations = this.currentState.conversations.map(conversation => {
       if (conversation.providerId === providerId) {
         return {
@@ -438,4 +665,79 @@ sendMessage(content: string): Observable<SendMessageResponse> {
     );
   }
 
+  /**
+   * Notifica que el usuario está escribiendo (solo vía STOMP)
+   * @param providerId ID del proveedor al que se le está escribiendo
+   */
+  notifyTyping(providerId: number): void {
+    const conversation = this.currentState.conversations.find(c => c.providerId === providerId);
+
+    if (!conversation) return;
+
+    this.realtimeService.notifyTypingViaStompIfConnected(conversation.id);
+  }
+
+  /**
+   * Obtiene el estado de conexión del servicio en tiempo real
+   */
+  getRealtimeConnectionState(): Observable<any> {
+    return this.realtimeService.state$;
+  }
+
+  /**
+   * Verifica si está usando WebSocket/STOMP
+   */
+  isUsingWebSocket(): boolean {
+    return this.realtimeService.isUsingWebSocket();
+  }
+
+  /**
+   * Fuerza una actualización manual de las conversaciones
+   */
+  forceRefreshConversations(): Observable<void> {
+    return this.realtimeService.forceRefresh();
+  }
+
+  /**
+   * Desconecta el servicio en tiempo real (útil al cerrar sesión)
+   */
+  disconnectRealtime(): void {
+    this.realtimeService.disconnect();
+  }
+
+  /**
+   * Reconecta el servicio en tiempo real (útil al abrir la app de nuevo)
+   */
+  reconnectRealtime(): void {
+    this.realtimeService.connect();
+  }
+
+  /**
+   * Limpia todos los datos del chat (al cerrar sesión)
+   * Previene que otro usuario vea las conversaciones del usuario anterior
+   */
+  clearData(): void {
+    console.log('[ChatService] 🧹 Limpiando datos del chat...');
+
+    // 1. Desconectar tiempo real
+    this.disconnectRealtime();
+
+    // 2. Limpiar cache del servicio en tiempo real
+    this.realtimeService.clearCache();
+
+    // 3. Resetear flag de inicialización
+    this.isInitialized = false;
+
+    // 4. Resetear estado a valores iniciales
+    this.chatStateSubject.next({
+      providers: [],
+      conversations: [],
+      selectedProviderId: null,
+      currentUserId: 0, // Valor temporal, se actualizará con el próximo usuario
+      isLoading: false,
+      error: null
+    });
+
+    console.log('[ChatService] ✅ Datos del chat limpiados completamente');
+  }
 }

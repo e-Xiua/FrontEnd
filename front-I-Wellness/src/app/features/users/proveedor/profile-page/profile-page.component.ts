@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { ChatRealtimeService } from '../../../../shared/services/chat-realtime.service';
 import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
 import { ReviewFormComponent } from "../../../../shared/ui/components/review-form/review-form.component";
 import { ServicioService } from '../../../servicios/services/servicio.service';
@@ -99,7 +100,8 @@ export class ProfilePageComponent implements OnInit {
     private router: Router,
     private usuarioService: UsuarioService,
     private servicioService: ServicioService,
-    private authService: AuthService
+    private authService: AuthService,
+    private chatRealtimeService: ChatRealtimeService
   ) {}
 
   ngOnInit(): void {
@@ -128,6 +130,17 @@ export class ProfilePageComponent implements OnInit {
         console.log('Contacto añadido con éxito');
         this.isContact = true; // Marcar como contacto
         this.isAddingContact = false;
+
+        // 🔔 NUEVO: Forzar actualización en tiempo real para reflejar el cambio inmediatamente
+        console.log('ProfilePage: Notificando cambio de contactos al sistema en tiempo real');
+        this.chatRealtimeService.forceRefresh().subscribe({
+          next: () => {
+            console.log('ProfilePage: ✅ Actualización en tiempo real completada - sidebar y modal se actualizarán automáticamente');
+          },
+          error: (err) => {
+            console.warn('ProfilePage: Error en actualización en tiempo real (no crítico):', err);
+          }
+        });
       },
       error: (err) => {
         console.error('Error al añadir contacto:', err);

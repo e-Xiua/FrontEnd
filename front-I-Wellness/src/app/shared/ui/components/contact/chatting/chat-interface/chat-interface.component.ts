@@ -151,13 +151,24 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewCheck
     this.isLoading = true;
     this.shouldScroll = true;
 
+    // Marcar para detección de cambios antes de enviar
+    this.cdr.markForCheck();
+
     this.chatService.sendMessage(content).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (response: any) => {
         console.log('Message sent:', response);
         this.isLoading = false;
+
+        // Forzar scroll después de que el mensaje se haya agregado
+        this.shouldScroll = true;
         this.cdr.markForCheck();
+
+        // Usar setTimeout para asegurar que el DOM se actualizó
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 50);
       },
       error: (error: any) => {
         console.error('Error sending message:', error);
