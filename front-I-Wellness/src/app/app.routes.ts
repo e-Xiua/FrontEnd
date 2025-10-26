@@ -43,8 +43,6 @@ import { PerfilTuristaComponent } from './features/users/turista/perfil-turista/
 import { RegistroTuristaComponent } from './features/users/turista/registro-turista/registro-turista.component';
 import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta-detalle.component';
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
-import { DashboardAdminComponent } from './features/users/administrador/dashboard-admin/dashboard-admin.component';
-import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 import { CalendarioComponent } from './features/calendario/calendario.component';
 import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 
