@@ -116,13 +116,4 @@ export class ReviewDisplayComponent implements OnInit, OnDestroy {
     });
   }
 
-  onHelpful(reviewId: number): void {
-    console.log(`Marcando reseña ${reviewId} como útil`);
-    // TODO: Implementar lógica para marcar como útil
-  }
-
-  onNotHelpful(reviewId: number): void {
-    console.log(`Marcando reseña ${reviewId} como no útil`);
-    // TODO: Implementar lógica para marcar como no útil
-  }
 }

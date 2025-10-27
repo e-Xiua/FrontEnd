@@ -63,22 +63,6 @@
 
       <p class="review-comment">{{ review.comment }}</p>
 
-      <div class="review-actions" *ngIf="review.helpful !== undefined || review.notHelpful !== undefined">
-        <button
-          class="action-button helpful"
-          (click)="onHelpful(review.id)"
-          type="button">
-          <i class="fas fa-thumbs-up"></i>
-          <span>{{ review.helpful || 0 }}</span>
-        </button>
-        <button
-          class="action-button not-helpful"
-          (click)="onNotHelpful(review.id)"
-          type="button">
-          <i class="fas fa-thumbs-down"></i>
-          <span>{{ review.notHelpful || 0 }}</span>
-        </button>
-      </div>
     </div>
   </div>
 
