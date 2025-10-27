@@ -6,7 +6,6 @@
   (click)="onCardClick()"
   (keydown.enter)="onCardClick()"
   (keydown.space)="onCardClick()"
-  role="button"
   tabindex="0"
   [attr.aria-label]="'Contacto de ' + provider.contactName">
 
@@ -97,5 +96,12 @@
       <mat-icon>person</mat-icon>
       <span *ngIf="!compactMode">Perfil</span>
     </button>
+
+    <!-- Contact menu -->
+    <app-contact-menu
+      [provider]="provider"
+      [compactMode]="compactMode"
+      class="contact-menu-wrapper">
+    </app-contact-menu>
   </div>
 </mat-card>

@@ -148,8 +148,12 @@
         inteligente del ecosistema de turismo de bienestar de la Zona Turística
         de La Fortuna, Costa Rica.
       </p>
-      <button class="btn" (click)="onLeerMas()">Leer Más</button>
-
+      <div class="action-buttons">
+        <button class="btn" (click)="onLeerMas()">Leer Más</button>
+        <button class="btn-secondary" routerLink="/buscador-web">
+          <i class="fas fa-search"></i> Observatorio Web
+        </button>
+      </div>
     </div>
   </div>
 

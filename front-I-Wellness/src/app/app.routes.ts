@@ -43,6 +43,8 @@ import { PerfilTuristaComponent } from './features/users/turista/perfil-turista/
 import { RegistroTuristaComponent } from './features/users/turista/registro-turista/registro-turista.component';
 import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta-detalle.component';
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
+import { CalendarioComponent } from './features/calendario/calendario.component';
+import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 
 // Shared/Common components
 import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
@@ -51,23 +53,31 @@ import { ProfilePageComponent } from './features/users/proveedor/profile-page/pr
 
 export const routes: Routes = [
     // Rutas públicas
-    { path: '', component: HomeComponent },
-    { path: 'temas', component: TemasComponent },
-    { path: 'registro', component: RegistroComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'registroturista', component: RegistroTuristaComponent },
-    { path: 'recuperar', component: RecuperarComponent },
+    { path: '', component: HomeComponent},
+    { path: 'temas', component: TemasComponent},
+    { path: 'registro', component: RegistroComponent},
+    // Buscador web scrapping público
+    { path: 'buscador-web', loadComponent: () => import('./features/web-scrapping-buscador/web-scrapping-buscador.component').then(m => m.WebScrappingBuscadorComponent) },
+    // Rutas públicas para objetivos
+    { path: 'objetivos', loadComponent: () => import('./features/objetivos/objetivos.component').then(m => m.ObjetivosComponent) },
+    { path: 'objetivos/turista', loadComponent: () => import('./features/objetivos/objetivos-turista.component').then(m => m.ObjetivosTuristaComponent) },
+    { path: 'objetivos/proveedor', loadComponent: () => import('./features/objetivos/objetivos-proveedor.component').then(m => m.ObjetivosProveedorComponent) },
+    { path: 'objetivos/admin', loadComponent: () => import('./features/objetivos/objetivos-admin.component').then(m => m.ObjetivosAdminComponent) },
+    { path: 'login', component: LoginComponent},
+    { path: 'registroturista', component: RegistroTuristaComponent},
+    { path: 'recuperar', component: RecuperarComponent},
     { path: 'restablecer', component: RestablecerComponent },
     { path: 'registroproveedor', component: RegistroProveedorComponent },
 
     // Rutas compartidas - accesibles a todos los usuarios autenticados
     { path: 'infoservicio/:id', component: InfoServicioComponent, canActivate: [authGuard] },
-
+    { path: 'dashboard-test', component: DashboardTestComponent },
+    { path: 'calendario', component: CalendarioComponent },
     // Rutas específicas para Turistas con Layout
     {
         path: 'turista',
         component: TuristaLayoutComponent,
-        canActivate: [turistaGuard],
+        //canActivate: [turistaGuard],
         children: [
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeTuristaComponent },

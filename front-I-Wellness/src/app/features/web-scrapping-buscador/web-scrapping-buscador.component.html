@@ -1,0 +1,160 @@
+<div class="observatorio-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1><i class="fas fa-search"></i> Observatorio de Turismo de Bienestar</h1>
+      <p>Análisis inteligente de parámetros turísticos en La Fortuna, Costa Rica</p>
+    </div>
+  </header>
+
+  <!-- Search Section -->
+  <section class="search-section">
+    <div class="search-card">
+      <h2><i class="fas fa-magnifying-glass"></i> Buscar Parámetros</h2>
+      <div class="search-form">
+        <input 
+          type="text" 
+          #searchInput 
+          [(ngModel)]="searchTerm"
+          placeholder="Ingresa un término: precio, clima, spa, hotel..." 
+          (keypress)="$event.key === 'Enter' && buscar(searchInput.value)"
+        />
+        <button (click)="buscar(searchInput.value)" [disabled]="buscando">
+          <i class="fas fa-search"></i> {{ buscando ? 'Buscando...' : 'Buscar' }}
+        </button>
+      </div>
+      <div class="search-suggestions">
+        <span class="suggestion-label">Términos sugeridos:</span>
+        <div class="suggestions">
+          <span 
+            *ngFor="let term of suggestedTerms" 
+            class="tag" 
+            (click)="searchSuggestion(term)"
+          >
+            {{ term }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <div *ngIf="buscando" class="loading">
+    <div class="spinner"></div>
+    <p>Analizando fuentes de datos turísticos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="searchResults && !buscando" class="results-section">
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-icon"><i class="fas fa-chart-bar"></i></div>
+        <div class="summary-content">
+          <div class="summary-number">{{ searchResults.total_matches }}</div>
+          <div class="summary-label">Coincidencias Totales</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon"><i class="fas fa-globe"></i></div>
+        <div class="summary-content">
+          <div class="summary-number">{{ searchResults.sources_with_results }}</div>
+          <div class="summary-label">Fuentes con Resultados</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon"><i class="fas fa-tags"></i></div>
+        <div class="summary-content">
+          <div class="summary-number">{{ searchResults.variations_found }}</div>
+          <div class="summary-label">Variaciones Encontradas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button 
+        [class.active]="currentTab === 'matches'"
+        (click)="changeTab('matches')"
+      >
+        <i class="fas fa-list"></i> Coincidencias ({{ searchResults.matches.length }})
+      </button>
+      <button 
+        [class.active]="currentTab === 'sources'"
+        (click)="changeTab('sources')"
+      >
+        <i class="fas fa-chart-pie"></i> Análisis por Fuentes
+      </button>
+      <button 
+        [class.active]="currentTab === 'summary'"
+        (click)="changeTab('summary')"
+      >
+        <i class="fas fa-info-circle"></i> Resumen
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Matches Tab -->
+      <div *ngIf="currentTab === 'matches'" class="matches-content">
+        <div *ngFor="let match of searchResults.matches" class="match-card">
+          <div class="match-header">
+            <h3>{{ match.source_title }}</h3>
+            <span class="match-url">{{ match.source_url }}</span>
+          </div>
+          <div class="match-context">
+            <span class="context-before">{{ match.context_before }}</span>
+            <mark class="highlighted-term">{{ match.found_variation }}</mark>
+            <span class="context-after">{{ match.context_after }}</span>
+          </div>
+          <div class="match-meta">
+            <span><i class="fas fa-calendar"></i> {{ formatDate(match.found_at) }}</span>
+            <span><i class="fas fa-map-marker-alt"></i> Posición: {{ match.position }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sources Tab -->
+      <div *ngIf="currentTab === 'sources'" class="sources-content">
+        <div *ngFor="let source of searchResults.sources_breakdown" class="source-card">
+          <div class="source-header">
+            <h3>{{ source.title }}</h3>
+            <span class="matches-count">{{ source.matches_count }} coincidencias</span>
+          </div>
+          <div class="source-url">{{ source.url }}</div>
+          <div class="sample-contexts">
+            <div *ngFor="let context of source.sample_contexts" class="sample-context">
+              <strong>"{{ context.snippet }}"</strong> - {{ context.context }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Tab -->
+      <div *ngIf="currentTab === 'summary'" class="summary-content">
+        <div class="summary-details">
+          <h3>Resumen de Búsqueda</h3>
+          <div class="summary-item">
+            <strong>Término buscado:</strong> "{{ searchResults.search_term }}"
+          </div>
+          <div class="summary-item">
+            <strong>Fecha de búsqueda:</strong> {{ formatDate(searchResults.search_timestamp) }}
+          </div>
+          <div class="summary-item">
+            <strong>Fuente principal:</strong> {{ searchResults.summary.top_source.url }} 
+            ({{ searchResults.summary.top_source.matches }} coincidencias)
+          </div>
+          <div class="summary-item">
+            <strong>Longitud promedio del contexto:</strong> {{ searchResults.summary.average_context_length }} caracteres
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -262,6 +262,7 @@
   gap: 8px;
   padding: 8px 16px 16px;
   justify-content: space-between;
+  align-items: center;
 }
 
 .compact .card-actions {
@@ -275,6 +276,10 @@
   font-weight: 500 !important;
   text-transform: none !important;
   min-width: 0 !important;
+}
+
+.contact-menu-wrapper {
+  flex-shrink: 0;
 }
 
 .compact .chat-button,

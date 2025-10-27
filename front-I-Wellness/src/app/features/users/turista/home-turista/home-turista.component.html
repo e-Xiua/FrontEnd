@@ -51,7 +51,7 @@
           <div class="scroll-wrapper">
             <button
               class="scroll-btn left"
-              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollLeft }"
+              [ngClass]="{ 'hidden': !scrollStates['para-ti'].canScrollLeft }"
               (click)="scrollLeft('para-ti')"
             >&#10094;</button>
 
@@ -68,7 +68,7 @@
 
             <button
               class="scroll-btn right"
-              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollRight }"
+              [ngClass]="{ 'hidden': !scrollStates['para-ti'].canScrollRight }"
               (click)="scrollRight('para-ti')"
             >&#10095;</button>
           </div>
@@ -81,7 +81,7 @@
             <div class="scroll-wrapper">
               <button
                 class="scroll-btn left"
-                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollLeft }"
+                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i].canScrollLeft }"
                 (click)="scrollLeft('grupo-' + i)"
               >&#10094;</button>
 
@@ -98,7 +98,7 @@
 
               <button
                 class="scroll-btn right"
-                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollRight }"
+                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i].canScrollRight }"
                 (click)="scrollRight('grupo-' + i)"
               >&#10095;</button>
             </div>
