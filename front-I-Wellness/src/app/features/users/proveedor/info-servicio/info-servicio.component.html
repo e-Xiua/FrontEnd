@@ -10,7 +10,7 @@
       </p>
       <p class="service-price" *ngIf="servicio.precio && tipoCambio">
         💰 <strong>Precio (CRC):</strong> {{ servicio.precio * tipoCambio | currency:'CRC' }}
-      </p>  
+      </p>
       <p class="service-hours" *ngIf="servicio.horario">
         ⏰ <strong>Horario:</strong> {{ servicio.horario }}
       </p>
@@ -20,11 +20,11 @@
   <div class="proveedor-info" *ngIf="proveedor">
   <h3>🏨 Servicio ofrecido por</h3>
   <div class="proveedor-contenido">
-    <img *ngIf="proveedor.foto" 
-         [src]="proveedor.foto" 
-         alt="{{ proveedor.nombre }}" 
+    <img *ngIf="proveedor.foto"
+         [src]="proveedor.foto"
+         alt="{{ proveedor.nombre }}"
          class="proveedor-foto">
-    
+
     <div class="proveedor-detalles">
       <p><strong>Empresa:</strong> {{ proveedor.proveedorInfo.nombre_empresa }}</p>
       <p><strong>Contacto:</strong> {{ proveedor.nombre }}</p>
@@ -41,9 +41,9 @@
     <div class="reserva-campos">
       <mat-form-field appearance="fill">
         <mat-label>📅 Selecciona una fecha</mat-label>
-        <input matInput 
+        <input matInput
               [matDatepicker]="picker"
-              [(ngModel)]="fechaSeleccionada" 
+              [(ngModel)]="fechaSeleccionada"
               [min]="minFechaObj"
               [matDatepickerFilter]="filtrarDiasDisponibles"
               required>
@@ -61,6 +61,34 @@
       <button (click)="hacerReserva()" class="btn-reservar">
         Reservar
       </button>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div class="reviews-section" *ngIf="servicio">
+    <h3 class="section-title">📝 Reseñas del Servicio</h3>
+
+    <!-- Mostrar formulario de reseña SI el usuario puede escribir -->
+    <div class="review-form-wrapper">
+      <app-review-form
+            [entityType]="'servicio'"
+                  [entityId]="servicioId">
+        </app-review-form>
+    </div>
+
+    <!-- Mensaje informativo para turistas sin reserva -->
+    <div *ngIf="currentUserRole === 'Turista' && !hasReservation && !canWriteReview()" class="info-message">
+      <i class="fas fa-info-circle"></i>
+      <p>Debes tener una reserva confirmada para poder escribir una reseña sobre este servicio.</p>
+    </div>
+
+    <!-- Mostrar reseñas existentes -->
+    <div class="reviews-display-wrapper">
+      <app-review-display
+        [entityType]="'servicio'"
+        [entityId]="servicioId">
+      </app-review-display>
+
     </div>
   </div>
 </div>

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
@@ -7,19 +7,21 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
+
   private apiUrl = 'http://localhost:8082/auth'; // URL completa al backend
-  
+  //private apiUrl = 'http://localhost:8765/api/auth';
+
   constructor(private http: HttpClient) { }
 
   // Método para el login
   login(correo: string, contraseña: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  
+
     const body = {
       correo: correo,
       contraseña: contraseña
     };
-  
+
     return this.http.post(`${this.apiUrl}/login`, body, {
       headers,
       responseType: 'text' // JWT en texto plano
@@ -30,17 +32,23 @@ export class AuthService {
         }
       }),
       switchMap((token: string) => {
-        // Una vez que tenemos el token, obtenemos el rol del usuario
-        return this.getUsuarioActual().pipe(
-          map((rol: string) => {
-            // Guardamos el rol
-            localStorage.setItem('rol', rol);
-            
-            // Devolvemos un objeto con el token y el rol
-            return { token, rol };
-          })
-        );
-      }),
+      // Once we have the token, get the user info including ID
+      return this.getUserInfo().pipe(
+        tap((userInfo: any) => {
+          // Store the user ID in localStorage
+          localStorage.setItem('USER_ID', userInfo.id.toString());
+          // Store the role as well
+          localStorage.setItem('rol', userInfo.role || ''); // Adjust based on your userInfo structure
+        }),
+        map((userInfo: any) => {
+          return {
+            token,
+            rol: userInfo.role, // Adjust based on your userInfo structure
+            userInfo
+          };
+        })
+      );
+    }),
       catchError(error => {
         console.error('Error en login:', error);
         return throwError(() => new Error(error.error || 'Error en el inicio de sesión'));
@@ -48,14 +56,14 @@ export class AuthService {
     );
   }
 
- 
+
 
   getUsuarioActual(): Observable<string> {
     const token = this.getToken();
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get(`${this.apiUrl}/role`, {
       headers,
       responseType: 'text' // evitar el error de JSON.parse
@@ -72,7 +80,7 @@ export class AuthService {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get(`${this.apiUrl}/info`, {
       headers,
       responseType: 'text' // evitar el error de JSON.parse
@@ -83,11 +91,11 @@ export class AuthService {
       })
     );
   }
-  
+
 
   registerProveedor(proveedorData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    
+
     const body = {
       nombre: proveedorData.nombre,
       correo: proveedorData.correo,
@@ -100,14 +108,14 @@ export class AuthService {
       telefonoEmpresa: proveedorData.telefonoEmpresa,
       foto: proveedorData.foto
     };
-  
-    return this.http.post<any>(`${this.apiUrl}/registro/Proveedor`, body, { 
+
+    return this.http.post<any>(`${this.apiUrl}/registro/Proveedor`, body, {
       headers,
       responseType: 'text' as 'json'
     }).pipe(
       switchMap((response) => {
         console.log('Respuesta de registro:', response);
-        
+
         // Después del registro exitoso, hacer login automático
         return this.login(proveedorData.correo, proveedorData.contraseña).pipe(
           map(loginResponse => ({
@@ -123,11 +131,11 @@ export class AuthService {
       })
     );
   }
-  
+
   // Similar para registerTurista
   registerTurista(turistaData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    
+
     const body = {
       nombre: turistaData.nombre,
       correo: turistaData.correo,
@@ -140,16 +148,16 @@ export class AuthService {
       estadoCivil: turistaData.estadoCivil,
       foto: turistaData.foto
     };
-  
+
     console.log("turista: ",body)
 
-    return this.http.post<any>(`${this.apiUrl}/registro/Turista`, body, { 
+    return this.http.post<any>(`${this.apiUrl}/registro/Turista`, body, {
       headers,
       responseType: 'text' as 'json'
     }).pipe(
       switchMap((response) => {
         console.log('Respuesta de registro:', response);
-        
+
         // Después del registro exitoso, hacer login automático
         return this.login(turistaData.correo, turistaData.contraseña).pipe(
           map(loginResponse => ({
@@ -165,7 +173,7 @@ export class AuthService {
       })
     );
   }
-  
+
   // Verificar si el usuario está autenticado
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
@@ -193,11 +201,11 @@ export class AuthService {
     if (!token) {
       return throwError(() => new Error('No hay token disponible'));
     }
-  
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get<any>(`${this.apiUrl}/info`, { headers }).pipe(
       map(response => {
         // Si la respuesta es una cadena JSON, la parseamos
@@ -212,13 +220,18 @@ export class AuthService {
       })
     );
   }
-  
+
   getCurrentUserId(): Observable<number> {
     return this.getUserInfo().pipe(
       map(userInfo => userInfo.id)
     );
   }
-  
+
+  public getCurrentUserIdSynchronous(): number | null {
+  const id = localStorage.getItem('USER_ID');
+  return id ? +id : null;
+}
+
   getCurrentUserRole(): string | null {
     return localStorage.getItem('rol');
   }

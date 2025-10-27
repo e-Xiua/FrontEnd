@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ChatLayoutService } from '../../shared/services/chat-layout.service';
+import { ChatService } from './chat.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ export class ChatIntegrationService {
   constructor(
     private authService: AuthService,
     private chatLayoutService: ChatLayoutService,
+    private chatService: ChatService,
     private router: Router
   ) {}
 
@@ -103,4 +105,21 @@ export class ChatIntegrationService {
         this.router.navigate(['/login']);
     }
   }
+
+startChatWithProvider(providerId: number): void {
+  console.log('[ChatIntegration] Iniciando chat con proveedor', providerId);
+
+  // 1. Mostrar el modal de chat
+  this.chatLayoutService.showModal();
+  this.chatLayoutService.setActiveTab('messages');
+
+  // 2. Seleccionar el proveedor (esto carga o crea la conversación)
+  this.chatService.selectProvider(providerId);
+
+  // 3. Si estamos en un dispositivo móvil, asegurar que el sidebar está oculto
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) {
+    this.chatLayoutService.hideSidebar();
+  }
+}
 }

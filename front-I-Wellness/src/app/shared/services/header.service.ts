@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { HeaderConfig } from '../models/header';
+import { ChatLayoutService } from './chat-layout.service';
+import { ChatRealtimeService } from './chat-realtime.service';
 
 /**
  * Servicio para gestión centralizada de headers
@@ -17,7 +19,9 @@ export class HeaderService {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private chatRealtimeService: ChatRealtimeService,
+    private chatLayoutService: ChatLayoutService
   ) {}
 
   /**
@@ -200,25 +204,54 @@ export class HeaderService {
   }
 
   private navigateToProfile(role: string): void {
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      switch (role) {
-        case 'admin':
-          this.router.navigate(['/admin/perfil', userId]);
-          break;
-        case 'proveedor':
-          this.router.navigate(['/proveedor/perfil', userId]);
-          break;
-        case 'turista':
-          this.router.navigate(['/turista/perfil', userId]);
-          break;
+
+    this.authService.getCurrentUserId().subscribe({
+
+      next: (userId) => {
+
+        console.log('Navegando al perfil del usuario con ID:', userId);
+
+        if (userId) {
+
+          switch (role) {
+            case 'admin':
+              this.router.navigate(['/admin/perfil', userId]);
+              break;
+            case 'proveedor':
+              this.router.navigate(['/proveedor/perfil', userId]);
+              break;
+            case 'turista':
+              this.router.navigate(['/turista/perfil', userId]);
+              break;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('No se pudo obtener el ID del usuario para navegar al perfil:', err);
+
+        this.router.navigate(['/home']);
       }
-    }
+    });
   }
 
   private logout(): void {
+    console.log('[HeaderService] Cerrando sesión y limpiando datos de chat...');
+
+    // 1. Desconectar servicio en tiempo real (WebSocket/STOMP)
+    this.chatRealtimeService.disconnect();
+
+    // 2. Limpiar estado del chat layout (conversaciones, contactos, mensajes)
+    this.chatLayoutService.clearAllData();
+
+    // 3. Cerrar sesión en AuthService
     this.authService.logout();
+
+    // 4. Limpiar configuración del header
     this.clearHeader();
+
+    // 5. Navegar a la página principal
     this.router.navigate(['/']);
+
+    console.log('[HeaderService] ✅ Sesión cerrada y datos limpiados');
   }
 }

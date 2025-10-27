@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ChatProvider } from '../../../../models/chat';
 import { AnimationContext } from '../../../../services/animation-strategy.service';
+import { ChatIntegrationService } from '../../../../services/chat-integration.service';
 import { ContactMenuComponent } from '../contact-menu/contact-menu.component';
 
 @Component({
@@ -29,8 +30,9 @@ export class ContactCardComponent {
   @Output() profileClick = new EventEmitter<ChatProvider>();
 
   constructor(
-    private readonly router: Router,
-    private readonly animationContext: AnimationContext
+    private router: Router,
+    private animationContext: AnimationContext,
+    private chatIntegration: ChatIntegrationService
   ) {}
 
   onCardClick(): void {
@@ -40,6 +42,7 @@ export class ContactCardComponent {
   onChatClick(event: Event): void {
     event.stopPropagation();
     this.chatClick.emit(this.provider);
+    this.chatIntegration.startChatWithProvider(this.provider.id);
   }
 
   onProfileClick(event: Event): void {

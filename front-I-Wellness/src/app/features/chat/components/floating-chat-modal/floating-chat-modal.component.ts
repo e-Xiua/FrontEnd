@@ -9,8 +9,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Subject, takeUntil } from 'rxjs';
 
-import { ChatProvider, Conversation } from '../../../../shared/models/chat';
+import { ChatProvider, ChatState, Conversation } from '../../../../shared/models/chat';
+import { AnimationContext, AnimationStrategyFactory } from '../../../../shared/services/animation-strategy.service';
 import { ChatLayoutService, ModalTab } from '../../../../shared/services/chat-layout.service';
+import { ChatRealtimeService } from '../../../../shared/services/chat-realtime.service';
+import { ChatService } from '../../../../shared/services/chat.service';
 import { ChatInterfaceComponent } from "../../../../shared/ui/components/contact/chatting/chat-interface/chat-interface.component";
 import { ContactCardComponent } from '../../../../shared/ui/components/contact/contact-card/contact-card.component';
 
@@ -68,9 +71,15 @@ import { ContactCardComponent } from '../../../../shared/ui/components/contact/c
 export class FloatingChatModalComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private chatLayoutService = inject(ChatLayoutService);
+  private chatService = inject(ChatService);
+  private chatRealtimeService = inject(ChatRealtimeService);
+  private animationFactory = inject(AnimationStrategyFactory);
+  private animationContext = inject(AnimationContext);
 
   // State observables
   layoutState$ = this.chatLayoutService.state$;
+  chatState$ = this.chatService.chatState$;
+  realtimeState$ = this.chatRealtimeService.state$;
   public selectedTabIndex: number = 0;
   paginatedMessages$ = this.chatLayoutService.paginatedMessages$;
   paginatedContacts$ = this.chatLayoutService.paginatedContacts$;
@@ -83,6 +92,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   // Selected data
   selectedProvider: ChatProvider | null = null;
   activeConversation: Conversation | null = null;
+  selectedProviderId: number | null = null;
 
   // Tab labels
   readonly tabLabels = {
@@ -91,12 +101,22 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    this.setupAnimations();
     this.subscribeToLayoutState();
+    this.subscribeToChatState();
+    this.setupRealtimeUpdates();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.chatRealtimeService.disconnect();
+  }
+
+  private setupAnimations(): void {
+    // Usar estrategia de slide para los elementos del modal
+    const strategy = this.animationFactory.createStrategy('slide');
+    this.animationContext.setStrategy(strategy);
   }
 
   private subscribeToLayoutState(): void {
@@ -105,7 +125,29 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     ).subscribe(state => {
       this.updateModalState(state.modalVisible);
       this.activeTab = state.activeTab;
+
+      // Actualizar selectedTabIndex cuando cambia el tab
+      this.selectedTabIndex = state.activeTab === 'contacts' ? 0 : 1;
+
       this.selectedProvider = state.filteredProviders.find(p => p.id === this.selectedProvider?.id) || null;
+    });
+  }
+
+  private subscribeToChatState(): void {
+    this.chatState$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((state: ChatState) => {
+      // Sincronizar con el provider seleccionado en ChatService
+      this.selectedProviderId = state.selectedProviderId;
+
+      // Si hay un provider seleccionado, buscar la conversación activa
+      if (this.selectedProviderId) {
+        this.activeConversation = state.conversations.find(
+          (c: Conversation) => c.providerId === this.selectedProviderId
+        ) || null;
+      } else {
+        this.activeConversation = null;
+      }
     });
   }
 
@@ -159,6 +201,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
 
   onProviderChat(provider: ChatProvider): void {
     this.onProviderSelect(provider);
+
   }
 
   onProviderProfile(provider: ChatProvider): void {
@@ -168,16 +211,22 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
 
   onConversationSelect(conversation: Conversation): void {
     console.log('FloatingChatModal: Seleccionando conversación', conversation);
-    this.activeConversation = conversation;
 
-    // Encontrar el proveedor correspondiente a esta conversación
-    const currentState = this.chatLayoutService.currentState;
-    const provider = currentState.allProviders.find(p => p.id === conversation.providerId);
-
-    if (provider) {
-      this.selectedProvider = provider;
-      this.chatLayoutService.selectProvider(provider.id);
+    // Verificar que existe providerId
+    if (!conversation.providerId) {
+      console.warn('FloatingChatModal: Conversación sin providerId', conversation);
+      return;
     }
+
+    // Usar ChatService para seleccionar el provider (esto carga todos los mensajes)
+    this.chatService.selectProvider(conversation.providerId);
+
+    // Actualizar estado local
+    this.activeConversation = conversation;
+    this.selectedProviderId = conversation.providerId;
+
+    // El provider se actualizará automáticamente a través de la suscripción a chatState$
+    console.log('FloatingChatModal: Conversación seleccionada, cargando mensajes...');
   }
 
   // Método para enviar mensajes
@@ -216,7 +265,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     return provider.id;
   }
 
-  trackByConversation(index: number, conversation: Conversation): string {
+  trackByConversation(index: number, conversation: Conversation): number {
     return conversation.id;
   }
 
@@ -233,12 +282,17 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   }
 
   get hasSelectedProvider(): boolean {
-    return this.selectedProvider !== null;
+    // Verificar si hay un provider seleccionado en el ChatService
+    return this.selectedProviderId !== null && this.selectedProviderId !== undefined;
   }
 
   get modalTitle(): string {
-    if (this.activeTab === 'messages' && this.selectedProvider) {
-      return `Chat con ${this.selectedProvider.contactName}`;
+    if (this.activeTab === 'messages' && this.activeConversation) {
+      // Mostrar nombre del participante de la conversación
+      const participantName = this.activeConversation.participant?.nombre ||
+                             this.activeConversation.participant2?.nombre ||
+                             `Usuario #${this.selectedProviderId}`;
+      return `Chat con ${participantName}`;
     }
     return this.tabLabels[this.activeTab];
   }
@@ -247,4 +301,66 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   // Adjust this mapping according to your tab order and ModalTab definition
   return index === 0 ? 'contacts' : 'messages';
 }
+
+  getAnimationClass(): string {
+    return this.animationContext.applyAnimation();
+  }
+
+  /**
+   * Configura actualizaciones en tiempo real para mensajes
+   * Similar al patrón de smart components de reviews
+   */
+  private setupRealtimeUpdates(): void {
+    console.log('FloatingChatModal: Configurando actualizaciones en tiempo real');
+
+    // Ya conectado por el ChatSidebarComponent, solo escuchar eventos
+
+    // Escuchar nuevos mensajes
+    this.chatRealtimeService.newMessages$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(conversations => {
+      if (conversations.length > 0) {
+        console.log('FloatingChatModal: 🔔 Nuevos mensajes detectados:', conversations.length);
+
+        // Actualizar conversaciones automáticamente
+        this.chatService.loadInitialConversations().subscribe({
+          next: () => {
+            console.log('FloatingChatModal: Conversaciones actualizadas automáticamente');
+
+            // Si el modal está en el tab de mensajes, mostrar notificación visual
+            if (this.activeTab === 'messages') {
+              this.showNewMessageIndicator();
+            }
+          },
+          error: (err) => console.error('FloatingChatModal: Error actualizando conversaciones:', err)
+        });
+      }
+    });
+
+    // Escuchar estado de conexión
+    this.chatRealtimeService.state$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(state => {
+      if (state.error) {
+        console.warn('FloatingChatModal: Error en tiempo real:', state.error);
+      }
+
+      if (!state.isConnected && state.error) {
+        // Mostrar indicador de desconexión si es necesario
+        console.error('FloatingChatModal: Desconectado del servicio en tiempo real');
+      }
+    });
+  }
+
+  /**
+   * Muestra un indicador visual de nuevo mensaje
+   * (puede ser un badge, notificación, etc.)
+   */
+  private showNewMessageIndicator(): void {
+    // TODO: Implementar indicador visual
+    console.log('FloatingChatModal: 💬 Nuevos mensajes disponibles');
+
+    // Ejemplo: Podría emitir un evento al header para mostrar badge
+    // o simplemente hacer scroll al último mensaje automáticamente
+  }
 }

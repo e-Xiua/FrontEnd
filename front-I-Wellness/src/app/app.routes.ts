@@ -49,6 +49,7 @@ import { DashboardTestComponent } from './features/dashboard-test/dashboard-test
 // Shared/Common components
 import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
 import { InfoServicioComponent } from './features/users/proveedor/info-servicio/info-servicio.component';
+import { ProfilePageComponent } from './features/users/proveedor/profile-page/profile-page.component';
 
 export const routes: Routes = [
     // Rutas públicas
@@ -103,7 +104,9 @@ export const routes: Routes = [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'perfil/:id', component: PerfilProveedorComponent },
             { path: 'rutas', component: MapaEmpresasComponent },
-            { path: 'ruta/:id', component: RutaDetalleComponent }, // Detalle de ruta para proveedores
+            { path: 'ruta/:id', component: RutaDetalleComponent },
+            { path: 'servicio/:id', component: InfoServicioComponent },
+            { path: 'ver-perfil/:id', component: ProfilePageComponent },
         ]
     },
 

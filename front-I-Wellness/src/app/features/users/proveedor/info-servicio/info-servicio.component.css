@@ -232,3 +232,67 @@ mat-form-field {
   color: #444;
 }
 
+/* Reviews Section */
+.reviews-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.review-form-wrapper {
+  margin-bottom: 2rem;
+}
+
+.reviews-display-wrapper {
+  margin-top: 1rem;
+}
+
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.info-message i {
+  font-size: 1.5rem;
+  color: #2196f3;
+}
+
+.info-message p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .reviews-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .info-message {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
