@@ -180,6 +180,7 @@ export class HeaderService {
         navigationItems: [
           { label: 'Inicio', route: '/', icon: 'home' },
           { label: 'Temas', route: '/temas', icon: 'explore' },
+          { label: 'Calendario', route: '/calendario', icon: 'event' },
         ],
         actions: [
           {

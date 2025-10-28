@@ -1,7 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
@@ -12,7 +11,10 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { Subject, takeUntil } from 'rxjs';
+import { UniversalHeaderComponent } from '../../shared/components/universal-header/universal-header.component';
 import { Evento, EventoForm } from '../../shared/models/evento';
+import { EventoApiService } from './services/evento-api.service';
 
 interface CalendarDay {
   date: Date;
@@ -29,7 +31,6 @@ interface CalendarDay {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
@@ -39,12 +40,15 @@ interface CalendarDay {
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    MatMenuModule
+    MatMenuModule,
+    UniversalHeaderComponent
   ],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css']
 })
-export class CalendarioComponent implements OnInit {
+export class CalendarioComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
   currentDate = new Date();
   currentMonth = this.currentDate.getMonth();
   currentYear = this.currentDate.getFullYear();
@@ -58,6 +62,10 @@ export class CalendarioComponent implements OnInit {
   
   calendarDays: CalendarDay[] = [];
   eventos: Evento[] = [];
+
+  isLoading = false;
+  loadError: string | null = null;
+  isSaving = false;
   
   eventoForm: FormGroup;
   showEventForm = false;
@@ -75,9 +83,9 @@ export class CalendarioComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly eventoApi: EventoApiService
   ) {
     this.eventoForm = this.fb.group({
       titulo: ['', Validators.required],
@@ -93,40 +101,13 @@ export class CalendarioComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.addSampleEvents();
     this.generateCalendar();
+    this.loadEventos();
   }
 
-  addSampleEvents() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const sampleEvent: Evento = {
-      id: '1',
-      titulo: 'Evento de Prueba',
-      descripcion: 'Este es un evento de prueba para verificar la funcionalidad',
-      fecha: tomorrow,
-      duracion: 60,
-      costo: 50,
-      asistentes: ['test@ejemplo.com'],
-      tipo: 'evento',
-      color: '#4CAF50'
-    };
-    
-    const sampleMeeting: Evento = {
-      id: '2',
-      titulo: 'Reunión de Equipo',
-      descripcion: 'Reunión semanal del equipo de desarrollo',
-      fecha: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000),
-      duracion: 90,
-      costo: 0,
-      asistentes: ['dev1@ejemplo.com', 'dev2@ejemplo.com'],
-      tipo: 'reunion',
-      color: '#2196F3'
-    };
-    
-    this.eventos.push(sampleEvent, sampleMeeting);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   generateAvailableYears() {
@@ -135,6 +116,41 @@ export class CalendarioComponent implements OnInit {
     for (let year = currentYear - 10; year <= currentYear + 10; year++) {
       this.availableYears.push(year);
     }
+  }
+
+  private loadEventos(): void {
+    this.isLoading = true;
+    this.loadError = null;
+
+    this.eventoApi.getEventos()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (eventos) => {
+          this.isLoading = false;
+          const formattedEventos = eventos
+            .map((evento) => ({
+              ...evento,
+              color: evento.color || this.getColorForType(evento.tipo)
+            }))
+            .filter(evento => evento.activo !== false);
+
+          this.eventos = formattedEventos
+            .sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+          this.generateCalendar();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al cargar los eventos', error);
+          this.isLoading = false;
+          this.loadError = 'No se pudieron cargar los eventos';
+          this.generateCalendar();
+          this.snackBar.open('No se pudieron cargar los eventos', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-error'
+          });
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   generateCalendar() {
@@ -221,7 +237,7 @@ export class CalendarioComponent implements OnInit {
 
   getEventsForDate(date: Date): Evento[] {
     return this.eventos.filter(evento => {
-      const eventoDate = new Date(evento.fecha);
+      const eventoDate = evento.fecha instanceof Date ? evento.fecha : new Date(evento.fecha);
       return this.isSameDate(eventoDate, date);
     });
   }
@@ -267,8 +283,9 @@ export class CalendarioComponent implements OnInit {
     this.showEventDetail = false;
     this.showEventForm = true;
     
-    const fechaStr = evento.fecha.toISOString().split('T')[0];
-    const horaStr = evento.fecha.toTimeString().split(' ')[0].substring(0, 5);
+    const eventDate = evento.fecha instanceof Date ? evento.fecha : new Date(evento.fecha);
+    const fechaStr = eventDate.toISOString().split('T')[0];
+    const horaStr = eventDate.toTimeString().split(' ')[0].substring(0, 5);
     
     this.eventoForm.patchValue({
       titulo: evento.titulo,
@@ -286,6 +303,7 @@ export class CalendarioComponent implements OnInit {
     this.selectedDate = null;
     this.selectedEvent = null;
     this.isEditing = false;
+    this.isSaving = false;
     this.eventoForm.reset();
   }
 
@@ -300,83 +318,165 @@ export class CalendarioComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.eventoForm.valid && (this.selectedDate || this.isEditing)) {
-      const formData = this.eventoForm.value as EventoForm;
-      const [year, month, day] = formData.fecha.split('-');
-      const [hours, minutes] = formData.hora.split(':');
-      
-      const eventDate = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hours),
-        parseInt(minutes)
-      );
+    if (!this.eventoForm.valid || (!this.selectedDate && !this.isEditing)) {
+      return;
+    }
 
-      const asistentes = formData.asistentes
-        .split(',')
-        .map(email => email.trim())
-        .filter(email => email.length > 0);
+    const formData = this.eventoForm.value as EventoForm;
+    const [year, month, day] = formData.fecha.split('-').map(value => parseInt(value, 10));
+    const [hours, minutes] = formData.hora.split(':').map(value => parseInt(value, 10));
 
-      if (this.isEditing && this.selectedEvent) {
-        const eventIndex = this.eventos.findIndex(e => e.id === this.selectedEvent!.id);
-        if (eventIndex !== -1) {
-          this.eventos[eventIndex] = {
-            ...this.eventos[eventIndex],
-            titulo: formData.titulo,
-            descripcion: formData.descripcion,
-            fecha: eventDate,
-            duracion: formData.duracion,
-            costo: formData.costo || 0,
-            asistentes: asistentes,
-            tipo: this.selectedEventType,
-            color: this.selectedEventType === 'evento' ? '#4CAF50' : '#2196F3'
-          };
-        }
-        
-        this.snackBar.open(
-          `${this.selectedEventType === 'evento' ? 'Evento' : 'Reunión'} actualizado exitosamente`,
-          'Cerrar',
-          { duration: 3000, panelClass: 'snackbar-success' }
-        );
-      } else {
-        const newEvent: Evento = {
-          id: Date.now().toString(),
-          titulo: formData.titulo,
-          descripcion: formData.descripcion,
-          fecha: eventDate,
-          duracion: formData.duracion,
-          costo: formData.costo || 0,
-          asistentes: asistentes,
-          tipo: this.selectedEventType,
-          color: this.selectedEventType === 'evento' ? '#4CAF50' : '#2196F3'
-        };
+    const eventDate = new Date(year, month - 1, day, hours, minutes);
 
-        this.eventos.push(newEvent);
-        
-        this.snackBar.open(
-          `${this.selectedEventType === 'evento' ? 'Evento' : 'Reunión'} creado exitosamente`,
-          'Cerrar',
-          { duration: 3000, panelClass: 'snackbar-success' }
-        );
+    const asistentes = formData.asistentes
+      ? formData.asistentes
+          .split(',')
+          .map(email => email.trim())
+          .filter(email => email.length > 0)
+      : [];
+
+    const entityLabel = this.selectedEventType === 'evento' ? 'Evento' : 'Reunión';
+    const entityLowerLabel = this.selectedEventType === 'evento' ? 'evento' : 'reunión';
+    const entityArticle = this.selectedEventType === 'evento' ? 'el' : 'la';
+
+    const baseEvent: Evento = {
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      fecha: eventDate,
+      duracion: formData.duracion,
+      costo: formData.costo || 0,
+      asistentes,
+      tipo: this.selectedEventType,
+      color: this.getColorForType(this.selectedEventType),
+      activo: this.selectedEvent?.activo ?? true
+    };
+
+    this.isSaving = true;
+
+    if (this.isEditing) {
+      if (!this.selectedEvent?.id) {
+        this.isSaving = false;
+        this.snackBar.open('No se pudo identificar el evento a actualizar', 'Cerrar', {
+          duration: 3000,
+          panelClass: 'snackbar-error'
+        });
+        return;
       }
-      
-      this.eventos.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-      this.closeEventForm();
-      this.generateCalendar();
+
+      const patchPayload = this.buildPatchPayload(this.selectedEvent, baseEvent, this.selectedEventType);
+
+      if (Object.keys(patchPayload).length === 0) {
+        this.isSaving = false;
+        this.snackBar.open('No se detectaron cambios para actualizar', 'Cerrar', {
+          duration: 3000,
+          panelClass: 'snackbar-success'
+        });
+        return;
+      }
+
+      this.eventoApi.patchEvento(this.selectedEvent.id, patchPayload)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (eventoActualizado) => {
+            this.isSaving = false;
+            const index = this.eventos.findIndex(e => e.id === eventoActualizado.id);
+            if (index !== -1) {
+              this.eventos[index] = eventoActualizado;
+            } else {
+              this.eventos.push(eventoActualizado);
+            }
+            this.eventos = this.eventos
+              .filter(evento => evento.activo !== false)
+              .sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+            this.snackBar.open(`${entityLabel} actualizado exitosamente`, 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-success'
+            });
+            this.closeEventForm();
+            this.generateCalendar();
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            console.error('Error al actualizar el evento', error);
+            this.isSaving = false;
+            this.snackBar.open(`No se pudo actualizar ${entityArticle} ${entityLowerLabel}`, 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-error'
+            });
+          }
+        });
+    } else {
+      const newEvent: Evento = {
+        ...baseEvent
+      };
+
+      this.eventoApi.createEvento(newEvent)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (eventoCreado) => {
+            this.isSaving = false;
+            this.eventos.push(eventoCreado);
+            this.eventos = this.eventos
+              .filter(evento => evento.activo !== false)
+              .sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+            this.snackBar.open(`${entityLabel} creado exitosamente`, 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-success'
+            });
+            this.closeEventForm();
+            this.generateCalendar();
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            console.error('Error al crear el evento', error);
+            this.isSaving = false;
+            this.snackBar.open(`No se pudo crear ${entityArticle} ${entityLowerLabel}`, 'Cerrar', {
+              duration: 3000,
+              panelClass: 'snackbar-error'
+            });
+          }
+        });
     }
   }
 
-  deleteEvent(eventId: string) {
-    this.eventos = this.eventos.filter(evento => evento.id !== eventId);
-    this.snackBar.open('Evento eliminado', 'Cerrar', { duration: 2000 });
-    this.generateCalendar();
+  deleteEvent(eventId?: string, onSuccess?: () => void) {
+    if (!eventId) {
+      this.snackBar.open('No se pudo identificar el evento a eliminar', 'Cerrar', {
+        duration: 3000,
+        panelClass: 'snackbar-error'
+      });
+      return;
+    }
+
+    this.eventoApi.patchEvento(eventId, { activo: false })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.eventos = this.eventos.filter(evento => evento.id !== eventId);
+          this.generateCalendar();
+          this.snackBar.open('Evento marcado como eliminado', 'Cerrar', {
+            duration: 2000,
+            panelClass: 'snackbar-success'
+          });
+          if (onSuccess) {
+            onSuccess();
+          }
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al eliminar el evento', error);
+          this.snackBar.open('No se pudo eliminar el evento', 'Cerrar', {
+            duration: 3000,
+            panelClass: 'snackbar-error'
+          });
+        }
+      });
   }
 
   deleteEventFromDetail() {
-    if (this.selectedEvent) {
-      this.deleteEvent(this.selectedEvent.id);
-      this.closeEventDetail();
+    if (this.selectedEvent?.id) {
+      const eventId = this.selectedEvent.id;
+      this.deleteEvent(eventId, () => this.closeEventDetail());
     }
   }
 
@@ -402,10 +502,69 @@ export class CalendarioComponent implements OnInit {
     this.showYearSelector = false;
   }
 
+  private getColorForType(tipo: 'evento' | 'reunion'): string {
+    return tipo === 'reunion' ? '#2196F3' : '#4CAF50';
+  }
+
+  private buildPatchPayload(original: Evento, updated: Evento, updatedType: 'evento' | 'reunion'): Partial<Evento> {
+    const patch: Partial<Evento> = {};
+
+    if (original.titulo !== updated.titulo) {
+      patch.titulo = updated.titulo;
+    }
+
+    if (original.descripcion !== updated.descripcion) {
+      patch.descripcion = updated.descripcion;
+    }
+
+    const originalDate = original.fecha instanceof Date ? original.fecha : new Date(original.fecha);
+    if (!isNaN(originalDate.getTime()) && originalDate.getTime() !== updated.fecha.getTime()) {
+      patch.fecha = updated.fecha;
+    }
+
+    if (original.duracion !== updated.duracion) {
+      patch.duracion = updated.duracion;
+    }
+
+    const originalCosto = original.costo ?? 0;
+    const updatedCosto = updated.costo ?? 0;
+    if (originalCosto !== updatedCosto) {
+      patch.costo = updatedCosto;
+    }
+
+    const originalAsistentes = this.normalizeEmails(original.asistentes);
+    const updatedAsistentes = this.normalizeEmails(updated.asistentes);
+    if (!this.arraysEqual(originalAsistentes, updatedAsistentes)) {
+      patch.asistentes = updatedAsistentes;
+    }
+
+    if (original.tipo !== updatedType) {
+      patch.tipo = updatedType;
+      patch.color = updated.color;
+    } else if (original.color !== updated.color) {
+      patch.color = updated.color;
+    }
+
+    return patch;
+  }
+
+  private normalizeEmails(emails?: string[]): string[] {
+    return (emails ?? [])
+      .map(email => email.trim())
+      .filter(email => email.length > 0);
+  }
+
+  private arraysEqual<T>(a: T[], b: T[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every((value, index) => value === b[index]);
+  }
+
   getEventSummary(): string {
     const totalEvents = this.eventos.length;
     const currentMonthEvents = this.eventos.filter(evento => {
-      const eventoDate = new Date(evento.fecha);
+      const eventoDate = evento.fecha instanceof Date ? evento.fecha : new Date(evento.fecha);
       return eventoDate.getMonth() === this.currentMonth && 
              eventoDate.getFullYear() === this.currentYear;
     }).length;

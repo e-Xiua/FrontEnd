@@ -1,12 +1,11 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, proveedorGuard, turistaGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, proveedorGuard } from './core/guards/auth.guard';
 
 // Landing/Public components
 import { HomeComponent } from './features/landing/home/home.component';
 import { LoginComponent } from './features/landing/login/login.component';
 import { RecuperarComponent } from './features/landing/recuperar/recuperar.component';
 import { RegistroComponent } from './features/landing/registro/registro.component';
-import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 import { TemasComponent } from './features/landing/temas/temas.component';
 
 // Layouts
@@ -17,7 +16,6 @@ import { TuristaLayoutComponent } from './features/users/turista/turista-layout/
 // Admin components
 import { CrearProveedorComponent } from './features/users/administrador/crear-proveedor/crear-proveedor.component';
 import { CrearTuristaComponent } from './features/users/administrador/crear-turista/crear-turista.component';
-import { DashboardAdminComponent } from './features/users/administrador/dashboard-admin/dashboard-admin.component';
 import { AdminComponent } from './features/users/administrador/home-admin/home-admin.component';
 import { PerfilAdminComponent } from './features/users/administrador/perfil-admin/perfil-admin.component';
 import { ProveedoresComponent } from './features/users/administrador/proveedores/proveedores.component';

@@ -5,6 +5,64 @@
   margin-top: 80px;
 }
 
+.status-banner {
+  background-color: #e8f4fd;
+  color: #0d47a1;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.status-banner.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+:host ::ng-deep .snackbar-success {
+  background-color: #81c784;
+  color: #000000;
+}
+
+:host ::ng-deep .snackbar-success .mat-mdc-snack-bar-label {
+  color: #000000;
+}
+
+:host ::ng-deep .snackbar-error {
+  background-color: #d32f2f;
+  color: #ffffff;
+}
+
+:host ::ng-deep .snackbar-error .mat-mdc-snack-bar-label {
+  color: #ffffff;
+}
+
+:host ::ng-deep .snackbar-success .mdc-button__label {
+  color: #000000;
+}
+
+:host ::ng-deep .snackbar-success .mdc-button {
+  background-color: #66bb6a;
+}
+
+:host ::ng-deep .snackbar-success .mdc-button:hover,
+:host ::ng-deep .snackbar-success .mdc-button:focus {
+  background-color: #4caf50;
+}
+
+:host ::ng-deep .snackbar-error .mdc-button__label {
+  color: #ffffff;
+}
+
+:host ::ng-deep .snackbar-error .mdc-button {
+  background-color: #c62828;
+}
+
+:host ::ng-deep .snackbar-error .mdc-button:hover,
+:host ::ng-deep .snackbar-error .mdc-button:focus {
+  background-color: #b71c1c;
+}
+
 .calendario-header {
   display: flex;
   justify-content: space-between;
