@@ -265,6 +265,11 @@
   align-items: center;
 }
 
+.card-actions button {
+  color: black !important;
+  border: 1px solid #1976d2 !important;
+}
+
 .compact .card-actions {
   padding: 4px 16px 12px;
 }
@@ -279,7 +284,9 @@
 }
 
 .contact-menu-wrapper {
-  flex-shrink: 0;
+  flex: 1;
+  display: flex;
+  width: 100%;
 }
 
 .compact .chat-button,
