@@ -154,7 +154,7 @@ export class HeaderService {
           { label: 'Inicio', route: '/turista/home', icon: 'home' },
           { label: 'Reservar Rutas', route: '/turista/reservar-rutas', icon: 'map' },
           { label: 'Reservas', route: '/turista/reservas', icon: 'event' },
-          { label: 'Preferencias', route: '/turista/preferencias', icon: 'tune' },
+          { label: 'Preferencias', route: '/turista/formulariogustos', icon: 'tune' },
         ],
         actions: [
           {

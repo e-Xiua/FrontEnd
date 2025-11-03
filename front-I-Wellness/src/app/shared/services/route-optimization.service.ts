@@ -21,9 +21,12 @@ export interface OptimizationPOI {
 }
 
 export interface RouteOptimizationRequest {
+  userId: number;
+  providerIds: number[];
+  optimizeFor?: 'distance' | 'cost' | 'time';
+  // Optional extended fields for future use
   routeId?: string;
-  userId?: string;
-  pois: OptimizationPOI[];
+  pois?: OptimizationPOI[];
   preferences?: {
     optimizeFor?: string;
     maxTotalTime?: number;
@@ -95,7 +98,8 @@ export interface OptimizedPOI {
 })
 export class RouteOptimizationService {
 
-  private readonly baseUrl = 'http://localhost:8085/api/v1';
+  private readonly baseUrlJobStatus = 'http://localhost:8085/api/v1';
+  private readonly baseUrl = 'http://localhost:8085/api/route-processing';
 
   constructor(private http: HttpClient) {}
 
@@ -103,13 +107,17 @@ export class RouteOptimizationService {
    * Submit route optimization request (returns 202 Accepted)
    */
   submitOptimizationRequest(request: RouteOptimizationRequest): Observable<JobSubmissionResponse> {
+    
+    const token = localStorage.getItem('token');
+      
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
     });
 
     return this.http.post<JobSubmissionResponse>(
-      `${this.baseUrl}/routes/optimize`,
+      `${this.baseUrl}/submit-optimization-job`,
       request,
       { headers }
     );
@@ -119,14 +127,14 @@ export class RouteOptimizationService {
    * Get job status
    */
   getJobStatus(jobId: string): Observable<JobStatusResponse> {
-    return this.http.get<JobStatusResponse>(`${this.baseUrl}/jobs/${jobId}/status`);
+    return this.http.get<JobStatusResponse>(`${this.baseUrlJobStatus}/jobs/${jobId}/status`);
   }
 
   /**
    * Cancel a job
    */
   cancelJob(jobId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/jobs/${jobId}`);
+    return this.http.delete<void>(`${this.baseUrlJobStatus}/jobs/${jobId}`);
   }
 
   /**
@@ -190,24 +198,6 @@ export class RouteOptimizationService {
       })
 
     );
-  }
-
-  /**
-   * Get mock POIs for testing
-   */
-  getMockPOIs(routeType: string = 'random', count: number = 8): Observable<OptimizationPOI[]> {
-    const params: any = {};
-    if (routeType !== 'random') params.routeType = routeType;
-    if (count !== 8) params.count = count;
-
-    return this.http.get<OptimizationPOI[]>(`${this.baseUrl}/pois/mock`, { params });
-  }
-
-  /**
-   * Get all available mock POIs
-   */
-  getAllMockPOIs(): Observable<OptimizationPOI[]> {
-    return this.http.get<OptimizationPOI[]>(`${this.baseUrl}/pois/all`);
   }
 
   /**
