@@ -77,7 +77,7 @@ export const routes: Routes = [
     {
         path: 'turista',
         component: TuristaLayoutComponent,
-        //canActivate: [turistaGuard],
+        canActivate: [turistaGuard],
         children: [
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeTuristaComponent },

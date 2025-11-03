@@ -46,7 +46,7 @@ describe('Registro de Proveedor', () => {
     cy.contains('button', 'Crear cuenta').click();
 
     // 5. dirigir al formulario de gustos
-    cy.url().should('include', 'http://localhost:4200/homeproveedor');
+    cy.url().should('include', 'http://localhost:4200/proveedor/home');
 
 
   });
