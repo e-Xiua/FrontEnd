@@ -1,11 +1,11 @@
 <div class="route-map-container">
   <!-- Carousel (Left side - 30%) -->
-  <div class="carousel-column" *ngIf="showCarousel && providerItems.length > 0">
+  <div class="carousel-column" *ngIf="showCarousel && mapDisplayItems.length > 0">
     <app-carousel
       mode="map-linked"
       [showHeader]="false"
       [itemsPerView]="1"
-      [linkedItems]="providerItems"
+      [linkedItems]="mapDisplayItems"
       (linkedItemChange)="onCarouselProviderChange($event)">
     </app-carousel>
   </div>

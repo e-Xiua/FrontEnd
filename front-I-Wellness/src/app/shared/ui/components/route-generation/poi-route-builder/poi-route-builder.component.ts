@@ -26,7 +26,7 @@ export class PoiRouteBuilderComponent {
 
   // ========== INPUTS (Data from parent) ==========
   
-  @Input() providers: EnrichedProviderData[] = [];
+  @Input() items: EnrichedProviderData[] = [];
   @Input() rows: RouteRow[] = [];
   @Input() isLoading: boolean = false;
   @Input() error: string | null = null;

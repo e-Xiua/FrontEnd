@@ -15,65 +15,51 @@ import {
   RouteMapDisplayComponent
 } from '../../../../shared/ui/components/route-generation';
 import { Subject, Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
+import { MapPoiComponent } from '../../../../shared/ui/components/map-poi/map-poi.component';
 
 @Component({
   selector: 'app-mapa-empresas',
-  templateUrl: './mapa-empresas.component.html',
-  styleUrls: ['./mapa-empresas.component.css'],
+  standalone: true,
   imports: [
     CommonModule,
     PoiRouteBuilderComponent,
     OptimizationStatusTrackerComponent,
-    RouteMapDisplayComponent
+    RouteMapDisplayComponent,
+    MapPoiComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true
+  templateUrl: './mapa-empresas.component.html',
+  styleUrls: ['./mapa-empresas.component.css']
 })
 export class MapaEmpresasComponent implements OnInit, OnDestroy {
 
-    // Observable streams from state service
+  // Observables from state service
   providers$: Observable<EnrichedProviderData[]>;
   selectedPois$: Observable<RouteRow[]>;
   activeJobs$: Observable<OptimizationJob[]>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
+  activeProviderId$: Observable<number | null>;
+  activeOptimizedPoiId$: Observable<number | string | null>;
+  selectedJobForDisplay$: Observable<OptimizationJob | null>;
 
-  // Local UI state
-  selectedJobForDisplay: OptimizationJob | null = null;
-  showCompletedJobs: boolean = true;
+  showCompletedJobs = true;
 
-  // Cleanup
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private stateService: RouteBuilderStateService,
-    private cdr: ChangeDetectorRef
-  ) {
-    // Initialize observables from state service
-    this.providers$ = this.stateService.providers$;
-    this.selectedPois$ = this.stateService.selectedPois$;
-    this.activeJobs$ = this.stateService.activeJobs$;
-    this.isLoading$ = this.stateService.isLoading$;
-    this.error$ = this.stateService.error$;
+  constructor(private state: RouteBuilderStateService) {
+    this.providers$ = this.state.providers$;
+    this.selectedPois$ = this.state.selectedPois$;
+    this.activeJobs$ = this.state.activeJobs$;
+    this.isLoading$ = this.state.isLoading$;
+    this.error$ = this.state.error$;
+    this.activeProviderId$ = this.state.activeProviderId$;
+    this.activeOptimizedPoiId$ = this.state.activeOptimizedPoiId$;
+    this.selectedJobForDisplay$ = this.state.selectedJobForDisplay$;
   }
 
   ngOnInit(): void {
-    // Load all providers (empty array means load all)
-    // TODO: In a real app, you might filter this based on user preferences or location
-    this.stateService.loadProviders();
-
-    // Subscribe to active jobs to automatically display completed routes
-    this.activeJobs$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(jobs => {
-        // Auto-select the first completed job for map display
-        const completedJob = jobs.find(job => job.status === 'COMPLETED' && job.result);
-        if (completedJob && !this.selectedJobForDisplay) {
-          this.selectedJobForDisplay = completedJob;
-          this.cdr.markForCheck();
-        }
-      });
+    this.state.loadProviders();
   }
 
   ngOnDestroy(): void {
@@ -89,84 +75,98 @@ export class MapaEmpresasComponent implements OnInit, OnDestroy {
    * Handle add row event from poi-route-builder
    */
   onAddRow(): void {
-    this.stateService.addPoiToRoute();
+    this.state.addPoiToRoute();
   }
 
   /**
    * Handle remove row event from poi-route-builder
    */
   onRemoveRow(rowId: string): void {
-    this.stateService.removePoiFromRoute(rowId);
+    this.state.removePoiFromRoute(rowId);
   }
 
   /**
    * Handle provider selection event from poi-route-builder
    */
   onProviderSelected(event: { rowId: string; providerId: number }): void {
-    this.stateService.updateRowProvider(event.rowId, event.providerId);
+    this.state.updateRowProvider(event.rowId, event.providerId);
   }
 
   /**
    * Handle service selection event from poi-route-builder
    */
   onServiceSelected(event: { rowId: string; serviceId: number }): void {
-    this.stateService.updateRowService(event.rowId, event.serviceId);
+    this.state.updateRowService(event.rowId, event.serviceId);
   }
 
   /**
    * Handle start optimization event from poi-route-builder
    */
-  onStartOptimization(optimizeFor: 'distance' | 'cost' | 'time'): void {
-    // TODO: Get actual user ID from auth service
-    const mockUserId = 1;
-    this.stateService.startOptimization(mockUserId, optimizeFor);
+  onStartOptimization(criteria: 'distance' | 'cost' | 'time'): void {
+    // Assuming a logged-in user with ID 1 for now
+    this.state.startOptimization(1, criteria);
   }
 
   /**
    * Handle view result event from optimization-status-tracker
    */
-  onViewResult(job: OptimizationJob): void {
-    this.selectedJobForDisplay = job;
-    this.cdr.markForCheck();
+  onViewResult(jobId: string): void {
+    this.state.selectJob(jobId);
   }
 
   /**
    * Handle cancel job event from optimization-status-tracker
    */
   onCancelJob(jobId: string): void {
-    this.stateService.cancelJob(jobId);
+    this.state.cancelJob(jobId);
   }
 
   /**
    * Handle remove job event from optimization-status-tracker
    */
   onRemoveJob(jobId: string): void {
-    this.stateService.removeJob(jobId);
-    
-    // If the removed job was being displayed, clear the display
-    if (this.selectedJobForDisplay?.jobId === jobId) {
-      this.selectedJobForDisplay = null;
-      this.cdr.markForCheck();
-    }
+    this.state.removeJob(jobId);
   }
 
   /**
    * Handle clear completed jobs event from optimization-status-tracker
    */
   onClearCompleted(): void {
-    this.stateService.clearCompletedJobs();
-    
-    // Clear the display if showing a completed job
-    if (this.selectedJobForDisplay?.status === 'COMPLETED') {
-      this.selectedJobForDisplay = null;
-      this.cdr.markForCheck();
-    }
+    this.state.clearCompletedJobs();
   }
 
   /**
    * Handle retry load event for error state
    */
   retryLoad(): void {
-    this.stateService.loadProviders();
+    this.state.loadProviders();
+  }
+
+  // ==================================================
+  // MAP INTERACTION HANDLERS
+  // ==================================================
+
+  onProviderMapItemSelected(providerId: number | string): void {
+    this.state.setActiveProvider(providerId as number);
+  }
+
+  onProviderMapNext(): void {
+    this.state.selectNextProvider();
+  }
+
+  onProviderMapPrevious(): void {
+    this.state.selectPreviousProvider();
+  }
+
+  onOptimizedMapItemSelected(poiId: number | string): void {
+    this.state.setActiveOptimizedPoi(poiId);
+  }
+
+  onOptimizedMapNext(): void {
+    this.state.selectNextOptimizedPoi();
+  }
+
+  onOptimizedMapPrevious(): void {
+    this.state.selectPreviousOptimizedPoi();
   }
 }

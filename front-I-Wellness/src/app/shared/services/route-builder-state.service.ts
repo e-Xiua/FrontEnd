@@ -17,7 +17,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, interval, throwError, forkJoin } from 'rxjs';
+import { BehaviorSubject, Observable, interval, throwError, forkJoin, of } from 'rxjs';
 import { map, switchMap, takeWhile, tap, catchError, finalize } from 'rxjs/operators';
 
 // Services
@@ -33,9 +33,11 @@ import {
   JobSubmissionResponse,
   JobStatusResponse,
   OptimizationJob,
-  OptimizationResult
+  OptimizationResult,
+  OptimizedPOI
 } from '../models/route-generation';
 import { ServicioService } from '../../features/servicios/services/servicio.service';
+import { MapDisplayItem } from '../models/map-display.model';
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +57,12 @@ export class RouteBuilderStateService {
   private _isLoading$ = new BehaviorSubject<boolean>(false);
   private _error$ = new BehaviorSubject<string | null>(null);
 
+  // New state for map UI
+  private _activeProviderId$ = new BehaviorSubject<number | null>(null);
+  private _activeOptimizedPoiId$ = new BehaviorSubject<number | string | null>(null);
+  private _selectedJobId$ = new BehaviorSubject<string | null>(null);
+
+
   // ========== PUBLIC OBSERVABLES (Read-only) ==========
 
   public readonly providers$ = this._providers$.asObservable();
@@ -63,6 +71,11 @@ export class RouteBuilderStateService {
   public readonly isLoading$ = this._isLoading$.asObservable();
   public readonly error$ = this._error$.asObservable();
 
+  // New public observables for map UI
+  public readonly activeProviderId$ = this._activeProviderId$.asObservable();
+  public readonly activeOptimizedPoiId$ = this._activeOptimizedPoiId$.asObservable();
+  public readonly selectedJobId$ = this._selectedJobId$.asObservable();
+
   // Computed observables
   public readonly completedJobs$: Observable<OptimizationJob[]> = this.activeJobs$.pipe(
     map(jobs => jobs.filter(job => job.status === 'COMPLETED'))
@@ -70,6 +83,12 @@ export class RouteBuilderStateService {
 
   public readonly processingJobs$: Observable<OptimizationJob[]> = this.activeJobs$.pipe(
     map(jobs => jobs.filter(job => job.status === 'PROCESSING' || job.status === 'PENDING'))
+  );
+
+  public readonly selectedJobForDisplay$: Observable<OptimizationJob | null> = this.selectedJobId$.pipe(
+    switchMap(jobId => this.completedJobs$.pipe(
+      map(jobs => jobs.find(j => j.jobId === jobId) || null)
+    ))
   );
 
   constructor(
@@ -103,14 +122,18 @@ export class RouteBuilderStateService {
         switchMap((providers: BackendProviderResponse[]) => {
           console.log(`Fetched ${providers.length} providers, now fetching services for each...`);
           
+          if (providers.length === 0) {
+            return of([]);
+          }
+
           // Fetch services for each provider in parallel
           const serviceRequests = providers.map(provider =>
             this.servicioService.obtenerServiciosPorProveedor(provider.id).pipe(
               map(services => ({ providerId: provider.id, services })),
               catchError(error => {
                 console.warn(`Failed to fetch services for provider ${provider.id}:`, error);
-                // Return empty services array if fetch fails
-                return [{ providerId: provider.id, services: [] }];
+                // Return an observable of an object with empty services array
+                return of({ providerId: provider.id, services: [] });
               })
             )
           );
@@ -486,5 +509,204 @@ export class RouteBuilderStateService {
    */
   clearError(): void {
     this._error$.next(null);
+  }
+
+  // ==================================================
+  // MAP UI STATE MANAGEMENT
+  // ==================================================
+
+  /**
+   * Sets the active provider for the general map view.
+   */
+  setActiveProvider(providerId: number | null): void {
+    this._activeProviderId$.next(providerId);
+  }
+
+  /**
+   * Selects the next provider in the list.
+   */
+  selectNextProvider(): void {
+    const providers = this._providers$.value;
+    if (providers.length === 0) return;
+
+    const currentId = this._activeProviderId$.value;
+    const currentIndex = providers.findIndex(p => p.provider.id === currentId);
+    const nextIndex = (currentIndex + 1) % providers.length;
+    
+    this.setActiveProvider(providers[nextIndex].provider.id);
+  }
+
+  /**
+   * Selects the previous provider in the list.
+   */
+  selectPreviousProvider(): void {
+    const providers = this._providers$.value;
+    if (providers.length === 0) return;
+
+    const currentId = this._activeProviderId$.value;
+    const currentIndex = providers.findIndex(p => p.provider.id === currentId);
+    const prevIndex = (currentIndex - 1 + providers.length) % providers.length;
+    
+    this.setActiveProvider(providers[prevIndex].provider.id);
+  }
+
+  /**
+   * Sets the active optimized POI for the detailed map view.
+   */
+  setActiveOptimizedPoi(poiId: number | string | null): void {
+    this._activeOptimizedPoiId$.next(poiId);
+  }
+
+  /**
+   * Selects the next optimized POI in the list.
+   */
+  selectNextOptimizedPoi(): void {
+    const currentId = this._activeOptimizedPoiId$.value;
+    const optimizedPois = this._activeJobs$.value.find(j => j.jobId === this._selectedJobId$.value)?.result?.optimizedSequence;
+    if (!optimizedPois || !currentId) return;
+
+    const currentIndex = optimizedPois.findIndex(poi => poi.poiId === currentId);
+    const nextIndex = (currentIndex + 1) % optimizedPois.length;
+    this.setActiveOptimizedPoi(optimizedPois[nextIndex].poiId);
+  }
+
+  selectPreviousOptimizedPoi(): void {
+    const currentId = this._activeOptimizedPoiId$.value;
+    const optimizedPois = this._activeJobs$.value.find(j => j.jobId === this._selectedJobId$.value)?.result?.optimizedSequence;
+    if (!optimizedPois || !currentId) return;
+
+    const currentIndex = optimizedPois.findIndex(poi => poi.poiId === currentId);
+    const prevIndex = (currentIndex - 1 + optimizedPois.length) % optimizedPois.length;
+    this.setActiveOptimizedPoi(optimizedPois[prevIndex].poiId);
+  }
+
+  // Job history management
+  selectJob(jobId: string | null): void {
+    this._selectedJobId$.next(jobId);
+  }
+
+  /**
+   * Clears the active provider and optimized POI selection.
+   */
+  clearActiveSelections(): void {
+    this.setActiveProvider(null);
+    this.setActiveOptimizedPoi(null);
+  }
+
+  /**
+   * Zooms the map to fit all providers in the current route.
+   */
+  zoomToFitProviders(map: any): void {
+    const providers = this._selectedPois$.value
+      .map(row => this._providers$.value.find(p => p.provider.id === row.providerId))
+      .filter((provider): provider is EnrichedProviderData => provider !== undefined);
+
+    if (providers.length === 0) return;
+
+    const bounds = new google.maps.LatLngBounds();
+    providers.forEach(provider => {
+      if (provider.provider.coordenadax && provider.provider.coordenaday) {
+        bounds.extend(new google.maps.LatLng(provider.provider.coordenadax, provider.provider.coordenaday));
+      }
+    });
+
+    map.fitBounds(bounds);
+  }
+
+  /**
+   * Zooms the map to fit the optimized route.
+   */
+  zoomToFitRoute(map: any, jobId: string): void {
+    const job = this._activeJobs$.value.find(j => j.jobId === jobId);
+    if (!job || !job.result || !job.result.optimizedSequence || job.result.optimizedSequence.length === 0) {
+      console.warn('Cannot zoom to fit route, no data available');
+      return;
+    }
+
+    const bounds = new google.maps.LatLngBounds();
+    job.result.optimizedSequence.forEach(poi => {
+      if (poi.latitude && poi.longitude) {
+        bounds.extend(new google.maps.LatLng(poi.latitude, poi.longitude));
+      }
+    });
+
+    map.fitBounds(bounds);
+  }
+
+  /**
+   * Centers the map on the active provider.
+   */
+  centerMapOnActiveProvider(map: any): void {
+    const provider = this._providers$.value.find(p => p.provider.id === this._activeProviderId$.value);
+    if (provider && provider.provider.coordenadax && provider.provider.coordenaday) {
+      map.setCenter(new google.maps.LatLng(provider.provider.coordenadax, provider.provider.coordenaday));
+    }
+  }
+
+  /**
+   * Centers the map on the active optimized POI.
+   */
+  centerMapOnActiveOptimizedPoi(map: any): void {
+    const allPois = this._activeJobs$.value.flatMap(j => j.result?.optimizedSequence ?? []);
+    const poi = allPois.find(p => p.poiId === this._activeOptimizedPoiId$.value);
+    if (poi && poi.latitude && poi.longitude) {
+      map.setCenter(new google.maps.LatLng(poi.latitude, poi.longitude));
+    }
+  }
+
+  /**
+   * Toggles the visibility of the route on the map.
+   */
+  toggleRouteVisibility(map: any, jobId: string): void {
+    const job = this._activeJobs$.value.find(j => j.jobId === jobId);
+    if (!job || !job.result || !job.result.optimizedSequence || job.result.optimizedSequence.length === 0) {
+      console.warn('Cannot toggle route visibility, no data available');
+      return;
+    }
+
+    const route = job.result.optimizedSequence;
+    const isVisible = map.getRouteVisibility(jobId);
+
+    if (isVisible) {
+      map.hideRoute(jobId);
+    } else {
+      map.showRoute(route, jobId);
+    }
+  }
+
+  /**
+   * Exports the optimized route to GPX format.
+   */
+  exportRouteToGPX(jobId: string): string | null {
+    const job = this._activeJobs$.value.find(j => j.jobId === jobId);
+    if (!job || !job.result || !job.result.optimizedSequence || job.result.optimizedSequence.length === 0) {
+      console.warn('Cannot export route to GPX, no data available');
+      return null;
+    }
+
+    const gpxHeader = `<?xml version="1.0" encoding="UTF-8"?>
+    <gpx version="1.1" creator="RouteBuilder">
+      <metadata>
+        <name>${job.routeName}</name>
+        <desc>Optimized route generated by RouteBuilder</desc>
+        <author>RouteBuilder</author>
+        <time>${job.completedAt ? job.completedAt.toISOString() : new Date().toISOString()}</time>
+      </metadata>
+      <trk>
+        <name>${job.routeName}</name>
+        <trkseg>`;
+    const gpxFooter = `</trkseg>
+      </trk>
+    </gpx>`;
+
+    const gpxBody = job.result.optimizedSequence.map(poi => {
+      return `
+        <trkpt lat="${poi.latitude}" lon="${poi.longitude}">
+          <time>${poi.arrivalTime ? new Date(poi.arrivalTime).toISOString() : ''}</time>
+          <name>${poi.name}</name>
+        </trkpt>`;
+    }).join('');
+
+    return gpxHeader + gpxBody + gpxFooter;
   }
 }

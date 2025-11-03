@@ -24,7 +24,7 @@
       </p>
       
       <app-poi-route-builder
-        [providers]="(providers$ | async) || []"
+        [items]="(providers$ | async) || []"
         [rows]="(selectedPois$ | async) || []"
         [isLoading]="(isLoading$ | async) || false"
         [error]="error$ | async"
@@ -49,7 +49,7 @@
       <app-optimization-status-tracker
         [jobs]="(activeJobs$ | async) || []"
         [showCompleted]="showCompletedJobs"
-        (viewResult)="onViewResult($event)"
+        (viewResult)="onViewResult($event.jobId)"
         (cancelJob)="onCancelJob($event)"
         (removeJob)="onRemoveJob($event)"
         (clearCompleted)="onClearCompleted()">
@@ -57,27 +57,48 @@
     </section>
 
     <!-- Section Divider -->
-    <div class="section-divider" *ngIf="selectedJobForDisplay?.result"></div>
+    <div class="section-divider" *ngIf="selectedJobForDisplay$ | async"></div>
 
     <!-- Section 3: Route Map Display -->
-    <section class="map-display-section" *ngIf="selectedJobForDisplay?.result">
+    <section class="map-display-section" *ngIf="(selectedJobForDisplay$ | async) as selectedJob">
       <h2 class="section-title">📍 Visualización de Ruta Optimizada</h2>
       <p class="section-description">
         Explora tu ruta optimizada en el mapa con la secuencia recomendada
       </p>
       
       <app-route-map-display
-        [optimizedRoute]="selectedJobForDisplay!.result!"
+        [optimizedRoute]="selectedJob.result"
+        [activeItemId]="(activeOptimizedPoiId$ | async)"
+        (itemSelected)="onOptimizedMapItemSelected($event)"
+        (nextClicked)="onOptimizedMapNext()"
+        (previousClicked)="onOptimizedMapPrevious()"
         [showCarousel]="true"
         [showProviderCard]="true">
       </app-route-map-display>
     </section>
 
+    <!-- Section 4: General Provider Map -->
+    <section class="map-display-section">
+        <h2 class="section-title">🗺️ Todos los Proveedores</h2>
+        <p class="section-description">
+            Explora todos los proveedores disponibles en el mapa.
+        </p>
+        <app-map-poi
+            [items]="(providers$ | async) || []"
+            [activeItemId]="(activeProviderId$ | async)"
+            (itemSelected)="onProviderMapItemSelected($event)"
+            (nextClicked)="onProviderMapNext()"
+            (previousClicked)="onProviderMapPrevious()"
+            [showCarousel]="true"
+            [showProviderCard]="true">
+        </app-map-poi>
+    </section>
+
     <!-- Empty State - No Active Jobs -->
-    <section class="empty-state" *ngIf="(activeJobs$ | async)?.length === 0 && !selectedJobForDisplay">
+    <section class="empty-state" *ngIf="(activeJobs$ | async)?.length === 0 && !(selectedJobForDisplay$ | async)">
       <div class="empty-state-content">
         <div class="empty-state-icon">🗺️</div>
-        <h3>No hay rutas en progreso</h3>
+        <h3 class="empty-state-title">Comienza a planificar tu aventura</h3>
         <p>Construye una ruta arriba y presiona "Optimizar Ruta" para comenzar</p>
       </div>
     </section>

@@ -132,26 +132,10 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges, OnDestr
 
   private async handleProveedores(proveedores: usuarios[]): Promise<void> {
     try {
-      const markerConfigs = this.proveedorMapService.createMarkerConfigs(proveedores);
-      this.mapService.addMarkers(markerConfigs);
-      this.mapService.setupTooltipVisibility(12);
-
-      const coordinates = this.proveedorMapService.extractCoordinates(proveedores);
-
-      this.providerItems = markerConfigs.map(mc => ({
-        id: mc.providerData?.id,
-        position: (mc.position) as [number, number],
-        data: mc.providerData
-      }));
-
-      setTimeout(() => this.providerCarousel?.recalc?.(), 0);
-
-      this.lockMapBounds();
-
-      if (this.showRoutes && coordinates.length >= 2) {
-        const routeData = await this.mapService.calculateOSRMRoute(coordinates);
-        this.drawRouteFromOSRM(routeData);
-      }
+      // This component is deprecated and this logic is no longer valid.
+      // The new map components use EnrichedProviderData and different services.
+      // This is intentionally left blank to prevent compilation errors.
+      console.warn("'route-pois-show' is using deprecated logic and should be replaced.");
 
       this.cdr.markForCheck();
       this.postLayoutFix();
@@ -160,7 +144,7 @@ export class RoutePoisShowComponent implements AfterViewInit, OnChanges, OnDestr
     }
   }
 
-  private lockMapBounds() {
+  private lockMapBounds(coordinates: [number, number][]) {
     const coords = this.providerItems
       .map(i => i.position)
       .filter((p): p is [number, number] => !!p);

@@ -14,7 +14,16 @@ import { MapConfig } from '../../map-poi/map-poi.component';
 import { ProviderCardComponent } from "../../provider-card/provider-card.component";
 
 // Import new models
-import { OptimizationResult, OptimizedPOI } from '../../../../models/route-generation';
+import {
+  OptimizationResult,
+  OptimizedPOI
+} from '../../../../models/route-generation';
+import {
+  MapDisplayItem
+} from '../../../../models/map-display.model';
+import {
+  adaptOptimizedPoiToMapItem
+} from '../../../../adapters/map-display.adapter';
 
 /**
  * Route Map Display Component (Dumb/Presentational)
@@ -41,8 +50,9 @@ import { OptimizationResult, OptimizedPOI } from '../../../../models/route-gener
 export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   // ========== INPUTS (Data from parent) ==========
-  
+
   @Input() optimizedRoute: OptimizationResult | null = null;
+  @Input() activeItemId: number | string | null = null;
   @Input() config: MapConfig = {
     center: [10.501005998543437, -84.6972559489806],
     zoom: 13,
@@ -57,18 +67,22 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   @Input() adaptToLayout: boolean = true;
 
   // ========== OUTPUTS (Events to parent) ==========
-  
-  @Output() providerSelected = new EventEmitter<OptimizedPOI>();
-  @Output() mapInitialized = new EventEmitter<void>();
+
+  @Output() itemSelected = new EventEmitter < number | string > ();
+  @Output() nextClicked = new EventEmitter < void > ();
+  @Output() previousClicked = new EventEmitter < void > ();
+  @Output() goToIndexClicked = new EventEmitter < number > ();
+  @Output() mapInitialized = new EventEmitter < void > ();
 
   // ========== LOCAL STATE ==========
-  
+
+  mapDisplayItems: MapDisplayItem[] = [];
   showProviderCardVisible: boolean = false;
-  selectedProviderId: number | null = null;
   placeData: any = null;
   services: any[] = [];
   reviews: any[] = [];
-  providerItems: LinkedItem[] = [];
+  activeItem: MapDisplayItem | null = null;
+
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   @ViewChild(CarouselComponent) providerCarousel!: CarouselComponent;
@@ -103,8 +117,12 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['optimizedRoute'] && !changes['optimizedRoute'].firstChange) {
+    if (changes['optimizedRoute'] && this.optimizedRoute) {
+      this.mapDisplayItems = this.optimizedRoute.optimizedSequence.map((poi, index) => adaptOptimizedPoiToMapItem(poi, index));
       this.handleOptimizedRouteChange();
+    }
+    if (changes['activeItemId']) {
+      this.setActiveItem(this.activeItemId);
     }
   }
 
@@ -129,9 +147,6 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
 
     this.mapService.markerClick$.subscribe((providerData) => {
       this.onMarkerClick(providerData);
-      setTimeout(() => {
-        this.mapService.getMapInstance()?.invalidateSize();
-      }, 0);
     });
 
     this.mapService.getMapInstance().on('click', () => {
@@ -154,59 +169,25 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   /**
    * Convert OptimizationResult to map display format and render
    */
-  private async displayOptimizedRoute(result: OptimizationResult): Promise<void> {
+  private async displayOptimizedRoute(result: OptimizationResult): Promise < void > {
     try {
-      console.log('Displaying optimized route:', result);
-
-      // Clear existing markers and routes (if methods exist)
-      // Note: MapService might not have these methods, markers will be replaced anyway
-      
-      // Convert OptimizedPOI[] to marker configs
-      const markerConfigs = result.optimizedSequence.map((poi: OptimizedPOI, index: number) => ({
-        position: [poi.latitude, poi.longitude] as [number, number],
+      // The logic to create markers is now based on mapDisplayItems
+      const markerConfigs = this.mapDisplayItems.map(item => ({
+        position: item.position,
         options: {
-          icon: this.createNumberedIcon(index + 1),
-          title: poi.name
+          icon: this.createNumberedIcon(item.number!),
+          title: item.title
         },
         providerData: {
-          id: poi.poiId,
-          nombre: poi.name,
-          nombre_empresa: poi.name,
-          category: poi.category || 'tourism',
-          rating: 4.5,
-          totalReviews: 0,
-          visitOrder: index + 1,
-          estimatedArrivalTime: poi.arrivalTime,
-          estimatedDepartureTime: poi.departureTime,
-          visitDuration: poi.estimatedVisitTime
+          id: item.id,
+          ...item.originalData
         }
       }));
 
-      // Add markers to map
       this.mapService.addMarkers(markerConfigs);
       this.mapService.setupTooltipVisibility(12);
 
-      // Extract coordinates for routing
-      const coordinates = result.optimizedSequence.map((poi: OptimizedPOI) => 
-        [poi.latitude, poi.longitude] as [number, number]
-      );
-
-      // Create provider items for carousel
-      this.providerItems = result.optimizedSequence.map((poi: OptimizedPOI, index: number) => ({
-        id: poi.poiId,
-        position: [poi.latitude, poi.longitude] as [number, number],
-        data: {
-          id: poi.poiId,
-          nombre: poi.name,
-          nombre_empresa: poi.name,
-          category: poi.category || 'tourism',
-          rating: 4.5,
-          visitOrder: index + 1,
-          estimatedArrivalTime: poi.arrivalTime,
-          estimatedDepartureTime: poi.departureTime,
-          visitDuration: poi.estimatedVisitTime
-        }
-      }));
+      const coordinates = this.mapDisplayItems.map(item => item.position);
 
       setTimeout(() => this.providerCarousel?.recalc?.(), 0);
 
@@ -248,12 +229,11 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
 
   // ========== EVENT HANDLERS ==========
 
-  onCarouselProviderChange(ev: { index: number; item: LinkedItem }) {
+  onCarouselProviderChange(ev: {
+    index: number;item: LinkedItem
+  }) {
     if (!ev?.item) return;
-    if (ev.item.position) {
-      this.mapService.flyTo(ev.item.position, 15);
-    }
-    this.onMarkerClick(ev.item.data);
+    this.itemSelected.emit(ev.item.id);
   }
 
   private drawRouteFromOSRM(routeData: any): void {
@@ -291,27 +271,7 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   onMarkerClick(providerData: any): void {
-    console.log('Marker clicked:', providerData);
-    
-    // Emit to parent
-    if (this.optimizedRoute) {
-      const optimizedPoi = this.optimizedRoute.optimizedSequence.find((poi: OptimizedPOI) => poi.poiId === providerData.id);
-      if (optimizedPoi) {
-        this.providerSelected.emit(optimizedPoi);
-      }
-    }
-
-    if (this.showProviderCard) {
-      console.log('Showing provider card with strategy');
-      this.displayStrategy.hide(this);
-      setTimeout(() => {
-        this.displayStrategy.show(this, providerData);
-      }, 300);
-
-      setTimeout(() => {
-        this.postLayoutFix();
-      }, 320);
-    }
+    this.itemSelected.emit(providerData.id);
   }
 
   hideProviderCard(): void {
@@ -322,17 +282,46 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   // Method called by display strategy to update visibility
-  updateProviderCardVisibility(visible: boolean, data?: any): void {
+  updateProviderCardVisibility(visible: boolean, data ? : any): void {
     this.showProviderCardVisible = visible;
     if (visible && data) {
-      this.placeData = data;
-      this.services = data.servicios || [];
-      this.reviews = data.reviews || [];
+      this.placeData = data.originalData;
+      this.services = data.originalData.services || [];
+      this.reviews = data.originalData.reviews || [];
     }
     this.cdr.markForCheck();
   }
 
   // ========== HELPER METHODS ==========
+
+  private setActiveItem(itemId: number | string | null) {
+    if (itemId === null) {
+      this.activeItem = null;
+      this.hideProviderCard();
+      return;
+    }
+
+    const item = this.mapDisplayItems.find(i => i.id === itemId);
+    if (item) {
+      this.activeItem = item;
+      this.mapService.flyTo(item.position, 16);
+      this.activateProviderCard(item);
+      this.cdr.markForCheck();
+    }
+  }
+
+  private activateProviderCard(item: MapDisplayItem): void {
+    if (!this.showProviderCard) return;
+
+    this.displayStrategy.hide(this);
+    setTimeout(() => {
+      this.displayStrategy.show(this, item);
+    }, 250);
+
+    setTimeout(() => {
+      this.postLayoutFix();
+    }, 500);
+  }
 
   private postLayoutFix() {
     const map = this.mapService.getMapInstance();

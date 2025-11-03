@@ -6,7 +6,17 @@
  */
 
 import { Injectable } from '@angular/core';
-import { EnrichedProviderData, Provider, Service } from '../models/route-generation/provider.models';
+import {
+  EnrichedProviderData,
+  Provider,
+  Service,
+  RouteRow,
+  RouteOptimizationRequest,
+  OptimizedPOI
+} from '../models/route-generation';
+import { ServicioService } from '../../features/servicios/services/servicio.service';
+import { MapDisplayItem } from '../models/map-display.model';
+import { usuarios } from '../models/usuarios';
 
 /**
  * Backend response structure from UsuarioService.obtenerProveedores()
@@ -166,5 +176,24 @@ export class ProviderDataAdapter {
       const services = servicesMap.get(provider.id) || [];
       return this.adaptProvider(provider, services);
     });
+  }
+
+  /**
+   * Adapt usuario to EnrichedProviderData
+   */
+  adaptUsuarioToEnrichedProviderData(usuario: usuarios): EnrichedProviderData {
+    const providerInfo = usuario.proveedorInfo || {};
+    return {
+      provider: {
+        id: usuario.id,
+        nombre_empresa: providerInfo.nombre_empresa || usuario.nombre,
+        coordenadax: providerInfo.coordenadax || providerInfo.latitud || 0,
+        coordenaday: providerInfo.coordenaday || providerInfo.longitud || 0,
+      },
+      services: [], // No service info is available here
+      averageCost: 0,
+      averageVisitDuration: 0,
+      categories: [],
+    };
   }
 }

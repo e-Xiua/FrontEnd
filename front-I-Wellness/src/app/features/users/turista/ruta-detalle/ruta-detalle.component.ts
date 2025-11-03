@@ -5,6 +5,8 @@ import { Route } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteDataService } from '../../../../shared/services/route-data.service';
 import { MapConfig, MapPoiComponent } from '../../../../shared/ui/components/map-poi/map-poi.component';
+import { EnrichedProviderData } from '../../../../shared/models/provider.models';
+import { ProviderDataAdapter} from '../../../../shared/adapters/provider-data.adapter';
 
 @Component({
   selector: 'app-ruta-detalle',
@@ -15,9 +17,8 @@ import { MapConfig, MapPoiComponent } from '../../../../shared/ui/components/map
   standalone: true
 })
 export class RutaDetalleComponent implements OnInit {
-
   selectedRoute: Route | null = null;
-  providers: usuarios[] = [];
+  providers: EnrichedProviderData[] = [];
   isLoading: boolean = true;
   error: string | null = null;
 
@@ -34,7 +35,8 @@ export class RutaDetalleComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private routeDataService: RouteDataService
+    private routeDataService: RouteDataService,
+    private providerDataAdapter: ProviderDataAdapter
   ) {}
 
   ngOnInit(): void {
@@ -94,7 +96,7 @@ export class RutaDetalleComponent implements OnInit {
 
   private processRouteData(routeData: Route): void {
     this.selectedRoute = routeData;
-    this.providers = routeData.providers || [];
+    this.providers = (routeData.providers || []).map(p => this.providerDataAdapter.adaptUsuarioToEnrichedProviderData(p));
 
     // Configurar el centro del mapa basado en los proveedores o ubicación de inicio de la ruta
     if (this.selectedRoute.startLocation) {
@@ -102,8 +104,8 @@ export class RutaDetalleComponent implements OnInit {
     } else if (this.providers.length > 0) {
       // Usar la ubicación del primer proveedor como centro
       const firstProvider = this.providers[0];
-      if (firstProvider.proveedorInfo?.latitud && firstProvider.proveedorInfo?.longitud) {
-        this.mapConfig.center = [firstProvider.proveedorInfo.latitud, firstProvider.proveedorInfo.longitud];
+      if (firstProvider.provider?.coordenadax && firstProvider.provider?.coordenaday) {
+        this.mapConfig.center = [firstProvider.provider.coordenadax, firstProvider.provider.coordenaday];
       }
     }
 

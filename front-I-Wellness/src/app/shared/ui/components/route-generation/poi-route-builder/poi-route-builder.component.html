@@ -50,7 +50,7 @@
             >
               <option value="">Select a provider...</option>
               <option 
-                *ngFor="let provider of providers" 
+                *ngFor="let provider of items" 
                 [value]="provider.provider.id"
               >
                 {{ provider.provider.nombre_empresa }}

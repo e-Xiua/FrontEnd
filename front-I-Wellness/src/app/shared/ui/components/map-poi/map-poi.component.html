@@ -2,10 +2,10 @@
   <div class="map-layout-column">
 
     <!-- Nombre del proveedor activo arriba del mapa -->
-    <div class="provider-name-header" *ngIf="showCarousel && providerItems.length > 0">
-      <h3 class="provider-name">{{ activeProviderName }}</h3>
-      <span class="provider-counter" *ngIf="providerItems.length > 1">
-        {{ activeProviderIndex + 1 }} de {{ providerItems.length }}
+    <div class="provider-name-header" *ngIf="showCarousel && mapDisplayItems.length > 0">
+      <h3 class="provider-name">{{ activeItem?.title || 'Seleccionar proveedor' }}</h3>
+      <span class="provider-counter" *ngIf="mapDisplayItems.length > 1">
+        {{ getActiveIndex() + 1 }} de {{ mapDisplayItems.length }}
       </span>
     </div>
 
@@ -15,30 +15,29 @@
     </div>
 
     <!-- Solo navegación del carousel debajo del mapa -->
-    <div class="carousel-navigation-only" *ngIf="showCarousel && providerItems.length > 1">
+    <div class="carousel-navigation-only" *ngIf="showCarousel && mapDisplayItems.length > 1">
       <button
         class="nav-btn prev-btn"
-        (click)="goToPreviousProvider()"
-        [disabled]="activeProviderIndex <= 0">
+        (click)="previousClicked.emit()"
+        [disabled]="getActiveIndex() <= 0">
         &#10094;
       </button>
 
       <div class="dots-container">
         <button
-          title="Ir al proveedor {{ i + 1 }}"
+          *ngFor="let item of mapDisplayItems; let i = index"
           type="button"
-          *ngFor="let item of providerItems; let i = index"
           class="nav-dot"
-          [class.active]="i === activeProviderIndex"
-          (click)="goToProviderIndex(i)"
-          [title]="item.data?.nombre_empresa || 'Proveedor ' + (i + 1)">
+          [class.active]="item.id === activeItemId"
+          (click)="itemSelected.emit(item.id)"
+          [title]="item.title">
         </button>
       </div>
 
       <button
         class="nav-btn next-btn"
-        (click)="goToNextProvider()"
-        [disabled]="activeProviderIndex >= providerItems.length - 1">
+        (click)="nextClicked.emit()"
+        [disabled]="getActiveIndex() >= mapDisplayItems.length - 1">
         &#10095;
       </button>
     </div>
