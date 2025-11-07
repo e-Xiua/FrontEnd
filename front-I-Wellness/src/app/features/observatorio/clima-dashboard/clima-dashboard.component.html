@@ -1,0 +1,208 @@
+<div class="clima-dashboard-container">
+  <header class="dashboard-header">
+    <button class="back-btn" routerLink="/observatorio">
+      <span class="material-icons">arrow_back</span>
+      Volver al Observatorio
+    </button>
+    <div class="title-section">
+      <h1><span class="material-icons">thermostat</span> Dashboard de Clima</h1>
+      <p class="subtitle">La Fortuna, Costa Rica - Información Meteorológica Detallada</p>
+    </div>
+    <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+      <span class="material-icons" [class.spinning]="loading">refresh</span>
+      Actualizar
+    </button>
+  </header>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando información del clima...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-content">
+    
+    <!-- Clima Actual -->
+    <section class="main-card current-weather-card" *ngIf="currentWeather?.success && currentWeather.data">
+      <h2>Condiciones Actuales</h2>
+      <div class="current-weather-display">
+        <div class="temp-section">
+          <div class="main-temp">{{ currentWeather.data!.temperature }}°C</div>
+          <div class="feels-like">Sensación: {{ currentWeather.data!.feels_like }}°C</div>
+          <div class="description">{{ currentWeather.data!.description }}</div>
+        </div>
+        <div class="weather-icon">
+          <span class="material-icons">{{ getTemperatureIcon() }}</span>
+        </div>
+      </div>
+      
+      <div class="weather-metrics-grid">
+        <div class="metric-item">
+          <span class="material-icons">water_drop</span>
+          <div>
+            <div class="metric-label">Humedad</div>
+            <div class="metric-value">{{ currentWeather.data!.humidity }}%</div>
+          </div>
+        </div>
+        <div class="metric-item">
+          <span class="material-icons">air</span>
+          <div>
+            <div class="metric-label">Viento</div>
+            <div class="metric-value">{{ currentWeather.data!.wind_speed }} m/s</div>
+          </div>
+        </div>
+        <div class="metric-item" *ngIf="currentWeather.data!.pressure">
+          <span class="material-icons">compress</span>
+          <div>
+            <div class="metric-label">Presión</div>
+            <div class="metric-value">{{ currentWeather.data!.pressure }} hPa</div>
+          </div>
+        </div>
+        <div class="metric-item" *ngIf="currentWeather.data!.visibility">
+          <span class="material-icons">visibility</span>
+          <div>
+            <div class="metric-label">Visibilidad</div>
+            <div class="metric-value">{{ (currentWeather.data!.visibility! / 1000).toFixed(1) }} km</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pronóstico 7 Días -->
+    <section class="main-card forecast-card" *ngIf="forecast?.success && forecast.forecast">
+      <h2>Pronóstico Extendido (7 días)</h2>
+      <div class="forecast-timeline">
+        <div *ngFor="let day of forecast.forecast" class="forecast-day">
+          <div class="day-header">
+            <div class="day-name">{{ day.date }}</div>
+          </div>
+          <div class="day-weather">
+            <div class="day-temps">
+              <span class="temp-max">{{ day.temp_max }}°</span>
+              <span class="temp-separator">/</span>
+              <span class="temp-min">{{ day.temp_min }}°</span>
+            </div>
+            <div class="day-description">{{ day.description }}</div>
+          </div>
+          <div class="day-details">
+            <div class="detail"><span class="material-icons">water_drop</span> {{ day.humidity }}%</div>
+            <div class="detail"><span class="material-icons">umbrella</span> {{ day.precipitation_chance }}%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Métricas Turísticas -->
+    <section class="main-card tourism-metrics-card" *ngIf="metrics?.success && metrics.metrics">
+      <h2>Evaluación para Turismo</h2>
+      
+      <div class="tourism-score-display">
+        <div class="score-circle" [ngClass]="getTourismScoreClass()">
+          <div class="score-value">{{ metrics.metrics!.tourism_score }}</div>
+          <div class="score-label">{{ getTourismScoreLabel() }}</div>
+        </div>
+        <div class="score-description">
+          <h3>Condiciones para turismo</h3>
+          <p>Puntaje basado en temperatura, humedad, precipitación y viento</p>
+        </div>
+      </div>
+
+      <div class="recommendations-section" *ngIf="metrics.metrics!.recommendations && metrics.metrics!.recommendations.length > 0">
+        <h3><span class="material-icons">tips_and_updates</span> Recomendaciones</h3>
+        <ul class="recommendations-list">
+          <li *ngFor="let rec of metrics.metrics!.recommendations">{{ rec }}</li>
+        </ul>
+      </div>
+
+      <div class="activities-suitability" *ngIf="metrics.metrics!.activities_suitability">
+        <h3><span class="material-icons">hiking</span> Idoneidad de Actividades</h3>
+        <div class="activities-grid">
+          <div class="activity-item">
+            <div class="activity-name">Actividades al Aire Libre</div>
+            <div class="activity-bar">
+              <div class="activity-fill" [ngClass]="getActivityClass(getActivityScore('outdoor'))" 
+                   [style.width.%]="getActivityScore('outdoor')"></div>
+            </div>
+            <div class="activity-score">{{ getActivityScore('outdoor') }}%</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-name">Deportes Acuáticos</div>
+            <div class="activity-bar">
+              <div class="activity-fill" [ngClass]="getActivityClass(getActivityScore('water_sports'))" 
+                   [style.width.%]="getActivityScore('water_sports')"></div>
+            </div>
+            <div class="activity-score">{{ getActivityScore('water_sports') }}%</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-name">Senderismo</div>
+            <div class="activity-bar">
+              <div class="activity-fill" [ngClass]="getActivityClass(getActivityScore('hiking'))" 
+                   [style.width.%]="getActivityScore('hiking')"></div>
+            </div>
+            <div class="activity-score">{{ getActivityScore('hiking') }}%</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-name">Relajación</div>
+            <div class="activity-bar">
+              <div class="activity-fill" [ngClass]="getActivityClass(getActivityScore('relaxation'))" 
+                   [style.width.%]="getActivityScore('relaxation')"></div>
+            </div>
+            <div class="activity-score">{{ getActivityScore('relaxation') }}%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="best-hours-section" *ngIf="metrics.metrics!.best_hours && metrics.metrics!.best_hours.length > 0">
+        <h3><span class="material-icons">schedule</span> Mejores Horarios</h3>
+        <div class="best-hours-list">
+          <span *ngFor="let hour of metrics.metrics!.best_hours" class="hour-badge">{{ hour }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insights del IMN -->
+    <section class="main-card imn-insights-card" *ngIf="imnInsights?.success && imnInsights.insights">
+      <h2>Análisis del IMN</h2>
+      
+      <div class="imn-recommendations" *ngIf="imnInsights.insights!.recommendations && imnInsights.insights!.recommendations.length > 0">
+        <h3><span class="material-icons">lightbulb</span> Recomendaciones Meteorológicas</h3>
+        <div class="imn-rec-grid">
+          <div *ngFor="let rec of imnInsights.insights!.recommendations" class="imn-rec-item">
+            <span class="material-icons">check_circle</span>
+            {{ rec }}
+          </div>
+        </div>
+      </div>
+
+      <div class="imn-alerts" *ngIf="imnInsights.insights!.alerts && imnInsights.insights!.alerts.length > 0">
+        <h3><span class="material-icons">warning</span> Alertas Meteorológicas</h3>
+        <div class="alerts-list">
+          <div *ngFor="let alert of imnInsights.insights!.alerts" class="alert-item" [ngClass]="'alert-' + alert.severity">
+            <span class="material-icons">{{ alert.icon || 'notifications' }}</span>
+            <div class="alert-content">
+              <strong>{{ alert.type }}</strong>
+              <p>{{ alert.message }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="imn-tourism-conditions" *ngIf="imnInsights.insights!.tourism_conditions">
+        <h3><span class="material-icons">wb_sunny</span> Condiciones Turísticas</h3>
+        <p class="tourism-conditions-text">{{ imnInsights.insights!.tourism_conditions }}</p>
+      </div>
+
+      <div class="best-time-visit" *ngIf="imnInsights.insights!.best_time_to_visit">
+        <span class="material-icons">schedule</span>
+        <strong>Mejor momento para visitar:</strong> {{ imnInsights.insights!.best_time_to_visit }}
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="dashboard-footer">
+    <div class="footer-info">
+      <p><span class="material-icons">update</span> Última actualización: {{ lastUpdate | date:'medium' }}</p>
+      <p><span class="material-icons">cloud</span> Datos proporcionados por OpenWeather API e IMN Costa Rica</p>
+    </div>
+  </footer>
+</div>

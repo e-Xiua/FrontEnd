@@ -194,8 +194,8 @@ export class MapaEmpresasComponent implements OnInit {
       isOptimizing: true,
       progress: 0,
       message: 'Iniciando optimización de ruta...',
-      result: null,
-      jobId: undefined
+      result: null as any,
+      jobId: undefined as string | undefined
     };
 
     this.activeOptimizations.set(routeKey, optimizationEntry);

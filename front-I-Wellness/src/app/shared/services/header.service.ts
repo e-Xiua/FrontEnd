@@ -147,7 +147,7 @@ export class HeaderService {
     return {
       role: 'turista',
       config: {
-        title: 'I-Wellness',
+        title: 'e-Xiua',
         logoUrl: '/assets/logo.png',
         theme: 'light',
         navigationItems: [
@@ -178,7 +178,7 @@ export class HeaderService {
     return {
       role: 'public',
       config: {
-        title: 'I-Wellness',
+        title: 'e-Xiua',
         logoUrl: '/assets/logo.png',
         theme: 'light',
         navigationItems: [

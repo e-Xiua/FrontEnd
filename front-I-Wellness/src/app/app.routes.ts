@@ -8,6 +8,7 @@ import { RecuperarComponent } from './features/landing/recuperar/recuperar.compo
 import { RegistroComponent } from './features/landing/registro/registro.component';
 import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 import { TemasComponent } from './features/landing/temas/temas.component';
+import { MetricasDashboardComponent } from './features/landing/metricas-dashboard/metricas-dashboard.component';
 
 // Layouts
 import { AdminLayoutComponent } from './features/users/administrador/admin-layout/admin-layout.component';
@@ -43,114 +44,143 @@ import { PerfilTuristaComponent } from './features/users/turista/perfil-turista/
 import { RegistroTuristaComponent } from './features/users/turista/registro-turista/registro-turista.component';
 import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta-detalle.component';
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
-import { CalendarioComponent } from './features/calendario/calendario.component';
-import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 
 // Shared/Common components
+import { CalendarioComponent } from './features/calendario/calendario.component';
+import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
 import { InfoServicioComponent } from './features/users/proveedor/info-servicio/info-servicio.component';
 import { ProfilePageComponent } from './features/users/proveedor/profile-page/profile-page.component';
 
 export const routes: Routes = [
-    // Rutas públicas
-    { path: '', component: HomeComponent},
-    { path: 'temas', component: TemasComponent},
-    { path: 'registro', component: RegistroComponent},
-    // Buscador web scrapping público
-    { path: 'buscador-web', loadComponent: () => import('./features/web-scrapping-buscador/web-scrapping-buscador.component').then(m => m.WebScrappingBuscadorComponent) },
-    // Rutas públicas para objetivos
-    { path: 'objetivos', loadComponent: () => import('./features/objetivos/objetivos.component').then(m => m.ObjetivosComponent) },
-    { path: 'objetivos/turista', loadComponent: () => import('./features/objetivos/objetivos-turista.component').then(m => m.ObjetivosTuristaComponent) },
-    { path: 'objetivos/proveedor', loadComponent: () => import('./features/objetivos/objetivos-proveedor.component').then(m => m.ObjetivosProveedorComponent) },
-    { path: 'objetivos/admin', loadComponent: () => import('./features/objetivos/objetivos-admin.component').then(m => m.ObjetivosAdminComponent) },
-    { path: 'login', component: LoginComponent},
-    { path: 'registroturista', component: RegistroTuristaComponent},
-    { path: 'recuperar', component: RecuperarComponent},
-    { path: 'restablecer', component: RestablecerComponent },
-    { path: 'registroproveedor', component: RegistroProveedorComponent },
-
-    // Rutas compartidas - accesibles a todos los usuarios autenticados
-    { path: 'infoservicio/:id', component: InfoServicioComponent, canActivate: [authGuard] },
-    { path: 'dashboard-test', component: DashboardTestComponent },
-    { path: 'calendario', component: CalendarioComponent },
-    // Rutas específicas para Turistas con Layout
-    {
-        path: 'turista',
-        component: TuristaLayoutComponent,
-        //canActivate: [turistaGuard],
-        children: [
-            { path: '', redirectTo: 'home', pathMatch: 'full' },
-            { path: 'home', component: HomeTuristaComponent },
-            { path: 'formulariogustos', component: FormulariogustosComponent },
-            { path: 'perfil/:id', component: PerfilTuristaComponent },
-            { path: 'edit-preferencias/:id', component: EditPreferenciasComponent },
-            { path: 'proveedor/:id', component: ServiciosProveedorComponent },
-            { path: 'reservas', component: VerReservasComponent },
-            { path: 'ver-rutas', component: ProveedorChatDemoComponent},
-        ]
-    },
-
-    // Rutas específicas para Proveedores con Chat Layout
-    {
-        path: 'proveedor',
-        component: ProveedorLayoutComponent,
-        canActivate: [proveedorGuard],
-        children: [
-            { path: '', redirectTo: 'home', pathMatch: 'full' },
-            { path: 'home', component: HomeProveedorComponent },
-            { path: 'chat-demo', component: ProveedorChatDemoComponent },
-            { path: 'agregar-servicio', component: AgregarServicioComponent },
-            { path: 'editar-servicio/:id', component: EditarServicioComponent },
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'perfil/:id', component: PerfilProveedorComponent },
-            { path: 'rutas', component: MapaEmpresasComponent },
-            { path: 'ruta/:id', component: RutaDetalleComponent },
-            { path: 'servicio/:id', component: InfoServicioComponent },
-            { path: 'ver-perfil/:id', component: ProfilePageComponent },
-        ]
-    },
-
-    // Rutas específicas para Administradores con Admin Layout
-    {
-        path: 'admin',
-        component: AdminLayoutComponent,
-        canActivate: [adminGuard],
-        children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: DashboardAdminComponent },
-            { path: 'home', component: AdminComponent },
-            { path: 'perfil/:id', component: PerfilAdminComponent },
-            { path: 'visitantes', component: VisitantesComponent },
-            { path: 'servicios/:id', component: ServiciosComponent },
-            { path: 'proveedores', component: ProveedoresComponent },
-            { path: 'crear-turista', component: CrearTuristaComponent },
-            { path: 'crear-proveedor', component: CrearProveedorComponent },
-            { path: 'rutas', component: CreadorDeRutasComponent},
-            { path: 'ruta/:id', component: RutaDetalleComponent }, // Detalle de ruta para administradores
-        ]
-    },
-
-    // Rutas legacy para compatibilidad (redirigen a las nuevas rutas)
-    { path: 'hometurista', redirectTo: '/turista/home', pathMatch: 'full' },
-    { path: 'perfilturista/:id', redirectTo: '/turista/perfil/:id', pathMatch: 'full' },
-    { path: 'mapaempresas', redirectTo: '/turista/mapa-empresas', pathMatch: 'full' },
-    { path: 'reservasturista', redirectTo: '/turista/reservas', pathMatch: 'full' },
-    { path: 'editpreferencias/:id', redirectTo: '/turista/edit-preferencias/:id', pathMatch: 'full' },
-
-    { path: 'homeproveedor', redirectTo: '/proveedor/home', pathMatch: 'full' },
-    { path: 'perfilproveedor/:id', redirectTo: '/proveedor/perfil/:id', pathMatch: 'full' },
-    { path: 'agregarservicio', redirectTo: '/proveedor/agregar-servicio', pathMatch: 'full' },
-    { path: 'editarservicio/:id', redirectTo: '/proveedor/editar-servicio/:id', pathMatch: 'full' },
-    { path: 'dashboard', redirectTo: '/proveedor/dashboard', pathMatch: 'full' },
-
-    { path: 'homeadmin', redirectTo: '/admin/home', pathMatch: 'full' },
-    { path: 'perfiladmin/:id', redirectTo: '/admin/perfil/:id', pathMatch: 'full' },
-    { path: 'visitantes', redirectTo: '/admin/visitantes', pathMatch: 'full' },
-    { path: 'proveedores', redirectTo: '/admin/proveedores', pathMatch: 'full' },
-    { path: 'crearturista', redirectTo: '/admin/crear-turista', pathMatch: 'full' },
-    { path: 'crearproveedor', redirectTo: '/admin/crear-proveedor', pathMatch: 'full' },
-    { path: 'dashboard-admin', redirectTo: '/admin/dashboard', pathMatch: 'full' },
-
-    // Ruta comodín - redirige a home
-    { path: '**', redirectTo: '' },
+  // Rutas públicas
+  { path: '', component: HomeComponent },
+  { path: 'temas', component: TemasComponent },
+  { path: 'registro', component: RegistroComponent },
+  { path: 'metricas', component: MetricasDashboardComponent },
+  
+  // Buscador web scrapping público
+  { path: 'buscador-web', loadComponent: () => import('./features/web-scrapping-buscador/web-scrapping-buscador.component').then(m => m.WebScrappingBuscadorComponent) },
+  
+  // ===================================================
+  // OBSERVATORIO DE TURISMO DE BIENESTAR - RUTAS PÚBLICAS
+  // ===================================================
+  { 
+    path: 'observatorio', 
+    loadComponent: () => import('./features/observatorio/observatorio-dashboard/observatorio-dashboard.component').then(m => m.ObservatorioDashboardComponent) 
+  },
+  { 
+    path: 'observatorio/clima', 
+    loadComponent: () => import('./features/observatorio/clima-dashboard/clima-dashboard.component').then(m => m.ClimaDashboardComponent) 
+  },
+  { 
+    path: 'observatorio/uv', 
+    loadComponent: () => import('./features/observatorio/uv-dashboard/uv-dashboard.component.js').then(m => m.UvDashboardComponent) 
+  },
+  { 
+    path: 'observatorio/volcan', 
+    loadComponent: () => import('./features/observatorio/volcan-dashboard/volcan-dashboard.component').then(m => m.VolcanDashboardComponent) 
+  },
+  { 
+    path: 'observatorio/eventos', 
+    loadComponent: () => import('./features/observatorio/eventos-dashboard/eventos-dashboard.component').then(m => m.EventosDashboardComponent) 
+  },
+  
+  // Rutas públicas para objetivos
+  { path: 'objetivos', loadComponent: () => import('./features/objetivos/objetivos.component').then(m => m.ObjetivosComponent) },
+  { path: 'objetivos/turista', loadComponent: () => import('./features/objetivos/objetivos-turista.component').then(m => m.ObjetivosTuristaComponent) },
+  { path: 'objetivos/proveedor', loadComponent: () => import('./features/objetivos/objetivos-proveedor.component').then(m => m.ObjetivosProveedorComponent) },
+  { path: 'objetivos/admin', loadComponent: () => import('./features/objetivos/objetivos-admin.component').then(m => m.ObjetivosAdminComponent) },
+  
+  { path: 'login', component: LoginComponent },
+  { path: 'registroturista', component: RegistroTuristaComponent },
+  { path: 'recuperar', component: RecuperarComponent },
+  { path: 'restablecer', component: RestablecerComponent },
+  { path: 'registroproveedor', component: RegistroProveedorComponent },
+  
+  // Rutas compartidas - accesibles a todos los usuarios autenticados
+  { path: 'infoservicio/:id', component: InfoServicioComponent, canActivate: [authGuard] },
+  { path: 'dashboard-test', component: DashboardTestComponent },
+  { path: 'calendario', component: CalendarioComponent },
+  
+  // Rutas específicas para Turistas con Layout
+  {
+    path: 'turista',
+    component: TuristaLayoutComponent,
+    //canActivate: [turistaGuard],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeTuristaComponent },
+      { path: 'formulariogustos', component: FormulariogustosComponent },
+      { path: 'perfil/:id', component: PerfilTuristaComponent },
+      { path: 'edit-preferencias/:id', component: EditPreferenciasComponent },
+      { path: 'proveedor/:id', component: ServiciosProveedorComponent },
+      { path: 'reservas', component: VerReservasComponent },
+      { path: 'ver-rutas', component: ProveedorChatDemoComponent },
+    ]
+  },
+  
+  // Rutas específicas para Proveedores con Chat Layout
+  {
+    path: 'proveedor',
+    component: ProveedorLayoutComponent,
+    canActivate: [proveedorGuard],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeProveedorComponent },
+      { path: 'chat-demo', component: ProveedorChatDemoComponent },
+      { path: 'agregar-servicio', component: AgregarServicioComponent },
+      { path: 'editar-servicio/:id', component: EditarServicioComponent },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'perfil/:id', component: PerfilProveedorComponent },
+      { path: 'rutas', component: MapaEmpresasComponent },
+      { path: 'ruta/:id', component: RutaDetalleComponent },
+      { path: 'servicio/:id', component: InfoServicioComponent },
+      { path: 'ver-perfil/:id', component: ProfilePageComponent },
+    ]
+  },
+  
+  // Rutas específicas para Administradores con Admin Layout
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [adminGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardAdminComponent },
+      { path: 'home', component: AdminComponent },
+      { path: 'perfil/:id', component: PerfilAdminComponent },
+      { path: 'visitantes', component: VisitantesComponent },
+      { path: 'servicios/:id', component: ServiciosComponent },
+      { path: 'proveedores', component: ProveedoresComponent },
+      { path: 'crear-turista', component: CrearTuristaComponent },
+      { path: 'crear-proveedor', component: CrearProveedorComponent },
+      { path: 'rutas', component: CreadorDeRutasComponent },
+      { path: 'ruta/:id', component: RutaDetalleComponent },
+    ]
+  },
+  
+  // Rutas legacy para compatibilidad (redirigen a las nuevas rutas)
+  { path: 'hometurista', redirectTo: '/turista/home', pathMatch: 'full' },
+  { path: 'perfilturista/:id', redirectTo: '/turista/perfil/:id', pathMatch: 'full' },
+  { path: 'mapaempresas', redirectTo: '/turista/mapa-empresas', pathMatch: 'full' },
+  { path: 'reservasturista', redirectTo: '/turista/reservas', pathMatch: 'full' },
+  { path: 'editpreferencias/:id', redirectTo: '/turista/edit-preferencias/:id', pathMatch: 'full' },
+  
+  { path: 'homeproveedor', redirectTo: '/proveedor/home', pathMatch: 'full' },
+  { path: 'perfilproveedor/:id', redirectTo: '/proveedor/perfil/:id', pathMatch: 'full' },
+  { path: 'agregarservicio', redirectTo: '/proveedor/agregar-servicio', pathMatch: 'full' },
+  { path: 'editarservicio/:id', redirectTo: '/proveedor/editar-servicio/:id', pathMatch: 'full' },
+  { path: 'dashboard', redirectTo: '/proveedor/dashboard', pathMatch: 'full' },
+  
+  { path: 'homeadmin', redirectTo: '/admin/home', pathMatch: 'full' },
+  { path: 'perfiladmin/:id', redirectTo: '/admin/perfil/:id', pathMatch: 'full' },
+  { path: 'visitantes', redirectTo: '/admin/visitantes', pathMatch: 'full' },
+  { path: 'proveedores', redirectTo: '/admin/proveedores', pathMatch: 'full' },
+  { path: 'crearturista', redirectTo: '/admin/crear-turista', pathMatch: 'full' },
+  { path: 'crearproveedor', redirectTo: '/admin/crear-proveedor', pathMatch: 'full' },
+  { path: 'dashboard-admin', redirectTo: '/admin/dashboard', pathMatch: 'full' },
+  
+  // Ruta comodín - redirige a home
+  { path: '**', redirectTo: '' },
 ];
