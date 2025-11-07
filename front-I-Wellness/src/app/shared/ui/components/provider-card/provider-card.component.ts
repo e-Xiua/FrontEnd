@@ -6,37 +6,7 @@ import { CarouselComponent } from '../carousel/carousel.component';
 import { ReviewDisplayComponent } from '../review-display/review-display.component';
 import { ReviewFormComponent, ReviewSubmission } from '../review-form/review-form.component';
 import { ServiceCardComponent } from '../service-card/service-card.component';
-
-interface PlaceData {
-  id: number;
-  name: string;
-  contactName: string;
-  email: string;
-  foto?: string | null;
-  category: string;
-  rating: number;
-  totalReviews: number;
-  address: string;
-  hours: string;
-  description: string;
-  phone: string;
-  companyPhone: string;
-  cargoContacto: string;
-  certificadosCalidad?: string[] | null;
-  identificacionFiscal?: string | null;
-  licenciasPermisos?: string[] | null;
-}
-
-interface Review {
-  id: number;
-  author: string;
-  avatar: string;
-  date: string;
-  rating: number;
-  comment: string;
-  helpful: number;
-  notHelpful: number;
-}
+import { ExtendedPlaceData } from '../../../models/place-data.model';
 
 @Component({
   selector: 'app-provider-card',
@@ -54,27 +24,92 @@ interface Review {
   standalone: true
 })
 export class ProviderCardComponent implements OnChanges {
-  @Input() placeData!: PlaceData;
-  @Input() reviews: Review[] = [];
-  @Input() services: any[] = [];
+  @Input() placeData!: ExtendedPlaceData;
 
   @Output() submitReview = new EventEmitter<ReviewSubmission>();
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['services']) {
-      console.log('Servicios actualizados en ProviderCardComponent:', this.services);
-      this.cdr.markForCheck();  // Asegura que el *ngFor se actualice
+    if (changes['placeData']) {
+      console.log('=== 📊 PROVIDER CARD - RECEIVED PLACE DATA ===');
+      console.log('Provider ID:', this.placeData.id);
+      console.log('Provider Name:', this.placeData.name);
+      console.log('Contact Details:', {
+        contactName: this.placeData.contactName,
+        cargoContacto: this.placeData.cargoContacto,
+        phone: this.placeData.phone,
+        companyPhone: this.placeData.companyPhone,
+        email: this.placeData.email
+      });
+      console.log('Business Metrics:', {
+        averageCost: this.placeData.averageCost,
+        averageVisitDuration: this.placeData.averageVisitDuration,
+        servicesCount: this.placeData.services?.length || 0,
+        categoriesCount: this.placeData.categories?.length || 0
+      });
+      console.log('Categories:', this.placeData.categories);
+      console.log('Full PlaceData:', this.placeData);
+      console.log('=============================================');
+      this.cdr.markForCheck();
     }
   }
 
   handleSubmitReview(reviewData: ReviewSubmission): void {
     this.submitReview.emit(reviewData);
-    this.cdr.markForCheck(); // Ensure view updates after review submission
+    this.cdr.markForCheck();
   }
 
   ngOnInit() {
-    console.log('Servicios recibidos en ProviderCardComponent:', this.services);
+    console.log('ProviderCardComponent initialized with data:', this.placeData);
+  }
+
+  /**
+   * Check if contact information is available and valid
+   */
+  hasValidContactInfo(): boolean {
+    return !!(
+      (this.placeData.contactName && this.placeData.contactName !== 'N/A') ||
+      (this.placeData.phone && this.placeData.phone !== 'N/A') ||
+      (this.placeData.companyPhone && this.placeData.companyPhone !== 'N/A') ||
+      (this.placeData.email && this.placeData.email !== 'N/A')
+    );
+  }
+
+  /**
+   * Check if business metrics are available and realistic
+   */
+  hasValidMetrics(): boolean {
+    return !!(
+      (this.placeData.averageCost && this.placeData.averageCost < 999999) ||
+      this.placeData.averageVisitDuration
+    );
+  }
+
+  /**
+   * Get formatted price string
+   */
+  getFormattedPrice(): string | null {
+    if (this.placeData.averageCost && this.placeData.averageCost < 999999) {
+      return `$${this.placeData.averageCost.toFixed(2)}`;
+    }
+    return null;
+  }
+
+  /**
+   * Get categories as a comma-separated string
+   */
+  getCategoriesString(): string {
+    if (this.placeData.categories && this.placeData.categories.length > 0) {
+      return this.placeData.categories.join(', ');
+    }
+    return this.placeData.category || 'N/A';
+  }
+
+  /**
+   * Check if services are available
+   */
+  hasServices(): boolean {
+    return !!(this.placeData.services && this.placeData.services.length > 0);
   }
 }

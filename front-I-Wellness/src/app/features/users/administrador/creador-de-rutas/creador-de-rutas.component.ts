@@ -4,14 +4,16 @@ import { OptimizationResultAdapterService } from '../../../../shared/models/adap
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route'; // 1. Import the Route model
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteOptimizationService } from '../../../../shared/services/route-optimization.service';
-import { RouteFilter, ShowRoutesManyOptionsComponent } from "../../../../shared/ui/components/show-routes-many-options/show-routes-many-options.component";
+import { RouteFilter } from '../../../../shared/services/route-filtering.service';
+import { RoutesViewComponent } from '../../../../shared/ui/components/routes-view/routes-view.component';
+
 
 @Component({
   selector: 'app-creador-de-rutas',
   standalone: true, // Make it standalone
-  imports: [CommonModule, ShowRoutesManyOptionsComponent], // Add CommonModule for *ngIf
+  imports: [CommonModule, RoutesViewComponent], // Add CommonModule for *ngIf
   templateUrl: './creador-de-rutas.component.html',
-  styleUrl: './creador-de-rutas.component.css'
+  styleUrls: ['./creador-de-rutas.component.css']
 })
 export class CreadorDeRutasComponent implements OnInit {
 
@@ -58,8 +60,8 @@ export class CreadorDeRutasComponent implements OnInit {
     onRouteFiltersChanged($event: RouteFilter) {
   console.log('Route filters changed:', $event);
   }
-  onRouteProviderSelected(arg0: Route,arg1: usuarios) {
-  console.log('Route provider selected:', arg0, arg1);
+  onRouteProviderSelected(event: { route: Route; provider: usuarios }) {
+    console.log('Route provider selected:', event.route, event.provider);
   }
   onRouteSelected($event: RouteSelectionEvent) {
   console.log('Route selected:', $event);

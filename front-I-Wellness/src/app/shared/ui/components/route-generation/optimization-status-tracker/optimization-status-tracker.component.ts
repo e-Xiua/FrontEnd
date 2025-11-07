@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Models
-import { OptimizationJob } from '../../../../models/route-generation';
+import { OptimizationJob } from '../../../../models/optimization-job.models';
 
 /**
  * Optimization Status Tracker Component (Dumb/Presentational)
@@ -16,7 +16,7 @@ import { OptimizationJob } from '../../../../models/route-generation';
   templateUrl: './optimization-status-tracker.component.html',
   styleUrl: './optimization-status-tracker.component.css'
 })
-export class OptimizationStatusTrackerComponent {
+export class OptimizationStatusTrackerComponent implements OnChanges {
 
   // ========== INPUTS (Data from parent) ==========
   
@@ -29,6 +29,41 @@ export class OptimizationStatusTrackerComponent {
   @Output() cancelJob = new EventEmitter<string>(); // jobId
   @Output() removeJob = new EventEmitter<string>(); // jobId
   @Output() clearCompleted = new EventEmitter<void>();
+
+  // ========== LIFECYCLE HOOKS ==========
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['jobs']) {
+      // 📊 LOGGING: Job status updates received
+      console.log('=== 📊 OPTIMIZATION STATUS TRACKER - JOBS UPDATE ===');
+      console.log('Total jobs:', this.jobs.length);
+      console.log('Active jobs:', this.activeJobs.length);
+      console.log('Completed jobs:', this.completedJobs.length);
+      
+      console.log('Jobs summary:', this.jobs.map(job => ({
+        jobId: job.jobId,
+        status: job.status,
+        progress: job.progress,
+        routeName: job.routeName,
+        message: job.message,
+        hasResult: !!job.result,
+        submittedAt: job.submittedAt,
+        completedAt: job.completedAt
+      })));
+      
+      // Log detailed info for completed jobs with results
+      const completedWithResults = this.jobs.filter(j => j.status === 'COMPLETED' && j.result);
+      if (completedWithResults.length > 0) {
+        console.log('Completed jobs with results:', completedWithResults.map(job => ({
+          jobId: job.jobId,
+          routeName: job.routeName,
+          resultKeys: job.result ? Object.keys(job.result) : []
+        })));
+      }
+      
+      console.log('====================================================');
+    }
+  }
 
   // ========== COMPUTED PROPERTIES ==========
 

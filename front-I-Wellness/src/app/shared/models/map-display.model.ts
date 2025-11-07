@@ -1,3 +1,5 @@
+import { ExtendedPlaceData } from './place-data.model';
+
 export interface MapDisplayItem {
   id: number | string; // Unique ID for the item
   position: [number, number]; // [lat, lng]
@@ -5,5 +7,5 @@ export interface MapDisplayItem {
   subtitle?: string; // e.g., "Stop 1" or category
   iconType: 'default' | 'numbered';
   number?: number; // For numbered icons in a sequence
-  originalData: any; // The original EnrichedProviderData or OptimizedPOI
+  originalData: ExtendedPlaceData; // The place data with extended information
 }

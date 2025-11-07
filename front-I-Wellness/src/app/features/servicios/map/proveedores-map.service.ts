@@ -12,7 +12,7 @@ export class ProveedorMapService {
   createMarkerConfigs(proveedores: Provider[]): MarkerConfig[] {
     return proveedores
       .map(p => {
-        const position: [number, number] = [p.coordenadax, p.coordenaday];
+        const position: [number, number] = [p.coordenadaX, p.coordenadaY];
 
         const popupContent = `
           <div class="popup-card">

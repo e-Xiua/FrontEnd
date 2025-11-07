@@ -19,11 +19,9 @@
 
     <!-- Provider Card -->
     <app-provider-card
-      *ngIf="showProviderCard && showProviderCardVisible"
+      *ngIf="showProviderCard && showProviderCardVisible && placeData"
       class="provider-card-wrapper"
       [placeData]="placeData"
-      [reviews]="reviews"
-      [services]="services"
       (submitReview)="onSubmitReview($event)">
     </app-provider-card>
   </div>

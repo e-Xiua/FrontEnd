@@ -81,19 +81,23 @@
 
           <!-- Cost Display -->
           <td class="col-cost">
-            <span class="cost-value" *ngIf="row.selectedService">
-              {{ row.selectedService.precio | currency:'EUR':'symbol':'1.2-2' }}
+            <!-- Show cost if provider or service selected -->
+            <span class="cost-value" *ngIf="getCostForRow(row) !== null" [class.cost-estimated]="isShowingAverages(row)">
+              {{ getCostForRow(row) | currency:'EUR':'symbol':'1.2-2' }}
+              <small *ngIf="isShowingAverages(row)" class="avg-indicator">(avg)</small>
             </span>
-            <span class="empty-value" *ngIf="!row.selectedService">—</span>
+            <span class="empty-value" *ngIf="getCostForRow(row) === null">—</span>
           </td>
 
           <!-- Duration Display -->
           <td class="col-duration">
-            <span class="duration-value" *ngIf="row.selectedService">
+            <!-- Show duration if provider or service selected -->
+            <span class="duration-value" *ngIf="getDurationForRow(row) !== null" [class.duration-estimated]="isShowingAverages(row)">
               <i class="far fa-clock"></i>
-              {{ row.selectedService.tiempoAproximado }} min
+              {{ getDurationForRow(row) }} min
+              <small *ngIf="isShowingAverages(row)" class="avg-indicator">(avg)</small>
             </span>
-            <span class="empty-value" *ngIf="!row.selectedService">—</span>
+            <span class="empty-value" *ngIf="getDurationForRow(row) === null">—</span>
           </td>
 
           <!-- Actions -->

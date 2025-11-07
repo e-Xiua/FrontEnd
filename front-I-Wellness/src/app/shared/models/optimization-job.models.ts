@@ -79,6 +79,8 @@ export interface OptimizedPOI {
   departureTime?: string;
   category?: string;
   cost?: number;
+  // Enriched data (added after optimization completes)
+  providerData?: any; // Full EnrichedProviderData for displaying on map
 }
 
 /**

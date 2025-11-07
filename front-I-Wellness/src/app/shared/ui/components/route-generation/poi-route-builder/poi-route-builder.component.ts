@@ -3,11 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // Models
-import {
-  EnrichedProviderData,
-  RouteRow,
-  RouteAverages
-} from '../../../../models/route-generation';
+import { EnrichedProviderData } from '../../../../models/provider.models';
+import { RouteRow, RouteAverages } from '../../../../models/route-builder.models';
 
 /**
  * POI Route Builder Component (Dumb/Presentational)
@@ -47,10 +44,12 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Calculate route averages from selected rows
+   * Now considers both specific service values AND provider averages
    */
   get routeAverages(): RouteAverages {
+    // Include rows with either specific service OR just provider selected
     const validRows = this.rows.filter(row => 
-      row.providerId && row.selectedService && row.providerData
+      row.providerId && row.providerData
     );
 
     if (validRows.length === 0) {
@@ -65,9 +64,13 @@ export class PoiRouteBuilderComponent {
     let totalDuration = 0;
 
     validRows.forEach(row => {
+      // Use specific service if selected, otherwise use provider averages
       if (row.selectedService) {
         totalCost += row.selectedService.precio || 0;
         totalDuration += row.selectedService.tiempoAproximado || 0;
+      } else if (row.providerData) {
+        totalCost += row.providerData.averageCost || 0;
+        totalDuration += row.providerData.averageVisitDuration || 30;
       }
     });
 
@@ -80,10 +83,11 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Check if optimization can be started
+   * Now allows optimization with just providers selected (no service required)
    */
   get canOptimize(): boolean {
     const validRows = this.rows.filter(row => 
-      row.providerId && row.selectedService
+      row.providerId && row.providerData
     );
     return validRows.length >= 2 && !this.isLoading;
   }
@@ -159,5 +163,47 @@ export class PoiRouteBuilderComponent {
    */
   trackByRowId(index: number, row: RouteRow): string {
     return row.id;
+  }
+
+  // ========== COST & DURATION HELPERS ==========
+
+  /**
+   * Get cost to display for a row
+   * - If specific service selected: show service cost
+   * - If only provider selected: show provider average cost
+   * - Otherwise: return null
+   */
+  getCostForRow(row: RouteRow): number | null {
+    if (row.selectedService) {
+      return row.selectedService.precio || 0;
+    }
+    if (row.providerData && row.providerId) {
+      return row.providerData.averageCost || 0;
+    }
+    return null;
+  }
+
+  /**
+   * Get duration to display for a row
+   * - If specific service selected: show service duration
+   * - If only provider selected: show provider average duration
+   * - Otherwise: return null
+   */
+  getDurationForRow(row: RouteRow): number | null {
+    if (row.selectedService) {
+      return row.selectedService.tiempoAproximado || 0;
+    }
+    if (row.providerData && row.providerId) {
+      return row.providerData.averageVisitDuration || 30;
+    }
+    return null;
+  }
+
+  /**
+   * Check if cost/duration shown are from provider averages (not specific service)
+   * Used to style differently (e.g., show as estimated)
+   */
+  isShowingAverages(row: RouteRow): boolean {
+    return !row.selectedService && !!row.providerData && !!row.providerId;
   }
 }

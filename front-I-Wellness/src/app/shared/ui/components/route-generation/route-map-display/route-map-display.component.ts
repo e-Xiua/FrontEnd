@@ -14,13 +14,9 @@ import { MapConfig } from '../../map-poi/map-poi.component';
 import { ProviderCardComponent } from "../../provider-card/provider-card.component";
 
 // Import new models
-import {
-  OptimizationResult,
-  OptimizedPOI
-} from '../../../../models/route-generation';
-import {
-  MapDisplayItem
-} from '../../../../models/map-display.model';
+import { OptimizationResult, OptimizedPOI } from '../../../../models/optimization-job.models';
+import { MapDisplayItem } from '../../../../models/map-display.model';
+import { PlaceData } from '../../../../models/place-data.model';
 import {
   adaptOptimizedPoiToMapItem
 } from '../../../../adapters/map-display.adapter';
@@ -78,9 +74,7 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
 
   mapDisplayItems: MapDisplayItem[] = [];
   showProviderCardVisible: boolean = false;
-  placeData: any = null;
-  services: any[] = [];
-  reviews: any[] = [];
+  placeData: PlaceData | null = null;
   activeItem: MapDisplayItem | null = null;
 
 
@@ -118,8 +112,42 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['optimizedRoute'] && this.optimizedRoute) {
-      this.mapDisplayItems = this.optimizedRoute.optimizedSequence.map((poi, index) => adaptOptimizedPoiToMapItem(poi, index));
-      this.handleOptimizedRouteChange();
+      // 🗺️ LOGGING: Optimized route data received for map display
+      console.log('=== 🗺️ ROUTE MAP DISPLAY - OPTIMIZED ROUTE RECEIVED ===');
+      console.log('Full optimized route object:', JSON.stringify(this.optimizedRoute, null, 2));
+      
+      console.log('Route summary:', {
+        optimizedRouteId: this.optimizedRoute.optimizedRouteId,
+        totalDistanceKm: this.optimizedRoute.totalDistanceKm,
+        totalTimeMinutes: this.optimizedRoute.totalTimeMinutes,
+        sequenceLength: this.optimizedRoute.optimizedSequence.length,
+        optimizationAlgorithm: this.optimizedRoute.optimizationAlgorithm,
+        optimizationScore: this.optimizedRoute.optimizationScore,
+        generatedAt: this.optimizedRoute.generatedAt,
+        hasMetadata: !!this.optimizedRoute.metadata
+      });
+      
+      console.log('Optimized sequence details:', this.optimizedRoute.optimizedSequence.map((poi, idx) => ({
+        sequenceOrder: idx + 1,
+        poiId: poi.poiId,
+        name: poi.name,
+        position: [poi.latitude, poi.longitude],
+        visitOrder: poi.visitOrder,
+        estimatedVisitTime: poi.estimatedVisitTime,
+        arrivalTime: poi.arrivalTime,
+        departureTime: poi.departureTime,
+        cost: poi.cost,
+        category: poi.category,
+        hasProviderData: !!poi.providerData
+      })));
+      
+      console.log('========================================================');
+      
+      // Use NgZone to ensure proper change detection
+      this.ngZone.run(() => {
+        this.mapDisplayItems = this.optimizedRoute!.optimizedSequence.map((poi, index) => adaptOptimizedPoiToMapItem(poi, index));
+        this.handleOptimizedRouteChange();
+      });
     }
     if (changes['activeItemId']) {
       this.setActiveItem(this.activeItemId);
@@ -178,9 +206,11 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
           icon: this.createNumberedIcon(item.number!),
           title: item.title
         },
-        providerData: {
+        providerData: item.originalData.provider || {
           id: item.id,
-          ...item.originalData
+          nombre_empresa: item.title,
+          coordenadax: item.position[0],
+          coordenaday: item.position[1]
         }
       }));
 
@@ -256,18 +286,8 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
 
   onSubmitReview(event: any): void {
     console.log('Review submitted:', event);
-    const newReview = {
-      id: this.reviews.length + 1,
-      author: 'Current User',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80',
-      date: 'Just now',
-      rating: event.rating,
-      comment: event.review,
-      helpful: 0,
-      notHelpful: 0
-    };
-
-    this.reviews.unshift(newReview);
+    // This functionality might need to be moved or handled differently
+    // as the component no longer manages reviews directly.
   }
 
   onMarkerClick(providerData: any): void {
@@ -282,12 +302,11 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   // Method called by display strategy to update visibility
-  updateProviderCardVisibility(visible: boolean, data ? : any): void {
+  updateProviderCardVisibility(visible: boolean, data?: MapDisplayItem): void {
     this.showProviderCardVisible = visible;
-    if (visible && data) {
+    if (visible && data && data.originalData) {
+      // data.originalData is already PlaceData from the adapter
       this.placeData = data.originalData;
-      this.services = data.originalData.services || [];
-      this.reviews = data.originalData.reviews || [];
     }
     this.cdr.markForCheck();
   }

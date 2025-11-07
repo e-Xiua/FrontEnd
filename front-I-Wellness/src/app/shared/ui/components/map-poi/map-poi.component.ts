@@ -4,13 +4,14 @@ import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../features/servicios/services/servicio.service';
-import { EnrichedProviderData } from '../../../models/route-generation';
+import { EnrichedProviderData } from '../../../models/provider.models';
 import { LayoutAdapterService } from '../../../services/layout-adapter.service';
 import { ProviderDisplayStrategy } from '../../animations/model/display-strategy';
 import { slideInAnimation } from '../../animations/slide.animations';
 import { SlidePanelStrategy } from '../../animations/strategies/slide-panel-strategy';
 import { ProviderCardComponent } from '../provider-card/provider-card.component';
 import { MapDisplayItem } from '../../../models/map-display.model';
+import { PlaceData } from '../../../models/place-data.model';
 import { adaptEnrichedProviderToMapItem } from '../../../adapters/map-display.adapter';
 
 export interface MapConfig {
@@ -69,9 +70,7 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   // Local UI state
   mapDisplayItems: MapDisplayItem[] = [];
   showProviderCardVisible: boolean = false;
-  placeData: any = null;
-  services: any[] = [];
-  reviews: any[] = [];
+  placeData: PlaceData | null = null;
   activeItem: MapDisplayItem | null = null;
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
@@ -137,7 +136,33 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['items']) {
-      this.mapDisplayItems = this.items.map(provider => adaptEnrichedProviderToMapItem(provider));
+      console.log('=== 🔍 MAP POI COMPONENT - RAW ENRICHED PROVIDER DATA ===');
+      console.log('Total items received:', this.items.length);
+      console.log('Full items array:', JSON.stringify(this.items, null, 2));
+      
+      if (this.items.length > 0) {
+        console.log('📋 First item detailed structure:');
+        console.log('  - Full object:', this.items[0]);
+        console.log('  - provider object:', this.items[0].provider);
+        console.log('  - user object:', (this.items[0] as any).user);
+        console.log('  - provider.id:', this.items[0].provider?.id);
+        console.log('  - provider.nombre_empresa:', this.items[0].provider?.nombre_empresa);
+        console.log('  - provider.telefono:', this.items[0].provider?.telefono);
+        console.log('  - provider.cargoContacto:', this.items[0].provider?.cargoContacto);
+        console.log('  - categories:', this.items[0].categories);
+        console.log('  - services:', this.items[0].services);
+        console.log('  - averageCost:', this.items[0].averageCost);
+        console.log('  - averageVisitDuration:', this.items[0].averageVisitDuration);
+      }
+      console.log('========================================================');
+      
+      this.mapDisplayItems = this.items.map(provider => {
+        console.log('🔄 Adaptando proveedor a MapDisplayItem:', provider);
+        const adapted = adaptEnrichedProviderToMapItem(provider);
+        console.log('✅ Resultado adaptado:', adapted);
+        console.log('📦 placeData creado:', adapted.originalData);
+        return adapted;
+      });
       this.handleProvidersChange();
     }
     if (changes['activeItemId'] && this.mapDisplayItems.length > 0) {
@@ -216,8 +241,15 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private getProviderCoordinates(provider: any): [number, number] {
-    const latitud = provider.proveedorInfo?.latitud || provider.proveedorInfo?.lat || 10.501005998543437;
-    const longitud = provider.proveedorInfo?.longitud || provider.proveedorInfo?.lng || -84.6972559489806;
+    // Backend returns coordinates as coordenadaX/coordenadaY (strings that need parsing)
+    // Try proveedorInfo first (nested), then fall back to top-level provider properties
+    const latStr = provider.proveedorInfo?.coordenadaX || provider.coordenadaX;
+    const lngStr = provider.proveedorInfo?.coordenadaY || provider.coordenadaY;
+    
+    // Parse to floats, with fallback to default Costa Rica coordinates
+    const latitud = latStr ? parseFloat(latStr) : 10.501005998543437;
+    const longitud = lngStr ? parseFloat(lngStr) : -84.6972559489806;
+    
     return [latitud, longitud];
   }
 
@@ -241,18 +273,9 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   onSubmitReview(event: any): void {
     console.log('Review submitted:', event);
-    const newReview = {
-      id: this.reviews.length + 1,
-      author: 'Current User',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80',
-      date: 'Just now',
-      rating: event.rating,
-      comment: event.review,
-      helpful: 0,
-      notHelpful: 0
-    };
-
-    this.reviews.unshift(newReview);
+    // This functionality might need to be moved or handled differently
+    // as the component no longer manages reviews directly.
+    // For now, we'll just log it.
   }
 
   onMarkerClick(providerData: any): void {
@@ -266,12 +289,11 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
   }
 
-  updateProviderCardVisibility(visible: boolean, data?: any): void {
+  updateProviderCardVisibility(visible: boolean, data?: MapDisplayItem): void {
     this.showProviderCardVisible = visible;
-    if (visible && data) {
-      this.placeData = data;
-      this.services = data.originalData.services || [];
-      this.reviews = data.reviews || [];
+    if (visible && data && data.originalData) {
+      // data.originalData is already PlaceData from the adapter
+      this.placeData = data.originalData;
     }
     this.cdr.markForCheck();
   }

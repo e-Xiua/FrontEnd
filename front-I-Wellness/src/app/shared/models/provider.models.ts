@@ -21,9 +21,12 @@ export interface Service {
  */
 export interface Provider {
   id: number;
-  nombre_empresa: string;
-  coordenadax: number; // Latitude
-  coordenaday: number; // Longitude
+  nombre_empresa: string
+  coordenadaX: number; // Latitude
+  coordenadaY: number; // Longitude
+  cargoContacto?: string;
+  telefono?: string;
+  telefonoEmpresa?: string;
 }
 
 /**

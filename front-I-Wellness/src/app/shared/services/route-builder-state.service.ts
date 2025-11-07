@@ -23,21 +23,20 @@ import { map, switchMap, takeWhile, tap, catchError, finalize } from 'rxjs/opera
 // Services
 import { UsuarioService } from '../../features/users/services/usuario.service';
 import { RouteOptimizationService } from './route-optimization.service';
-import { ProviderDataAdapter, BackendProviderResponse, BackendServiceResponse } from '../adapters/provider-data.adapter';
 
 // Models
+import { EnrichedProviderData } from '../models/provider.models';
+import { RouteRow, RouteOptimizationRequest } from '../models/route-builder.models';
 import {
-  EnrichedProviderData,
-  RouteRow,
-  RouteOptimizationRequest,
   JobSubmissionResponse,
   JobStatusResponse,
   OptimizationJob,
   OptimizationResult,
   OptimizedPOI
-} from '../models/route-generation';
+} from '../models/optimization-job.models';
 import { ServicioService } from '../../features/servicios/services/servicio.service';
 import { MapDisplayItem } from '../models/map-display.model';
+import { usuarios } from '../models/usuarios';
 
 @Injectable({
   providedIn: 'root'
@@ -93,21 +92,33 @@ export class RouteBuilderStateService {
 
   constructor(
     private http: HttpClient,
-    private servicioService: ServicioService,
+    private servicioService: ServicioService, // Kept for backward compatibility, no longer used in loadProviders
     private usuarioService: UsuarioService,
     private routeOptimizationService: RouteOptimizationService,
-    private providerAdapter: ProviderDataAdapter
+    
   ) {
-    console.log('RouteBuilderStateService initialized');
+    console.log('RouteBuilderStateService initialized - Using backend enrichment');
   }
 
   // ========== PUBLIC METHODS (Actions) ==========
 
   /**
-   * Load all available providers and enrich with services data
+   * Load all available providers and enrich with services data FROM BACKEND
    * 
-   * Flow:
+   * NEW FLOW (Backend-Driven Enrichment):
    * 1. Fetch all providers from UsuarioService
+   * 2. For each provider, call backend enrichment endpoint
+   * 3. Backend returns complete EnrichedProviderData with:
+   *    - Provider info
+   *    - All services
+   *    - Average cost (calculated by backend)
+   *    - Average duration (calculated by backend)
+   *    - Categories
+   * 
+   * OLD FLOW (Deprecated):
+   * 1. Fetch all providers from UsuarioService
+   * 2. For each provider, fetch their services from providers API
+   * 3. Transform to EnrichedProviderData using adapter (frontend calculates averages)
    * 2. For each provider, fetch their services from providers API
    * 3. Transform to EnrichedProviderData using adapter
    */
@@ -119,41 +130,33 @@ export class RouteBuilderStateService {
 
     this.usuarioService.obtenerProveedores()
       .pipe(
-        switchMap((providers: BackendProviderResponse[]) => {
-          console.log(`Fetched ${providers.length} providers, now fetching services for each...`);
+        switchMap((providers: usuarios[]) => {
+          console.log(`Fetched ${providers.length} providers, now fetching enriched data from backend for each...`);
           
           if (providers.length === 0) {
             return of([]);
           }
 
-          // Fetch services for each provider in parallel
-          const serviceRequests = providers.map(provider =>
-            this.servicioService.obtenerServiciosPorProveedor(provider.id).pipe(
-              map(services => ({ providerId: provider.id, services })),
+          // 🔄 NEW APPROACH: Fetch enriched data from backend for each provider
+          // This replaces the previous approach of fetching services separately and calculating averages on frontend
+          const enrichmentRequests = providers.map(provider =>
+            this.routeOptimizationService.enrichProvidersData(provider.id).pipe(
+              map(enrichedData => {
+                console.log(`Received enriched data for provider ${provider.id} from backend`, enrichedData);
+                // The backend already returns the data in EnrichedProviderData format
+                // We just need to ensure it matches our interface
+                return enrichedData as EnrichedProviderData;
+              }),
               catchError(error => {
-                console.warn(`Failed to fetch services for provider ${provider.id}:`, error);
-                // Return an observable of an object with empty services array
-                return of({ providerId: provider.id, services: [] });
+                console.error(`Error enriching data for provider ${provider.id}:`, error);
+                // On error, create a fallback object so the entire process doesn't fail
+                return of(this.createFallbackEnrichedData(provider as any));
               })
             )
           );
 
-          // Wait for all service requests to complete
-          return forkJoin(serviceRequests).pipe(
-            map(servicesResults => {
-              // Create a map of providerId -> services
-              const servicesMap = new Map<number, BackendServiceResponse[]>();
-              servicesResults.forEach(result => {
-                servicesMap.set(result.providerId, result.services);
-              });
-
-              // Transform to EnrichedProviderData
-              const enrichedProviders = this.providerAdapter.adaptProviders(providers, servicesMap);
-              
-              console.log(`Enriched ${enrichedProviders.length} providers with services`);
-              return enrichedProviders;
-            })
-          );
+          // Wait for all enrichment requests to complete
+          return forkJoin(enrichmentRequests);
         }),
         catchError(error => {
           console.error('Error loading and enriching providers:', error);
@@ -167,8 +170,45 @@ export class RouteBuilderStateService {
       .subscribe((enrichedProviders: EnrichedProviderData[]) => {
         this._providers$.next(enrichedProviders);
         console.log('Providers loaded successfully:', enrichedProviders.length);
-        console.log('Sample enriched provider:', enrichedProviders[0]);
+        
+        // 📊 LOGGING: Sample enriched provider data from backend
+        if (enrichedProviders.length > 0) {
+          console.log('=== 📊 ENRICHED PROVIDER DATA FROM BACKEND ===');
+          console.log(JSON.stringify(enrichedProviders[0], null, 2));
+          console.log('Provider details:', {
+            id: enrichedProviders[0].provider.id,
+            name: enrichedProviders[0].provider.nombre_empresa,
+            coordinates: [enrichedProviders[0].provider.coordenadaX, enrichedProviders[0].provider.coordenadaY],
+            servicesCount: enrichedProviders[0].services.length,
+            averageCost: enrichedProviders[0].averageCost,
+            averageDuration: enrichedProviders[0].averageVisitDuration,
+            categories: enrichedProviders[0].categories,
+            source: 'BACKEND (not frontend calculated)'
+          });
+          console.log('===============================================');
+        }
       });
+  }
+
+  /**
+   * Create fallback enriched data when backend call fails
+   */
+  private createFallbackEnrichedData(provider: EnrichedProviderData): EnrichedProviderData {
+    const providerInfo = provider.provider;
+    const empresaName = providerInfo.nombre_empresa || 'Unknown';
+
+    return {
+      provider: {
+        id: provider.provider.id,
+        nombre_empresa: empresaName || 'Unknown',
+        coordenadaX: providerInfo.coordenadaX || 0,
+        coordenadaY: providerInfo.coordenadaY || 0
+      },
+      services: [],
+      averageCost: 0,
+      averageVisitDuration: 30,
+      categories: []
+    };
   }  /**
    * Add a new empty row to the route builder
    */
@@ -214,16 +254,41 @@ export class RouteBuilderStateService {
       return;
     }
 
-    console.log('=== ENRICHED PROVIDER DATA FOR ROW ===');
+    // 🔍 LOGGING: Enriched provider data when user selects a provider
+    console.log('=== 🔍 PROVIDER SELECTED IN ROUTE BUILDER ===');
     console.log('Row ID:', rowId);
     console.log('Provider ID:', providerId);
-    console.log('Enriched Data:', providerData);
-    console.log('Provider Info:', providerData.provider);
-    console.log('Services:', providerData.services);
-    console.log('Average Cost:', providerData.averageCost);
-    console.log('Average Duration:', providerData.averageVisitDuration);
-    console.log('Categories:', providerData.categories);
-    console.log('======================================');
+    
+    // Log full enriched data as JSON for complete inspection
+    console.log('Full EnrichedProviderData (JSON):');
+    console.log(JSON.stringify(providerData, null, 2));
+    
+    // Log structured summary for easy reading
+    console.log('Provider Summary:', {
+      id: providerData.provider.id,
+      name: providerData.provider.nombre_empresa,
+      coordinates: {
+        latitude: providerData.provider.coordenadaX,
+        longitude: providerData.provider.coordenadaY
+      },
+      servicesCount: providerData.services.length,
+      averageCost: providerData.averageCost,
+      averageVisitDuration: providerData.averageVisitDuration,
+      categories: providerData.categories
+    });
+    
+    // Log all available services with their details
+    console.log('Available Services for this Provider:');
+    providerData.services.forEach((service, index) => {
+      console.log(`  ${index + 1}. ${service.nombre}`, {
+        id: service.idServicio,
+        precio: service.precio,
+        tiempoAproximado: service.tiempoAproximado,
+        descripcion: service.descripcion
+      });
+    });
+    
+    console.log('=============================================');
 
     const updatedRows = currentRows.map(row => {
       if (row.id === rowId) {
@@ -250,6 +315,42 @@ export class RouteBuilderStateService {
     const updatedRows = currentRows.map(row => {
       if (row.id === rowId && row.providerData) {
         const service = row.providerData.services.find((s: any) => s.idServicio === serviceId);
+        
+        // 🎯 LOGGING: Specific service selected by user
+        if (service) {
+          console.log('=== 🎯 SERVICE SELECTED IN ROUTE BUILDER ===');
+          console.log('Row ID:', rowId);
+          console.log('Service ID:', serviceId);
+          console.log('Provider:', row.providerData.provider.nombre_empresa);
+          
+          // Log full service object as JSON
+          console.log('Full Service Object (JSON):');
+          console.log(JSON.stringify(service, null, 2));
+          
+          // Log structured service details
+          console.log('Selected Service Details:', {
+            id: service.idServicio,
+            nombre: service.nombre,
+            descripcion: service.descripcion,
+            precio: service.precio,
+            tiempoAproximado: service.tiempoAproximado
+          });
+          
+          // Show comparison with provider averages
+          console.log('Comparison with Provider Averages:', {
+            serviceCost: service.precio,
+            providerAvgCost: row.providerData.averageCost,
+            costDifference: service.precio - row.providerData.averageCost,
+            serviceDuration: service.tiempoAproximado,
+            providerAvgDuration: row.providerData.averageVisitDuration,
+            durationDifference: service.tiempoAproximado - row.providerData.averageVisitDuration
+          });
+          
+          console.log('============================================');
+        } else {
+          console.warn(`Service with ID ${serviceId} not found in provider's services`);
+        }
+        
         return {
           ...row,
           selectedService: service || null
@@ -259,17 +360,21 @@ export class RouteBuilderStateService {
     });
 
     this._selectedPois$.next(updatedRows);
-    console.log('Updated row service:', rowId, serviceId);
   }
 
   /**
    * Start route optimization
    * Submits the job and starts polling for status
    * Uses RouteOptimizationService for job submission
+   * 
+   * NOW SUPPORTS:
+   * - Rows with specific service selected (uses service cost/duration)
+   * - Rows with only provider selected (uses backend-calculated averages)
    */
   startOptimization(userId: number, optimizeFor: 'distance' | 'cost' | 'time' = 'distance'): void {
+    // Include rows with provider selected (service is now optional)
     const selectedRows = this._selectedPois$.value.filter(row =>
-      row.providerId && row.selectedService
+      row.providerId && row.providerData
     );
 
     if (selectedRows.length < 2) {
@@ -291,10 +396,27 @@ export class RouteBuilderStateService {
       optimizeFor: optimizeFor
     };
 
-    console.log('Submitting optimization request via RouteOptimizationService:', request);
-    console.log('Selected providers:', providerIds);
-    console.log('User ID:', userId);
-    console.log('Optimize for:', optimizeFor);
+    // 📤 LOGGING: Complete optimization request payload before sending to backend
+    console.log('=== 📤 OPTIMIZATION REQUEST PAYLOAD ===');
+    console.log(JSON.stringify(request, null, 2));
+    console.log('Request summary:', {
+      userId: userId,
+      providersCount: providerIds.length,
+      providerIds: providerIds,
+      optimizationCriteria: optimizeFor,
+      timestamp: new Date().toISOString()
+    });
+    console.log('Selected rows details:', selectedRows.map(row => ({
+      rowId: row.id,
+      providerId: row.providerId,
+      providerName: row.providerData?.provider.nombre_empresa,
+      dataSource: row.selectedService ? 'SPECIFIC_SERVICE' : 'PROVIDER_AVERAGES',
+      serviceName: row.selectedService?.nombre || 'N/A (using averages)',
+      cost: row.selectedService?.precio || row.providerData?.averageCost,
+      duration: row.selectedService?.tiempoAproximado || row.providerData?.averageVisitDuration,
+      categories: row.providerData?.categories
+    })));
+    console.log('========================================');
 
     // Submit job using RouteOptimizationService
     // Note: RouteOptimizationService uses snake_case in its response
@@ -384,6 +506,7 @@ export class RouteBuilderStateService {
 
   /**
    * Update job state based on status response
+   * Enriches the optimized sequence with full provider data from cache
    */
   private updateJobInState(jobId: string, status: JobStatusResponse): void {
     const currentJobs = this._activeJobs$.value;
@@ -397,10 +520,13 @@ export class RouteBuilderStateService {
           message: status.message
         };
 
-        // If completed, store result
+        // If completed, store result and ENRICH with provider data
         if (status.status === 'COMPLETED' && status.result) {
-          updatedJob.result = status.result;
+          const enrichedResult = this.enrichOptimizationResult(status.result);
+          updatedJob.result = enrichedResult;
           updatedJob.completedAt = new Date();
+          
+          console.log('✨ ENRICHED OPTIMIZATION RESULT:', enrichedResult);
         }
 
         // If failed, store error
@@ -414,7 +540,85 @@ export class RouteBuilderStateService {
       return job;
     });
 
-    this._activeJobs$.next(updatedJobs);
+    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    // This ensures state updates happen outside the current change detection cycle
+    setTimeout(() => {
+      this._activeJobs$.next(updatedJobs);
+    }, 0);
+  }
+
+  /**
+   * Enrich optimization result with full provider data
+   * Takes the bare-bones result from backend and adds:
+   * - Provider details (name, coordinates from enriched data)
+   * - Service information (cost, category)
+   * - All metadata from EnrichedProviderData
+   */
+  private enrichOptimizationResult(result: any): OptimizationResult {
+    const providers = this._providers$.value;
+    
+    console.log('📊 Enriching optimization result with cached provider data...');
+    console.log('Available providers in cache:', providers.length);
+    
+    // Enrich each POI in the sequence
+    const enrichedSequence = result.optimizedSequence.map((poi: any) => {
+      // Find the matching provider by poiId
+      const providerData = providers.find(p => p.provider.id === poi.poiId);
+      
+      if (!providerData) {
+        console.warn(`⚠️ Provider ${poi.poiId} not found in cache, using basic data`);
+        return {
+          poiId: poi.poiId,
+          name: poi.name || 'Unknown Provider',
+          latitude: poi.latitude,
+          longitude: poi.longitude,
+          visitOrder: poi.visitOrder,
+          estimatedVisitTime: poi.estimatedVisitTime,
+          arrivalTime: poi.arrivalTime,
+          departureTime: poi.departureTime,
+          category: undefined,
+          cost: undefined
+        };
+      }
+      
+      // Enrich with full provider data
+      const enrichedPOI = {
+        poiId: poi.poiId,
+        name: providerData.provider.nombre_empresa, // Use actual provider name
+        latitude: providerData.provider.coordenadaX,
+        longitude: providerData.provider.coordenadaY,
+        visitOrder: poi.visitOrder,
+        estimatedVisitTime: poi.estimatedVisitTime,
+        arrivalTime: poi.arrivalTime,
+        departureTime: poi.departureTime,
+        // Add enriched data
+        category: providerData.categories.length > 0 ? providerData.categories[0] : undefined,
+        cost: providerData.averageCost,
+        // Store full provider data for map display
+        providerData: providerData
+      };
+      
+      console.log(`✅ Enriched POI ${poi.poiId}:`, {
+        originalName: poi.name,
+        enrichedName: enrichedPOI.name,
+        category: enrichedPOI.category,
+        cost: enrichedPOI.cost,
+        servicesCount: providerData.services.length
+      });
+      
+      return enrichedPOI;
+    });
+    
+    // Return enriched result
+    return {
+      optimizedRouteId: result.optimizedRouteId,
+      optimizedSequence: enrichedSequence,
+      totalDistanceKm: result.totalDistanceKm || 0,
+      totalTimeMinutes: result.totalTimeMinutes || 0,
+      optimizationAlgorithm: result.algorithm || result.optimizationAlgorithm || 'Unknown',
+      optimizationScore: result.optimizationScore || 0,
+      generatedAt: result.processedAt || result.generatedAt || new Date().toISOString()
+    };
   }
 
   /**
@@ -519,7 +723,10 @@ export class RouteBuilderStateService {
    * Sets the active provider for the general map view.
    */
   setActiveProvider(providerId: number | null): void {
-    this._activeProviderId$.next(providerId);
+    // Wrap in setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      this._activeProviderId$.next(providerId);
+    }, 0);
   }
 
   /**
@@ -554,7 +761,10 @@ export class RouteBuilderStateService {
    * Sets the active optimized POI for the detailed map view.
    */
   setActiveOptimizedPoi(poiId: number | string | null): void {
-    this._activeOptimizedPoiId$.next(poiId);
+    // Wrap in setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      this._activeOptimizedPoiId$.next(poiId);
+    }, 0);
   }
 
   /**
@@ -582,7 +792,10 @@ export class RouteBuilderStateService {
 
   // Job history management
   selectJob(jobId: string | null): void {
-    this._selectedJobId$.next(jobId);
+    // Wrap in setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      this._selectedJobId$.next(jobId);
+    }, 0);
   }
 
   /**
@@ -605,8 +818,8 @@ export class RouteBuilderStateService {
 
     const bounds = new google.maps.LatLngBounds();
     providers.forEach(provider => {
-      if (provider.provider.coordenadax && provider.provider.coordenaday) {
-        bounds.extend(new google.maps.LatLng(provider.provider.coordenadax, provider.provider.coordenaday));
+      if (provider.provider.coordenadaX && provider.provider.coordenadaY) {
+        bounds.extend(new google.maps.LatLng(provider.provider.coordenadaX, provider.provider.coordenadaY));
       }
     });
 
@@ -638,8 +851,8 @@ export class RouteBuilderStateService {
    */
   centerMapOnActiveProvider(map: any): void {
     const provider = this._providers$.value.find(p => p.provider.id === this._activeProviderId$.value);
-    if (provider && provider.provider.coordenadax && provider.provider.coordenaday) {
-      map.setCenter(new google.maps.LatLng(provider.provider.coordenadax, provider.provider.coordenaday));
+    if (provider && provider.provider.coordenadaX && provider.provider.coordenadaY) {
+      map.setCenter(new google.maps.LatLng(provider.provider.coordenadaX, provider.provider.coordenadaY));
     }
   }
 

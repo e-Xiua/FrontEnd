@@ -1,4 +1,5 @@
 import { usuarios } from './usuarios';
+import { OptimizationResult } from './optimization-job.models';
 
 export interface Route {
   id: string;
@@ -19,6 +20,7 @@ export interface Route {
   createdAt?: Date;
   rating?: number; // Calificación promedio de la ruta
   totalReviews?: number;
+  optimizationResult?: OptimizationResult; // Add this line
 }
 
 export interface RouteDisplayOptions {

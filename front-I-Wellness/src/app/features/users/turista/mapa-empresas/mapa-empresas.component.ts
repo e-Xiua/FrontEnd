@@ -1,14 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { RouteBuilderStateService } from '../../../../shared/services/route-builder-state.service';
-import {
-  OptimizationJob,
-  OptimizationResult
-} from '../../../../shared/models/route-generation/optimization-job.models';
-import {
-  EnrichedProviderData,
-  RouteRow
-} from '../../../../shared/models/route-generation';
+import { OptimizationJob, OptimizationResult } from '../../../../shared/models/optimization-job.models';
+import { EnrichedProviderData } from '../../../../shared/models/provider.models';
+import { RouteRow } from '../../../../shared/models/route-builder.models';
 import {
   PoiRouteBuilderComponent,
   OptimizationStatusTrackerComponent,
@@ -29,7 +24,8 @@ import { MapPoiComponent } from '../../../../shared/ui/components/map-poi/map-po
     MapPoiComponent
   ],
   templateUrl: './mapa-empresas.component.html',
-  styleUrls: ['./mapa-empresas.component.css']
+  styleUrls: ['./mapa-empresas.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapaEmpresasComponent implements OnInit, OnDestroy {
 
