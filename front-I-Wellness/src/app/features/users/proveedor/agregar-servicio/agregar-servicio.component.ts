@@ -24,7 +24,7 @@ export class AgregarServicioComponent {
     _idProveedor: 0,
     nombre: '',
     descripcion: '',
-    precio: null,
+    precio: null as number | null,
     imagen: '',
     horario: '',
     estado: true,

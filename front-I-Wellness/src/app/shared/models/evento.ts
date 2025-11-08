@@ -1,5 +1,5 @@
 export interface Evento {
-  id: string;
+  id?: string;
   titulo: string;
   descripcion: string;
   fecha: Date;
@@ -8,6 +8,7 @@ export interface Evento {
   asistentes: string[];
   tipo: 'evento' | 'reunion';
   color: string;
+  activo?: boolean
 }
 
 export interface EventoForm {
@@ -18,4 +19,5 @@ export interface EventoForm {
   duracion: number;
   costo?: number;
   asistentes: string;
+  activo?: boolean
 }
