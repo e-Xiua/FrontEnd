@@ -1,101 +1,26 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable, catchError, interval, map, mergeMap, of, switchMap, takeWhile } from 'rxjs';
+import {
+  JobSubmissionResponse,
+  JobStatusResponse,
+  OptimizationResult,
+  OptimizedPOI,
+} from '../models/optimization-job.models';
+import { RouteOptimizationRequest } from '../models/route-builder.models';
 
-export interface OptimizationPOI {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  category?: string;
-  subcategory?: string;
-  visitDuration?: number;
-  cost?: number;
-  rating?: number;
-  openingHours?: string;
-  description?: string;
-  imageUrl?: string;
-  accessibility?: boolean;
-  providerId?: number;
-  providerName?: string;
-}
-
-export interface RouteOptimizationRequest {
-  routeId?: string;
-  userId?: string;
-  pois: OptimizationPOI[];
-  preferences?: {
-    optimizeFor?: string;
-    maxTotalTime?: number;
-    maxTotalCost?: number;
-    preferredCategories?: string[];
-    avoidCategories?: string[];
-    accessibilityRequired?: boolean;
-  };
-  constraints?: {
-    startLocation?: { latitude: number; longitude: number };
-    endLocation?: { latitude: number; longitude: number };
-    startTime?: string;
-    lunchBreakRequired?: boolean;
-    lunchBreakDuration?: number;
-  };
-}
-
-export interface JobSubmissionResponse {
-  job_id: string;
-  polling_url: string;
-  message: string;
-  estimated_completion_time: string;
-  retry_after_seconds: number;
-  status: string;
-  created_at: string;
-}
-
-export interface JobStatusResponse {
-  job_id: string;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
-  message: string;
-  progress_percentage: number;
-  created_at: string;
-  updated_at: string;
-  completed_at?: string;
-  estimated_completion_time?: string;
-  retry_after_seconds?: number;
-  result?: OptimizationResult;
-  error?: {
-    code: string;
-    message: string;
-    details: string;
-  };
-}
-
-export interface OptimizationResult {
-  optimizedRouteId: string;
-  optimizedSequence: OptimizedPOI[];
-  totalDistanceKm: number;
-  totalTimeMinutes: number;
-  optimizationAlgorithm: string;
-  optimizationScore: number;
-  generatedAt: string;
-}
-
-export interface OptimizedPOI {
-  poiId: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  visitOrder: number;
-  estimatedVisitTime: number;
-  arrivalTime?: string;
-  departureTime?: string;
-}
+// Type alias for raw backend responses to avoid confusion
+type BackendJobSubmissionResponse = any;
+type BackendJobStatusResponse = any;
+type BackendOptimizationResult = any;
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouteOptimizationService {
 
-  private readonly baseUrl = 'http://localhost:8085/api/v1';
+  private readonly baseUrlJobStatus = 'http://localhost:8085/api/v1';
+  private readonly baseUrl = 'http://localhost:8085/api/route-processing';
 
   constructor(private http: HttpClient) {}
 
@@ -103,14 +28,40 @@ export class RouteOptimizationService {
    * Submit route optimization request (returns 202 Accepted)
    */
   submitOptimizationRequest(request: RouteOptimizationRequest): Observable<JobSubmissionResponse> {
+    
+    const token = localStorage.getItem('token');
+      
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
     });
 
-    return this.http.post<JobSubmissionResponse>(
-      `${this.baseUrl}/routes/optimize`,
+    return this.http.post<BackendJobSubmissionResponse>(
+      `${this.baseUrl}/submit-optimization-job`,
       request,
+      { headers }
+    ).pipe(
+      map(this.mapToJobSubmissionResponse)
+    );
+  }
+
+  /**
+   * Submit route optimization request (returns 202 Accepted)
+   */
+  enrichProvidersData(providerID: number): Observable<any> {
+
+    const token = localStorage.getItem('token');
+      
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+
+    return this.http.get<any>(
+      `${this.baseUrl}/provider/${providerID}/enriched`,
+      
       { headers }
     );
   }
@@ -119,21 +70,23 @@ export class RouteOptimizationService {
    * Get job status
    */
   getJobStatus(jobId: string): Observable<JobStatusResponse> {
-    return this.http.get<JobStatusResponse>(`${this.baseUrl}/jobs/${jobId}/status`);
+    return this.http.get<BackendJobStatusResponse>(`${this.baseUrlJobStatus}/jobs/${jobId}/status`).pipe(
+      map(res => this.mapToJobStatusResponse(res))
+    );
   }
 
   /**
    * Cancel a job
    */
   cancelJob(jobId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/jobs/${jobId}`);
+    return this.http.delete<void>(`${this.baseUrlJobStatus}/jobs/${jobId}`);
   }
 
   /**
    * Poll for job completion using Request-Response with Status Polling pattern
    */
   pollForCompletion(jobId: string, maxAttempts: number = 10000): Observable<JobStatusResponse> {
-    return interval(2000) // Poll every 7 seconds
+    return interval(2000) // Poll every 2 seconds
       .pipe(
         switchMap(() => this.getJobStatus(jobId)),
         takeWhile((status, index) => {
@@ -141,7 +94,7 @@ export class RouteOptimizationService {
           return (status.status === 'PENDING' || status.status === 'PROCESSING') && index < maxAttempts;
         }, true), // Include the final emission that fails the condition
         map(status => {
-          console.log(`Job ${jobId} status: ${status.status} (${status.progress_percentage}%)`);
+          console.log(`Job ${jobId} status: ${status.status} (${status.progressPercentage}%)`);
           return status;
         }),
         catchError(error => {
@@ -158,10 +111,10 @@ export class RouteOptimizationService {
   optimizeRouteComplete(request: RouteOptimizationRequest): Observable<OptimizationResult> {
     return this.submitOptimizationRequest(request).pipe(
       switchMap(submission => {
-        console.log(`Route optimization job submitted: ${submission.job_id}`);
-        console.log(`Estimated completion: ${submission.estimated_completion_time}`);
+        console.log(`Route optimization job submitted: ${submission.jobId}`);
+        console.log(`Estimated completion: ${submission.estimatedCompletionTime}`);
 
-        return this.pollForCompletion(submission.job_id);
+        return this.pollForCompletion(submission.jobId);
       }),
       // Usa mergeMap para transformar el valor en un nuevo stream
       mergeMap(finalStatus => {
@@ -180,7 +133,7 @@ export class RouteOptimizationService {
         }
 
         if (finalStatus.status === 'PROCESSING' || finalStatus.status === 'PENDING') {
-          console.warn(`Client timeout: The optimization is still processing on the server. Job ID: ${finalStatus.job_id}`);
+          console.warn(`Client timeout: The optimization is still processing on the server. Job ID: ${finalStatus.jobId}`);
           // Devuelve un observable que se completa inmediatamente sin emitir nada
           return EMPTY;
         }
@@ -190,24 +143,6 @@ export class RouteOptimizationService {
       })
 
     );
-  }
-
-  /**
-   * Get mock POIs for testing
-   */
-  getMockPOIs(routeType: string = 'random', count: number = 8): Observable<OptimizationPOI[]> {
-    const params: any = {};
-    if (routeType !== 'random') params.routeType = routeType;
-    if (count !== 8) params.count = count;
-
-    return this.http.get<OptimizationPOI[]>(`${this.baseUrl}/pois/mock`, { params });
-  }
-
-  /**
-   * Get all available mock POIs
-   */
-  getAllMockPOIs(): Observable<OptimizationPOI[]> {
-    return this.http.get<OptimizationPOI[]>(`${this.baseUrl}/pois/all`);
   }
 
   /**
@@ -231,4 +166,72 @@ export class RouteOptimizationService {
     return this.http.get<OptimizationResult>(`${this.baseUrl}/routes/completed?userId=${userId}`);
   }
 
+  // ==================================================
+  // PRIVATE DATA MAPPING ADAPTERS
+  // ==================================================
+
+  /**
+   * Maps snake_case backend response to camelCase JobSubmissionResponse model.
+   */
+  private mapToJobSubmissionResponse(backendResponse: BackendJobSubmissionResponse): JobSubmissionResponse {
+    return {
+      jobId: backendResponse.job_id,
+      status: backendResponse.status,
+      message: backendResponse.message,
+      pollingUrl: backendResponse.polling_url,
+      estimatedCompletionTime: backendResponse.estimated_completion_time,
+      retryAfterSeconds: backendResponse.retry_after_seconds,
+      createdAt: backendResponse.created_at,
+    };
+  }
+
+  /**
+   * Maps snake_case backend response to camelCase JobStatusResponse model.
+   */
+  private mapToJobStatusResponse(backendResponse: BackendJobStatusResponse): JobStatusResponse {
+    return {
+      jobId: backendResponse.job_id,
+      status: backendResponse.status,
+      message: backendResponse.message,
+      progressPercentage: backendResponse.progress_percentage,
+      createdAt: backendResponse.created_at,
+      updatedAt: backendResponse.updated_at,
+      completedAt: backendResponse.completed_at,
+      estimatedCompletionTime: backendResponse.estimated_completion_time,
+      retryAfterSeconds: backendResponse.retry_after_seconds,
+      result: backendResponse.result ? this.mapToOptimizationResult(backendResponse.result) : undefined,
+      error: backendResponse.error,
+    };
+  }
+
+  /**
+   * Maps snake_case backend result to camelCase OptimizationResult model.
+   */
+  private mapToOptimizationResult(backendResult: BackendOptimizationResult): OptimizationResult {
+    return {
+      optimizedRouteId: backendResult.optimizedRouteId,
+      optimizedSequence: backendResult.optimizedSequence.map((poi: any) => this.mapToOptimizedPOI(poi)),
+      totalDistanceKm: backendResult.totalDistanceKm,
+      totalTimeMinutes: backendResult.totalTimeMinutes,
+      optimizationAlgorithm: backendResult.optimizationAlgorithm,
+      optimizationScore: backendResult.optimizationScore,
+      generatedAt: backendResult.generatedAt,
+    };
+  }
+
+    /**
+   * Maps snake_case backend POI to camelCase OptimizedPOI model.
+   */
+  private mapToOptimizedPOI(backendPOI: any): OptimizedPOI {
+    return {
+      poiId: backendPOI.poiId,
+      name: backendPOI.name,
+      latitude: backendPOI.latitude,
+      longitude: backendPOI.longitude,
+      visitOrder: backendPOI.visitOrder,
+      estimatedVisitTime: backendPOI.estimatedVisitTime,
+      arrivalTime: backendPOI.arrivalTime,
+      departureTime: backendPOI.departureTime,
+    };
+  }
 }

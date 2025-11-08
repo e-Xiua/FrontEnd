@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { OptimizedPOI } from '../../services/route-optimization.service';
+
 import { Roles } from '../roles';
 import { usuarios } from '../usuarios';
+import { OptimizedPOI } from '../optimization-job.models';
 
 
 @Injectable({
@@ -17,6 +18,7 @@ export class OptimizedPoiAdapterService {
    * @returns A usuarios object compatible with other components.
    */
   public adapt(poi: OptimizedPOI): usuarios {
+
 
     console.log('Adapting OptimizedPOI to usuarios:', poi);
     // The core of the Adapter Pattern: mapping fields from one interface to another.

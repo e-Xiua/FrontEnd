@@ -5,6 +5,8 @@ import { Route } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteDataService } from '../../../../shared/services/route-data.service';
 import { MapConfig, MapPoiComponent } from '../../../../shared/ui/components/map-poi/map-poi.component';
+import { EnrichedProviderData } from '../../../../shared/models/provider.models';
+
 
 @Component({
   selector: 'app-ruta-detalle',
@@ -15,9 +17,8 @@ import { MapConfig, MapPoiComponent } from '../../../../shared/ui/components/map
   standalone: true
 })
 export class RutaDetalleComponent implements OnInit {
-
   selectedRoute: Route | null = null;
-  providers: usuarios[] = [];
+  providers: EnrichedProviderData[] = [];
   isLoading: boolean = true;
   error: string | null = null;
 
@@ -34,82 +35,15 @@ export class RutaDetalleComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private routeDataService: RouteDataService
+    private routeDataService: RouteDataService,
+   
   ) {}
 
   ngOnInit(): void {
-    this.loadRouteData();
+    
   }
 
-  private loadRouteData(): void {
-    this.isLoading = true;
-    this.error = null;
-    console.log('Cargando datos de la ruta...');
-
-    // Método 1: Intentar obtener desde query params
-    this.route.queryParams.subscribe(params => {
-      console.log('Query params recibidos:', params);
-      let routeData: Route | null = null;
-
-      try {
-        if (params['routeData']) {
-          console.log('Raw routeData param:', params['routeData']);
-          const decodedData = decodeURIComponent(params['routeData']);
-          console.log('Decoded data length:', decodedData.length);
-          routeData = JSON.parse(decodedData) as Route;
-          console.log('Datos de la ruta obtenidos desde queryParams:', routeData);
-        } else {
-          console.log('No routeData found in query params');
-        }
-      } catch (error) {
-        console.error('Error parsing route data from query params:', error);
-      }
-
-      // Método 2: Intentar obtener desde el servicio compartido (fallback principal)
-      if (!routeData) {
-        routeData = this.routeDataService.getSelectedRoute();
-        console.log('Datos de la ruta obtenidos desde servicio:', routeData);
-      }
-
-      // Método 3: Intentar obtener desde el estado de navegación (último recurso)
-      if (!routeData) {
-        const navigation = this.router.getCurrentNavigation();
-        routeData = navigation?.extras?.state?.['route'] as Route;
-        console.log('Datos de navegación (último recurso):', navigation);
-        console.log('Datos de la ruta extraídos (último recurso):', routeData);
-      }
-
-      if (routeData) {
-        console.log('Procesando datos de la ruta:', routeData.name);
-        this.processRouteData(routeData);
-      } else {
-        // Si no hay datos de ninguna fuente, mostrar error
-        this.error = 'No se encontraron datos de la ruta';
-        console.error(this.error);
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  private processRouteData(routeData: Route): void {
-    this.selectedRoute = routeData;
-    this.providers = routeData.providers || [];
-
-    // Configurar el centro del mapa basado en los proveedores o ubicación de inicio de la ruta
-    if (this.selectedRoute.startLocation) {
-      this.mapConfig.center = this.selectedRoute.startLocation;
-    } else if (this.providers.length > 0) {
-      // Usar la ubicación del primer proveedor como centro
-      const firstProvider = this.providers[0];
-      if (firstProvider.proveedorInfo?.latitud && firstProvider.proveedorInfo?.longitud) {
-        this.mapConfig.center = [firstProvider.proveedorInfo.latitud, firstProvider.proveedorInfo.longitud];
-      }
-    }
-
-    this.isLoading = false;
-    this.cdr.markForCheck();
-  }
+  
 
   onProviderSelected(providerData: any): void {
     console.log('Provider selected in route detail:', providerData);

@@ -1,242 +1,106 @@
 <div class="mapa-empresas-container">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isLoading$ | async" class="loading-container">
     <div class="loading-spinner"></div>
     <p>Cargando proveedores...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="error-container">
+  <div *ngIf="(error$ | async) as error" class="error-container">
     <p class="error-message">{{ error }}</p>
     <button (click)="retryLoad()" class="retry-button">
       Reintentar
     </button>
   </div>
 
-  <!-- Contenido principal cuando los datos están cargados -->
-  <div *ngIf="!isLoading && !error" class="content-container">
-
-    <!-- Mapa general con todos los proveedores -->
-    <section class="map-section">
-      <h2 class="section-title">Mapa General de Proveedores</h2>
-      <app-route-pois-show
-        [providers]="providers"
-        [config]="mapConfig"
-        [showRoutes]="false"
-        [showCarousel]="true"
-        [showProviderCard]="true"
-        mapId="mapa-general-proveedores"
+  <!-- Main Content - Route Builder Workflow -->
+  <div *ngIf="!(isLoading$ | async) && !(error$ | async)" class="content-container">
+    
+    <!-- Section 1: POI Route Builder -->
+    <section class="route-builder-section">
+      <h2 class="section-title">🗺️ Construye tu Ruta Personalizada</h2>
+      <p class="section-description">
+        Selecciona los lugares que deseas visitar y optimiza tu ruta con IA
+      </p>
+      
+      <app-poi-route-builder
+        [items]="(providers$ | async) || []"
+        [rows]="(selectedPois$ | async) || []"
+        [isLoading]="(isLoading$ | async) || false"
+        [error]="error$ | async"
+        (addRow)="onAddRow()"
+        (removeRow)="onRemoveRow($event)"
         (providerSelected)="onProviderSelected($event)"
-        (mapInitialized)="onMapInitialized()">
-      </app-route-pois-show>
+        (serviceSelected)="onServiceSelected($event)"
+        (startOptimization)="onStartOptimization($event)">
+      </app-poi-route-builder>
     </section>
 
-    <!-- Separador visual -->
+    <!-- Section Divider -->
     <div class="section-divider"></div>
 
-    <!-- Componente de rutas múltiples -->
-    <section class="routes-section">
-      <h2 class="section-title">Rutas Sugeridas</h2>
+    <!-- Section 2: Optimization Status Tracker -->
+    <section class="status-tracker-section" *ngIf="(activeJobs$ | async)?.length as jobCount">
+      <h2 class="section-title">🚀 Estado de Optimizaciones ({{ jobCount }})</h2>
       <p class="section-description">
-        Explora diferentes rutas curadas con múltiples proveedores para una experiencia completa de bienestar.
+        Sigue el progreso de tus rutas optimizadas en tiempo real
       </p>
-
-      <app-show-routes-many-options
-        *ngIf="routes.length > 0"
-        [routes]="routes"
-        [displayOptions]="{
-          showRouteInfo: true,
-          showProviderCarousel: true,
-          showProviderCard: true,
-          showRouteLines: true,
-          compactMode: false,
-          allowRouteSelection: true
-        }"
-        [maxRoutesToShow]="8"
-        [showFilters]="true"
-        [showRouteStats]="true"
-        [layoutMode]="'accordion'"
-        (routeSelected)="onRouteSelected($event)"
-        (providerSelected)="onRouteProviderSelected($event.route, $event.provider)"
-        (filtersChanged)="onRouteFiltersChanged($event)">
-      </app-show-routes-many-options>
-
-      <!-- Mensaje cuando no hay rutas -->
-      <div *ngIf="routes.length === 0" class="no-routes-message">
-        <p>No hay rutas disponibles en este momento.</p>
-      </div>
+      
+      <app-optimization-status-tracker
+        [jobs]="(activeJobs$ | async) || []"
+        [showCompleted]="showCompletedJobs"
+        (viewResult)="onViewResult($event.jobId)"
+        (cancelJob)="onCancelJob($event)"
+        (removeJob)="onRemoveJob($event)"
+        (clearCompleted)="onClearCompleted()">
+      </app-optimization-status-tracker>
     </section>
 
-    <!-- Información de ruta seleccionada -->
-    <section *ngIf="selectedRoute" class="selected-route-section">
-      <div class="selected-route-content">
-        <div class="selected-route-info">
-          <h3 class="selected-route-title">Ruta Seleccionada: {{ selectedRoute.name }}</h3>
-          <p class="selected-route-description">{{ selectedRoute.description }}</p>
+    <!-- Section Divider -->
+    <div class="section-divider" *ngIf="selectedJobForDisplay$ | async"></div>
 
-          <!-- Current Route Optimization Status -->
-          <div *ngIf="isOptimizing" class="optimization-status">
-            <div class="optimization-progress">
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="optimizationProgress"></div>
-              </div>
-              <p class="optimization-message">{{ optimizationMessage }}</p>
-              <p class="progress-text">{{ optimizationProgress }}%</p>
-            </div>
-          </div>
-
-          <!-- Optimization Results -->
-          <div *ngIf="optimizedResult && !isOptimizing" class="optimization-results">
-            <h4>✅ Optimización Completada</h4>
-            <div class="optimization-metrics">
-              <div class="metric">
-                <span class="metric-label">Distancia Total:</span>
-                <span class="metric-value">{{ optimizedResult.totalDistanceKm.toFixed(1) }} km</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Tiempo Estimado:</span>
-                <span class="metric-value">{{ Math.floor(optimizedResult.totalTimeMinutes / 60) }}h {{ optimizedResult.totalTimeMinutes % 60 }}m</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Puntuación:</span>
-                <span class="metric-value">{{ (optimizedResult.optimizationScore * 100).toFixed(1) }}%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="selected-route-actions">
-          <!-- Standard Navigation Button -->
-          <button class="vamos-button" (click)="navigateToRouteDetail()">
-            🚀 ¡Vamos!
-          </button>
-
-          <!-- Route Optimization Controls -->
-          <div class="optimization-controls">
-            <button
-              *ngIf="!isOptimizing && !optimizedResult"
-              class="optimize-button"
-              (click)="optimizeSelectedRoute()">
-              🧠 Optimizar Ruta con IA
-            </button>
-
-            <button
-              *ngIf="optimizedResult && !isOptimizing"
-              class="clear-optimization-button"
-              (click)="clearOptimizationResults()">
-              🔄 Nueva Optimización
-            </button>
-
-            <button
-              *ngIf="isOptimizing"
-              class="cancel-button"
-              disabled>
-              ⏳ Optimizando...
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- Section 3: Route Map Display -->
+    <section class="map-display-section" *ngIf="(selectedJobForDisplay$ | async) as selectedJob">
+      <h2 class="section-title">📍 Visualización de Ruta Optimizada</h2>
+      <p class="section-description">
+        Explora tu ruta optimizada en el mapa con la secuencia recomendada
+      </p>
+      
+      <app-route-map-display
+        [optimizedRoute]="selectedJob.result"
+        [activeItemId]="(activeOptimizedPoiId$ | async)"
+        (itemSelected)="onOptimizedMapItemSelected($event)"
+        (nextClicked)="onOptimizedMapNext()"
+        (previousClicked)="onOptimizedMapPrevious()"
+        [showCarousel]="true"
+        [showProviderCard]="true">
+      </app-route-map-display>
     </section>
 
-    <!-- Multiple Active Optimizations Section -->
-    <section *ngIf="activeOptimizations.size > 0" class="active-optimizations-section">
-      <h3 class="section-title">🚀 Optimizaciones Activas</h3>
-      <div class="optimizations-grid">
-        <div
-          *ngFor="let entry of activeOptimizations | keyvalue; trackBy: trackOptimizationEntry"
-          class="optimization-card"
-          [class.completed]="!entry.value.isOptimizing && entry.value.result"
-          [class.error]="!entry.value.isOptimizing && !entry.value.result"
-        >
-          <div class="optimization-header">
-            <h4 class="optimization-route-name">{{ entry.value.routeName }}</h4>
-            <div class="optimization-status-badge">
-              <span *ngIf="entry.value.isOptimizing" class="status-running">🔄 En progreso</span>
-              <span *ngIf="!entry.value.isOptimizing && entry.value.result" class="status-completed">✅ Completado</span>
-              <span *ngIf="!entry.value.isOptimizing && !entry.value.result" class="status-error">❌ Error</span>
-            </div>
-          </div>
-
-          <div class="optimization-body">
-            <!-- Progress Bar -->
-            <div *ngIf="entry.value.isOptimizing" class="progress-container">
-              <div class="progress-bar small">
-                <div class="progress-fill" [style.width.%]="entry.value.progress"></div>
-              </div>
-              <p class="progress-text small">{{ entry.value.progress }}%</p>
-            </div>
-
-            <!-- Status Message -->
-            <p class="optimization-message small">{{ entry.value.message }}</p>
-
-            <!-- Results Summary (when completed) -->
-            <div *ngIf="entry.value.result && !entry.value.isOptimizing" class="results-summary">
-              <div class="result-metrics">
-                <span class="metric-item">
-                  📏 {{ entry.value.result.totalDistanceKm.toFixed(1) }} km
-                </span>
-                <span class="metric-item">
-                  ⏱️ {{ Math.floor(entry.value.result.totalTimeMinutes / 60) }}h {{ entry.value.result.totalTimeMinutes % 60 }}m
-                </span>
-                <span class="metric-item">
-                  ⭐ {{ (entry.value.result.optimizationScore * 100).toFixed(1) }}%
-                </span>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="optimization-actions">
-              <button
-                *ngIf="entry.value.isOptimizing"
-                class="cancel-optimization-btn"
-                (click)="cancelOptimization(entry.key)">
-                ⏹️ Cancelar
-              </button>
-              <button
-                *ngIf="!entry.value.isOptimizing"
-                class="remove-optimization-btn"
-                (click)="removeOptimization(entry.key)">
-                🗑️ Quitar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Clear All Button -->
-      <div class="clear-all-container">
-        <button
-          class="clear-all-optimizations-btn"
-          (click)="clearAllOptimizations()">
-          🧹 Limpiar Todas las Optimizaciones
-        </button>
-      </div>
+    <!-- Section 4: General Provider Map -->
+    <section class="map-display-section">
+        <h2 class="section-title">🗺️ Todos los Proveedores</h2>
+        <p class="section-description">
+            Explora todos los proveedores disponibles en el mapa.
+        </p>
+        <app-map-poi
+            [items]="(providers$ | async) || []"
+            [activeItemId]="(activeProviderId$ | async)"
+            (itemSelected)="onProviderMapItemSelected($event)"
+            (nextClicked)="onProviderMapNext()"
+            (previousClicked)="onProviderMapPrevious()"
+            [showCarousel]="true"
+            [showProviderCard]="true">
+        </app-map-poi>
     </section>
 
-    <!-- Test Optimization Section (Development Only) -->
-    <section *ngIf="routes.length > 0 && !selectedRoute" class="test-section">
-      <div class="test-controls">
-        <h4>🧪 Prueba de Optimización</h4>
-        <button class="test-button" (click)="testRouteOptimization()">
-          Probar Optimización con Ruta Aleatoria
-        </button>
+    <!-- Empty State - No Active Jobs -->
+    <section class="empty-state" *ngIf="(activeJobs$ | async)?.length === 0 && !(selectedJobForDisplay$ | async)">
+      <div class="empty-state-content">
+        <div class="empty-state-icon">🗺️</div>
+        <h3 class="empty-state-title">Comienza a planificar tu aventura</h3>
+        <p>Construye una ruta arriba y presiona "Optimizar Ruta" para comenzar</p>
       </div>
     </section>
   </div>
 </div>
-
-
-    <section class="map-section"
-    *ngFor="let optimizedResult of optimizedResults">
-      <h2 class="section-title">Mapa General de Proveedores</h2>
-      <app-route-pois-show
-        [providers]="this.poiAdapter.adaptAll(optimizedResult.optimizedSequence)"
-        [config]="mapConfig"
-        [showRoutes]="false"
-        [showCarousel]="true"
-        [showProviderCard]="true"
-        mapId="{{optimizedResult.optimizedRouteId}}"
-        (providerSelected)="onProviderSelected($event)"
-        (mapInitialized)="onMapInitialized()">
-      </app-route-pois-show>
-    </section>

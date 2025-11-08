@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RoutePoisShowComponent } from './route-pois-show.component';
+import { PoiRouteBuilderComponent } from './poi-route-builder.component';
 
-describe('RoutePoisShowComponent', () => {
-  let component: RoutePoisShowComponent;
-  let fixture: ComponentFixture<RoutePoisShowComponent>;
+describe('PoiRouteBuilderComponent', () => {
+  let component: PoiRouteBuilderComponent;
+  let fixture: ComponentFixture<PoiRouteBuilderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RoutePoisShowComponent]
+      imports: [PoiRouteBuilderComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RoutePoisShowComponent);
+    fixture = TestBed.createComponent(PoiRouteBuilderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

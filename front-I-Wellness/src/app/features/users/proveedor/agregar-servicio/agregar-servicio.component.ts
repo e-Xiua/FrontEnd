@@ -27,7 +27,8 @@ export class AgregarServicioComponent {
     precio: null as number | null,
     imagen: '',
     horario: '',
-    estado: true
+    estado: true,
+    tiempoAproximado: null as number | null // Tiempo aproximado en minutos
   };
 
   // Días de la semana disponibles
@@ -160,6 +161,28 @@ export class AgregarServicioComponent {
         confirmButtonColor: '#4a9c9f' 
       });
       return;
+    }
+  
+    // Validar tiempo aproximado
+    if (this.nuevoServicio.tiempoAproximado !== null && this.nuevoServicio.tiempoAproximado !== undefined) {
+      if (this.nuevoServicio.tiempoAproximado <= 0) {
+        Swal.fire({
+          title: 'Tiempo inválido',
+          text: 'El tiempo aproximado debe ser mayor a 0 minutos.',
+          icon: 'warning',
+          confirmButtonColor: '#4a9c9f' 
+        });
+        return;
+      }
+      if (this.nuevoServicio.tiempoAproximado > 480) {
+        Swal.fire({
+          title: 'Tiempo inválido',
+          text: 'El tiempo aproximado no puede exceder 480 minutos (8 horas).',
+          icon: 'warning',
+          confirmButtonColor: '#4a9c9f' 
+        });
+        return;
+      }
     }
   
     if (!this.imagePreview) {

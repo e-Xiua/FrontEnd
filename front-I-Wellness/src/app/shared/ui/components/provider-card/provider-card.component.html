@@ -10,9 +10,13 @@
           [title]="placeData.name"
           class="header-image"
         />
-        <div class="badge-container">
-          <span class="badge">{{ placeData.category }}</span>  <!-- Usa category -->
-        </div>
+        <!-- Show all categories if available, otherwise show single category -->
+          <span class="badge" *ngIf="placeData.categories && placeData.categories.length > 0">
+            {{ placeData.categories.join(', ') }}
+          </span>
+          <span class="badge" *ngIf="!placeData.categories || placeData.categories.length === 0">
+            {{ placeData.category }}
+          </span>
       </div>
 
       <div class="card-header">
@@ -61,7 +65,7 @@
       <div class="card-content">
         <!-- Carousel de Servicios (ya muestra images como URLs) -->
         <app-carousel [itemsPerView]="2">
-          <ng-container *ngFor="let service of services">
+          <ng-container *ngFor="let service of placeData.services">
             <ng-template appCarouselItem>
               <app-service-card
                 [id]="service.id || service._idServicio"

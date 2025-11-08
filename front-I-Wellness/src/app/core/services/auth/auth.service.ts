@@ -35,15 +35,17 @@ export class AuthService {
       // Once we have the token, get the user info including ID
       return this.getUserInfo().pipe(
         tap((userInfo: any) => {
+          console.log('User Info received in login:', userInfo); // Log para ver qué se recibe
           // Store the user ID in localStorage
           localStorage.setItem('USER_ID', userInfo.id.toString());
           // Store the role as well
-          localStorage.setItem('rol', userInfo.role || ''); // Adjust based on your userInfo structure
+          localStorage.setItem('rol', userInfo.rol || ''); // FIX: Changed from userInfo.role to userInfo.rol
+          console.log('Role stored in localStorage:', userInfo.rol); // Log para confirmar el rol
         }),
         map((userInfo: any) => {
           return {
             token,
-            rol: userInfo.role, // Adjust based on your userInfo structure
+            rol: userInfo.rol, // FIX: Changed from userInfo.role to userInfo.rol
             userInfo
           };
         })
@@ -51,6 +53,10 @@ export class AuthService {
     }),
       catchError(error => {
         console.error('Error en login:', error);
+        // Limpiar localStorage en caso de error de login para evitar estado inconsistente
+        localStorage.removeItem('token');
+        localStorage.removeItem('USER_ID');
+        localStorage.removeItem('rol');
         return throwError(() => new Error(error.error || 'Error en el inicio de sesión'));
       })
     );

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { OptimizationResult } from '../../services/route-optimization.service';
+
 import { Route } from '../route';
 import { OptimizedPoiAdapterService } from './optimized-poi-adapter';
+import { OptimizationResult } from '../optimization-job.models';
 
 
 @Injectable({
@@ -18,6 +19,8 @@ export class OptimizationResultAdapterService {
    * @returns A Route object compatible with ShowRoutesManyOptionsComponent.
    */
   public adapt(result: OptimizationResult): Route {
+
+    console.log('Adapting OptimizationResult to Route:', result);
     // The core of the Adapter Pattern: mapping the parent object.
     return {
       id: result.optimizedRouteId,
@@ -35,7 +38,10 @@ export class OptimizationResultAdapterService {
       rating: 4.5, // Example default rating
       category: 'Optimized',
       difficulty: this.getDifficulty(result.totalDistanceKm, result.totalTimeMinutes),
-      tags: ['optimizado', 'automático']
+      tags: ['optimizado', 'automático'],
+      
+      // Include the original result for components that need it
+      optimizationResult: result
     };
   }
 
