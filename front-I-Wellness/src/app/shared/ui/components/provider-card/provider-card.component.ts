@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ExtendedPlaceData, placeDataDefaults } from '../../../models/place-data.model';
 import { CarouselItemDirective } from '../carousel/carousel-item.directive';
 import { CarouselComponent } from '../carousel/carousel.component';
 import { ReviewDisplayComponent } from '../review-display/review-display.component';
 import { ReviewFormComponent, ReviewSubmission } from '../review-form/review-form.component';
 import { ServiceCardComponent } from '../service-card/service-card.component';
-import { ExtendedPlaceData } from '../../../models/place-data.model';
 
 @Component({
   selector: 'app-provider-card',
@@ -27,6 +27,9 @@ export class ProviderCardComponent implements OnChanges {
   @Input() placeData!: ExtendedPlaceData;
 
   @Output() submitReview = new EventEmitter<ReviewSubmission>();
+
+  // Defaults available to template
+  readonly defaults = placeDataDefaults;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -69,10 +72,10 @@ export class ProviderCardComponent implements OnChanges {
    */
   hasValidContactInfo(): boolean {
     return !!(
-      (this.placeData.contactName && this.placeData.contactName !== 'N/A') ||
-      (this.placeData.phone && this.placeData.phone !== 'N/A') ||
-      (this.placeData.companyPhone && this.placeData.companyPhone !== 'N/A') ||
-      (this.placeData.email && this.placeData.email !== 'N/A')
+      this.placeData?.contactName ||
+      this.placeData?.phone ||
+      this.placeData?.companyPhone ||
+      this.placeData?.email
     );
   }
 
@@ -103,7 +106,7 @@ export class ProviderCardComponent implements OnChanges {
     if (this.placeData.categories && this.placeData.categories.length > 0) {
       return this.placeData.categories.join(', ');
     }
-    return this.placeData.category || 'N/A';
+    return this.placeData.category || this.defaults.category;
   }
 
   /**

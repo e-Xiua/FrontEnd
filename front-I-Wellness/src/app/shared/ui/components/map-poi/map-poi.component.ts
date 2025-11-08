@@ -164,6 +164,16 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
         return adapted;
       });
       this.handleProvidersChange();
+      // Asegurar selección/activación tras remapeo de items
+      if (this.mapDisplayItems.length > 0) {
+        if (this.activeItemId != null) {
+          this.setActiveItem(this.activeItemId);
+        } else if (this.autoSelectFirst) {
+          const firstId = this.mapDisplayItems[0].id;
+          this.itemSelected.emit(firstId);
+          this.setActiveItem(firstId);
+        }
+      }
     }
     if (changes['activeItemId'] && this.mapDisplayItems.length > 0) {
       this.setActiveItem(this.activeItemId);
@@ -293,7 +303,27 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.showProviderCardVisible = visible;
     if (visible && data && data.originalData) {
       // data.originalData is already PlaceData from the adapter
-      this.placeData = data.originalData;
+      // Defensive: clone and sanitize to avoid later mutations (e.g., legacy adapters writing 'N/A')
+      const incoming = data.originalData as any;
+      // Debug trace to compare before/after
+      console.log('➡️ updateProviderCardVisibility incoming PlaceData:', incoming);
+      const sanitizeNa = (v: unknown) => (v === 'N/A' ? undefined : v);
+      this.placeData = {
+        ...incoming,
+        // Normalize known string placeholders to undefined so template defaults apply
+        name: sanitizeNa(incoming.name),
+        contactName: sanitizeNa(incoming.contactName),
+        cargoContacto: sanitizeNa(incoming.cargoContacto),
+        phone: sanitizeNa(incoming.phone),
+        companyPhone: sanitizeNa(incoming.companyPhone),
+        email: sanitizeNa(incoming.email),
+        address: sanitizeNa(incoming.address),
+        hours: sanitizeNa(incoming.hours),
+        category: sanitizeNa(incoming.category),
+        description: sanitizeNa(incoming.description),
+        foto: incoming.foto ?? null
+      } as PlaceData;
+      console.log('✅ updateProviderCardVisibility normalized PlaceData:', this.placeData);
     }
     this.cdr.markForCheck();
   }

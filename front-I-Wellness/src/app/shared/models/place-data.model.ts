@@ -1,28 +1,28 @@
 /**
  * Place Data Model
- * 
+ *
  * Represents the data structure for displaying provider/place information
  * in the ProviderCardComponent and other UI components that show detailed
  * provider information.
- * 
+ *
  * This is the single source of truth for provider display data.
  */
 
 export interface PlaceData {
   id: number;
-  name: string;
-  contactName: string;
-  email: string;
-  foto?: string | null;
-  category: string;
-  rating: number;
-  totalReviews: number;
-  address: string;
-  hours: string;
-  description: string;
-  phone: string;
-  companyPhone: string;
-  cargoContacto: string;
+  name: string; // Nombre comercial del proveedor
+  contactName?: string; // Nombre del contacto principal
+  email?: string; // Email si disponible
+  foto?: string | null; // URL/base64 foto
+  category?: string; // Categoría principal
+  rating: number; // Rating calculado o fijo
+  totalReviews: number; // Número de reviews
+  address?: string; // Dirección textual
+  hours?: string; // Horario formateado
+  description?: string; // Descripción/resumen
+  phone?: string; // Teléfono principal
+  companyPhone?: string; // Teléfono empresa
+  cargoContacto?: string; // Cargo del contacto
   certificadosCalidad?: string[] | null;
   identificacionFiscal?: string | null;
   licenciasPermisos?: string[] | null;
@@ -41,3 +41,20 @@ export interface ExtendedPlaceData extends PlaceData {
   provider?: any;
   poiDetails?: any;
 }
+
+/**
+ * Defaults helper – can be used in templates or adapters to supply UI fallbacks
+ */
+export const placeDataDefaults: Required<Pick<PlaceData,
+  'contactName' | 'email' | 'category' | 'address' | 'hours' | 'description' | 'phone' | 'companyPhone' | 'cargoContacto'
+>> = {
+  contactName: 'N/D',
+  email: 'N/D',
+  category: 'Sin categoría',
+  address: 'Dirección no disponible',
+  hours: 'Horario no disponible',
+  description: 'Sin descripción',
+  phone: 'Teléfono no disponible',
+  companyPhone: 'Teléfono empresa no disponible',
+  cargoContacto: 'Contacto no disponible'
+};

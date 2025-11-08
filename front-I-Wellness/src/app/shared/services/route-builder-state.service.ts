@@ -26,6 +26,7 @@ import { RouteOptimizationService } from './route-optimization.service';
 
 // Models
 import { ServicioService } from '../../features/servicios/services/servicio.service';
+import { buildFallbackEnrichedProvider, normalizeEnrichedProvider } from '../adapters/provider-data.adapter';
 import {
   JobStatusResponse,
   OptimizationJob,
@@ -140,14 +141,13 @@ export class RouteBuilderStateService {
             this.routeOptimizationService.enrichProvidersData(provider.id).pipe(
               map(enrichedData => {
                 console.log(`Received enriched data for provider ${provider.id} from backend`, enrichedData);
-                // The backend already returns the data in EnrichedProviderData format
-                // We just need to ensure it matches our interface
-                return enrichedData as EnrichedProviderData;
+                // Normalize backend payload into our strict EnrichedProviderData shape
+                return normalizeEnrichedProvider(enrichedData as any);
               }),
               catchError(error => {
                 console.error(`Error enriching data for provider ${provider.id}:`, error);
-                // On error, create a fallback object so the entire process doesn't fail
-                return of(this.createFallbackEnrichedData(provider as any));
+                // On error, create a normalized fallback object so the entire process doesn't fail
+                return of(buildFallbackEnrichedProvider(provider as any));
               })
             )
           );
@@ -197,43 +197,8 @@ export class RouteBuilderStateService {
    * to numbers here so the rest of the app can rely on numeric lat/lng.
    */
   private createFallbackEnrichedData(provider: any): EnrichedProviderData {
-    // If the argument is already an EnrichedProviderData-like object, use its .provider
-    const rawCandidate = provider && provider.provider ? provider.provider : provider;
-
-    // If there is nested 'proveedorInfo', prefer its fields (merged over top-level)
-    const merged = rawCandidate && rawCandidate.proveedorInfo
-      ? { ...rawCandidate, ...rawCandidate.proveedorInfo }
-      : rawCandidate || {};
-
-    // Normalize ID (could be 'id' or 'idProveedor', string or number)
-    const idRaw = merged.id ?? merged.idProveedor ?? 0;
-    const id = typeof idRaw === 'string' ? parseInt(idRaw, 10) : idRaw;
-
-    // Normalize company/name
-    const nombre_empresa = merged.nombre_empresa ?? merged.nombreEmpresa ?? merged.nombre ?? 'Unknown';
-
-    // Coordinates may come as strings; parseFloat if necessary
-    const coordXRaw = merged.coordenadaX ?? merged.lat ?? 0;
-    const coordYRaw = merged.coordenadaY ?? merged.lng ?? 0;
-    const coordenadaX = typeof coordXRaw === 'string' ? parseFloat(coordXRaw) : (coordXRaw ?? 0);
-    const coordenadaY = typeof coordYRaw === 'string' ? parseFloat(coordYRaw) : (coordYRaw ?? 0);
-
-    return {
-      provider: {
-        id: (Number.isNaN(id) ? 0 : (id as number)),
-        nombre_empresa,
-        coordenadaX: Number.isNaN(coordenadaX) ? 0 : coordenadaX,
-        coordenadaY: Number.isNaN(coordenadaY) ? 0 : coordenadaY,
-        // preserve optional contact fields if available
-        cargoContacto: merged.cargoContacto ?? undefined,
-        telefono: merged.telefono ?? undefined,
-        telefonoEmpresa: merged.telefonoEmpresa ?? undefined
-      },
-      services: [],
-      averageCost: 0,
-      averageVisitDuration: 30,
-      categories: []
-    };
+    // Kept for backward compatibility – now delegates to centralized adapter
+    return buildFallbackEnrichedProvider(provider);
   }
   /**
    * Add a new empty row to the route builder
