@@ -408,7 +408,7 @@ export class ChatRealtimeService implements OnDestroy {
       takeUntil(this.destroy$),
       filter(() => this.usePollingFallback && this.isConnected),
       switchMap(() => this.performUpdateCheck()),
-      catchError((error) => {
+      catchError((error): any[] => {
         console.error('[ChatRealtimeService] Error en polling:', error);
         this.handlePollingError(error);
         return [];

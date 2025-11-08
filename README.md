@@ -1,10 +1,10 @@
-# FrontEnd_IWellness
+# FrontEnd_e-Xiua
 
 Interfaz web del ecosistema de turismo de bienestar, diseñada para turistas, proveedores y administradores.
 
 ## 📌 Descripción
 
-`FrontEnd_IWellness` es la aplicación web principal que permite la interacción entre los distintos actores del ecosistema de turismo de bienestar. Este frontend facilita la visualización, registro, consulta y gestión de la información relacionada con usuarios, servicios turísticos, reservas y preferencias.
+`FrontEnd_e-Xiua` es la aplicación web principal que permite la interacción entre los distintos actores del ecosistema de turismo de bienestar. Este frontend facilita la visualización, registro, consulta y gestión de la información relacionada con usuarios, servicios turísticos, reservas y preferencias.
 
 El sistema se adapta a distintos roles: turistas, proveedores y administradores, presentando interfaces específicas y funcionalidades diferenciadas para cada uno.
 
@@ -32,7 +32,7 @@ Este frontend consume los siguientes microservicios vía HTTP:
 - `admin_users_api` → Gestión de usuarios y autenticación
 - `providers_api` → Gestión de servicios turísticos y reservas
 - `user_preferences_api` → Registro y gestión de preferencias del usuario
-- `IWellness_Data_Services` → Especificamente data_analisys.py → Consulta de datos analíticos y reportes
+- `e-Xiua_Data_Services` → Especificamente data_analisys.py → Consulta de datos analíticos y reportes
 
 ## 🛡️ Seguridad
 
@@ -47,4 +47,4 @@ El frontend debe ejecutarse junto con:
 - `admin_users_api`
 - `providers_api`
 - `user_preferences_api`
-- `Queue_Rabbit` y `IWellness_Data_Services` para el flujo de datos analíticos
+- `Queue_Rabbit` y `e-Xiua_Data_Services` para el flujo de datos analíticos

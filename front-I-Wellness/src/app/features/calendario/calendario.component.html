@@ -1,4 +1,14 @@
+<app-universal-header role="public"></app-universal-header>
+
 <div class="calendario-container">
+  <div class="status-banner" *ngIf="isLoading">
+    Cargando eventos...
+  </div>
+
+  <div class="status-banner error" *ngIf="!isLoading && loadError">
+    {{ loadError }}
+  </div>
+
   <div class="calendario-header">
     <div class="month-navigation">
       <button mat-icon-button (click)="previousYear()" title="Año anterior">
@@ -27,13 +37,13 @@
       </button>
     </div>
 
-  <div class="header-actions">
-    <div class="event-summary">{{ getEventSummary() }}</div>
-    <button mat-raised-button color="primary" (click)="goToToday()">
-      <mat-icon>today</mat-icon>
-      Hoy
-    </button>
-  </div>
+    <div class="header-actions">
+      <div class="event-summary">{{ getEventSummary() }}</div>
+      <button mat-raised-button color="primary" (click)="goToToday()">
+        <mat-icon>today</mat-icon>
+        Hoy
+      </button>
+    </div>
   </div>
 
   <div class="month-selector" *ngIf="showMonthSelector">
@@ -207,12 +217,16 @@
               mat-raised-button
               color="primary"
               type="submit"
-              [disabled]="!eventoForm.valid"
+              [disabled]="!eventoForm.valid || isSaving"
             >
               {{
-                isEditing
-                  ? (selectedEventType === "evento" ? "Actualizar Evento" : "Actualizar Reunión")
-                  : (selectedEventType === "evento" ? "Crear Evento" : "Crear Reunión")
+                isSaving
+                  ? "Guardando..."
+                  : (
+                      isEditing
+                        ? (selectedEventType === "evento" ? "Actualizar Evento" : "Actualizar Reunión")
+                        : (selectedEventType === "evento" ? "Crear Evento" : "Crear Reunión")
+                    )
               }}
             </button>
           </div>
