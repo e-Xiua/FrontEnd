@@ -50,14 +50,14 @@ export class ContactMenuComponent implements AfterViewInit {
   }
 
   openWhatsApp(provider: ChatProvider): void {
-    const phoneNumber = provider.telefono || '573212375438';
+    const phoneNumber = provider.telefono || '573132629210';
     const message = `Hola ${provider.contactName}, me interesa conocer más sobre tus servicios de turismo.`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   }
 
   openTelegram(provider: ChatProvider): void {
-    const phoneNumber = provider.telefono || '573212375438';
+    const phoneNumber = provider.telefono || '573132629210';
     const message = `Hola ${provider.contactName}, me interesa conocer más sobre tus servicios de turismo.`;
     const telegramUrl = `https://t.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(telegramUrl, '_blank');
