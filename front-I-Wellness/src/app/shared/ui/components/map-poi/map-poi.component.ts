@@ -4,15 +4,15 @@ import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../features/servicios/services/servicio.service';
+import { adaptEnrichedProviderToMapItem } from '../../../adapters/map-display.adapter';
+import { MapDisplayItem } from '../../../models/map-display.model';
+import { PlaceData } from '../../../models/place-data.model';
 import { EnrichedProviderData } from '../../../models/provider.models';
 import { LayoutAdapterService } from '../../../services/layout-adapter.service';
 import { ProviderDisplayStrategy } from '../../animations/model/display-strategy';
 import { slideInAnimation } from '../../animations/slide.animations';
 import { SlidePanelStrategy } from '../../animations/strategies/slide-panel-strategy';
 import { ProviderCardComponent } from '../provider-card/provider-card.component';
-import { MapDisplayItem } from '../../../models/map-display.model';
-import { PlaceData } from '../../../models/place-data.model';
-import { adaptEnrichedProviderToMapItem } from '../../../adapters/map-display.adapter';
 
 export interface MapConfig {
   center?: [number, number];
@@ -139,7 +139,7 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
       console.log('=== 🔍 MAP POI COMPONENT - RAW ENRICHED PROVIDER DATA ===');
       console.log('Total items received:', this.items.length);
       console.log('Full items array:', JSON.stringify(this.items, null, 2));
-      
+
       if (this.items.length > 0) {
         console.log('📋 First item detailed structure:');
         console.log('  - Full object:', this.items[0]);
@@ -155,7 +155,7 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
         console.log('  - averageVisitDuration:', this.items[0].averageVisitDuration);
       }
       console.log('========================================================');
-      
+
       this.mapDisplayItems = this.items.map(provider => {
         console.log('🔄 Adaptando proveedor a MapDisplayItem:', provider);
         const adapted = adaptEnrichedProviderToMapItem(provider);
@@ -245,11 +245,11 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     // Try proveedorInfo first (nested), then fall back to top-level provider properties
     const latStr = provider.proveedorInfo?.coordenadaX || provider.coordenadaX;
     const lngStr = provider.proveedorInfo?.coordenadaY || provider.coordenadaY;
-    
+
     // Parse to floats, with fallback to default Costa Rica coordinates
     const latitud = latStr ? parseFloat(latStr) : 10.501005998543437;
     const longitud = lngStr ? parseFloat(lngStr) : -84.6972559489806;
-    
+
     return [latitud, longitud];
   }
 

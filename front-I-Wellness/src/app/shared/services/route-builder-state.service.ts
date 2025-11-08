@@ -1,41 +1,38 @@
 /**
  * Route Builder State Service
- * 
+ *
  * Centralized state management service for route building and optimization.
  * Uses RxJS BehaviorSubjects to provide reactive state updates to components.
- * 
+ *
  * Responsibilities:
  * - Manage UI state for the route builder (selected POIs, active jobs, loading states)
  * - Coordinate between UsuarioService and RouteOptimizationService
  * - Provide reactive observables for components to subscribe to
  * - Handle business logic for route building workflow
- * 
+ *
  * Delegates HTTP communication to:
  * - UsuarioService: For fetching provider data
  * - RouteOptimizationService: For job submission, status polling, and cancellation
  */
 
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, interval, throwError, forkJoin, of } from 'rxjs';
-import { map, switchMap, takeWhile, tap, catchError, finalize } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, forkJoin, interval, of, throwError } from 'rxjs';
+import { catchError, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 
 // Services
 import { UsuarioService } from '../../features/users/services/usuario.service';
 import { RouteOptimizationService } from './route-optimization.service';
 
 // Models
-import { EnrichedProviderData } from '../models/provider.models';
-import { RouteRow, RouteOptimizationRequest } from '../models/route-builder.models';
+import { ServicioService } from '../../features/servicios/services/servicio.service';
 import {
-  JobSubmissionResponse,
   JobStatusResponse,
   OptimizationJob,
-  OptimizationResult,
-  OptimizedPOI
+  OptimizationResult
 } from '../models/optimization-job.models';
-import { ServicioService } from '../../features/servicios/services/servicio.service';
-import { MapDisplayItem } from '../models/map-display.model';
+import { EnrichedProviderData } from '../models/provider.models';
+import { RouteRow } from '../models/route-builder.models';
 import { usuarios } from '../models/usuarios';
 
 @Injectable({
@@ -95,7 +92,7 @@ export class RouteBuilderStateService {
     private servicioService: ServicioService, // Kept for backward compatibility, no longer used in loadProviders
     private usuarioService: UsuarioService,
     private routeOptimizationService: RouteOptimizationService,
-    
+
   ) {
     console.log('RouteBuilderStateService initialized - Using backend enrichment');
   }
@@ -104,7 +101,7 @@ export class RouteBuilderStateService {
 
   /**
    * Load all available providers and enrich with services data FROM BACKEND
-   * 
+   *
    * NEW FLOW (Backend-Driven Enrichment):
    * 1. Fetch all providers from UsuarioService
    * 2. For each provider, call backend enrichment endpoint
@@ -114,7 +111,7 @@ export class RouteBuilderStateService {
    *    - Average cost (calculated by backend)
    *    - Average duration (calculated by backend)
    *    - Categories
-   * 
+   *
    * OLD FLOW (Deprecated):
    * 1. Fetch all providers from UsuarioService
    * 2. For each provider, fetch their services from providers API
@@ -132,7 +129,7 @@ export class RouteBuilderStateService {
       .pipe(
         switchMap((providers: usuarios[]) => {
           console.log(`Fetched ${providers.length} providers, now fetching enriched data from backend for each...`);
-          
+
           if (providers.length === 0) {
             return of([]);
           }
@@ -170,7 +167,7 @@ export class RouteBuilderStateService {
       .subscribe((enrichedProviders: EnrichedProviderData[]) => {
         this._providers$.next(enrichedProviders);
         console.log('Providers loaded successfully:', enrichedProviders.length);
-        
+
         // 📊 LOGGING: Sample enriched provider data from backend
         if (enrichedProviders.length > 0) {
           console.log('=== 📊 ENRICHED PROVIDER DATA FROM BACKEND ===');
@@ -192,24 +189,53 @@ export class RouteBuilderStateService {
 
   /**
    * Create fallback enriched data when backend call fails
+   *
+   * This function is defensive: `provider` can be either an already-enriched
+   * object (with `.provider`) or a raw provider object returned by
+   * `usuarioService` (which may have fields like `idProveedor`,
+   * `proveedorInfo`, and string coordinates). We normalize and parse coordinates
+   * to numbers here so the rest of the app can rely on numeric lat/lng.
    */
-  private createFallbackEnrichedData(provider: EnrichedProviderData): EnrichedProviderData {
-    const providerInfo = provider.provider;
-    const empresaName = providerInfo.nombre_empresa || 'Unknown';
+  private createFallbackEnrichedData(provider: any): EnrichedProviderData {
+    // If the argument is already an EnrichedProviderData-like object, use its .provider
+    const rawCandidate = provider && provider.provider ? provider.provider : provider;
+
+    // If there is nested 'proveedorInfo', prefer its fields (merged over top-level)
+    const merged = rawCandidate && rawCandidate.proveedorInfo
+      ? { ...rawCandidate, ...rawCandidate.proveedorInfo }
+      : rawCandidate || {};
+
+    // Normalize ID (could be 'id' or 'idProveedor', string or number)
+    const idRaw = merged.id ?? merged.idProveedor ?? 0;
+    const id = typeof idRaw === 'string' ? parseInt(idRaw, 10) : idRaw;
+
+    // Normalize company/name
+    const nombre_empresa = merged.nombre_empresa ?? merged.nombreEmpresa ?? merged.nombre ?? 'Unknown';
+
+    // Coordinates may come as strings; parseFloat if necessary
+    const coordXRaw = merged.coordenadaX ?? merged.lat ?? 0;
+    const coordYRaw = merged.coordenadaY ?? merged.lng ?? 0;
+    const coordenadaX = typeof coordXRaw === 'string' ? parseFloat(coordXRaw) : (coordXRaw ?? 0);
+    const coordenadaY = typeof coordYRaw === 'string' ? parseFloat(coordYRaw) : (coordYRaw ?? 0);
 
     return {
       provider: {
-        id: provider.provider.id,
-        nombre_empresa: empresaName || 'Unknown',
-        coordenadaX: providerInfo.coordenadaX || 0,
-        coordenadaY: providerInfo.coordenadaY || 0
+        id: (Number.isNaN(id) ? 0 : (id as number)),
+        nombre_empresa,
+        coordenadaX: Number.isNaN(coordenadaX) ? 0 : coordenadaX,
+        coordenadaY: Number.isNaN(coordenadaY) ? 0 : coordenadaY,
+        // preserve optional contact fields if available
+        cargoContacto: merged.cargoContacto ?? undefined,
+        telefono: merged.telefono ?? undefined,
+        telefonoEmpresa: merged.telefonoEmpresa ?? undefined
       },
       services: [],
       averageCost: 0,
       averageVisitDuration: 30,
       categories: []
     };
-  }  /**
+  }
+  /**
    * Add a new empty row to the route builder
    */
   addPoiToRoute(): void {
@@ -258,11 +284,11 @@ export class RouteBuilderStateService {
     console.log('=== 🔍 PROVIDER SELECTED IN ROUTE BUILDER ===');
     console.log('Row ID:', rowId);
     console.log('Provider ID:', providerId);
-    
+
     // Log full enriched data as JSON for complete inspection
     console.log('Full EnrichedProviderData (JSON):');
     console.log(JSON.stringify(providerData, null, 2));
-    
+
     // Log structured summary for easy reading
     console.log('Provider Summary:', {
       id: providerData.provider.id,
@@ -276,7 +302,7 @@ export class RouteBuilderStateService {
       averageVisitDuration: providerData.averageVisitDuration,
       categories: providerData.categories
     });
-    
+
     // Log all available services with their details
     console.log('Available Services for this Provider:');
     providerData.services.forEach((service, index) => {
@@ -287,7 +313,7 @@ export class RouteBuilderStateService {
         descripcion: service.descripcion
       });
     });
-    
+
     console.log('=============================================');
 
     const updatedRows = currentRows.map(row => {
@@ -315,18 +341,18 @@ export class RouteBuilderStateService {
     const updatedRows = currentRows.map(row => {
       if (row.id === rowId && row.providerData) {
         const service = row.providerData.services.find((s: any) => s.idServicio === serviceId);
-        
+
         // 🎯 LOGGING: Specific service selected by user
         if (service) {
           console.log('=== 🎯 SERVICE SELECTED IN ROUTE BUILDER ===');
           console.log('Row ID:', rowId);
           console.log('Service ID:', serviceId);
           console.log('Provider:', row.providerData.provider.nombre_empresa);
-          
+
           // Log full service object as JSON
           console.log('Full Service Object (JSON):');
           console.log(JSON.stringify(service, null, 2));
-          
+
           // Log structured service details
           console.log('Selected Service Details:', {
             id: service.idServicio,
@@ -335,7 +361,7 @@ export class RouteBuilderStateService {
             precio: service.precio,
             tiempoAproximado: service.tiempoAproximado
           });
-          
+
           // Show comparison with provider averages
           console.log('Comparison with Provider Averages:', {
             serviceCost: service.precio,
@@ -345,12 +371,12 @@ export class RouteBuilderStateService {
             providerAvgDuration: row.providerData.averageVisitDuration,
             durationDifference: service.tiempoAproximado - row.providerData.averageVisitDuration
           });
-          
+
           console.log('============================================');
         } else {
           console.warn(`Service with ID ${serviceId} not found in provider's services`);
         }
-        
+
         return {
           ...row,
           selectedService: service || null
@@ -366,7 +392,7 @@ export class RouteBuilderStateService {
    * Start route optimization
    * Submits the job and starts polling for status
    * Uses RouteOptimizationService for job submission
-   * 
+   *
    * NOW SUPPORTS:
    * - Rows with specific service selected (uses service cost/duration)
    * - Rows with only provider selected (uses backend-calculated averages)
@@ -525,7 +551,7 @@ export class RouteBuilderStateService {
           const enrichedResult = this.enrichOptimizationResult(status.result);
           updatedJob.result = enrichedResult;
           updatedJob.completedAt = new Date();
-          
+
           console.log('✨ ENRICHED OPTIMIZATION RESULT:', enrichedResult);
         }
 
@@ -556,15 +582,15 @@ export class RouteBuilderStateService {
    */
   private enrichOptimizationResult(result: any): OptimizationResult {
     const providers = this._providers$.value;
-    
+
     console.log('📊 Enriching optimization result with cached provider data...');
     console.log('Available providers in cache:', providers.length);
-    
+
     // Enrich each POI in the sequence
     const enrichedSequence = result.optimizedSequence.map((poi: any) => {
       // Find the matching provider by poiId
       const providerData = providers.find(p => p.provider.id === poi.poiId);
-      
+
       if (!providerData) {
         console.warn(`⚠️ Provider ${poi.poiId} not found in cache, using basic data`);
         return {
@@ -580,7 +606,7 @@ export class RouteBuilderStateService {
           cost: undefined
         };
       }
-      
+
       // Enrich with full provider data
       const enrichedPOI = {
         poiId: poi.poiId,
@@ -597,7 +623,7 @@ export class RouteBuilderStateService {
         // Store full provider data for map display
         providerData: providerData
       };
-      
+
       console.log(`✅ Enriched POI ${poi.poiId}:`, {
         originalName: poi.name,
         enrichedName: enrichedPOI.name,
@@ -605,10 +631,10 @@ export class RouteBuilderStateService {
         cost: enrichedPOI.cost,
         servicesCount: providerData.services.length
       });
-      
+
       return enrichedPOI;
     });
-    
+
     // Return enriched result
     return {
       optimizedRouteId: result.optimizedRouteId,
@@ -739,7 +765,7 @@ export class RouteBuilderStateService {
     const currentId = this._activeProviderId$.value;
     const currentIndex = providers.findIndex(p => p.provider.id === currentId);
     const nextIndex = (currentIndex + 1) % providers.length;
-    
+
     this.setActiveProvider(providers[nextIndex].provider.id);
   }
 
@@ -753,7 +779,7 @@ export class RouteBuilderStateService {
     const currentId = this._activeProviderId$.value;
     const currentIndex = providers.findIndex(p => p.provider.id === currentId);
     const prevIndex = (currentIndex - 1 + providers.length) % providers.length;
-    
+
     this.setActiveProvider(providers[prevIndex].provider.id);
   }
 
