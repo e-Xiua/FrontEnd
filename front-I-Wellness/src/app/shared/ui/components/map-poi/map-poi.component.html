@@ -1,4 +1,7 @@
-<div class="map-poi-container">
+<div class="map-poi-container"
+  [class.with-panel]="showProviderCard && showProviderCardVisible"
+  [class.full-map]="!(showProviderCard && showProviderCardVisible)"
+  [style.gridTemplateColumns]="(showProviderCard && showProviderCardVisible) ? ((100 - panelWidthPercent) + '% ' + panelWidthPercent + '%') : '1fr'">
   <div class="map-layout-column">
 
     <!-- Nombre del proveedor activo arriba del mapa -->
@@ -10,13 +13,13 @@
     </div>
 
     <!-- Mapa -->
-    <div class="map-container full">
-      <div [id]="mapId" class="map-leaflet-wrapper"></div>
-    </div>
+        <div class="map-container" #mapContainer [style.height.px]="mapHeight">
+          <div [id]="mapId" class="map-leaflet-wrapper"></div>
+        </div>
 
     <!-- Solo navegación del carousel debajo del mapa -->
     <div class="carousel-navigation-only" *ngIf="showCarousel && mapDisplayItems.length > 1">
-      <button
+      <button title="Anterior proveedor"
         class="nav-btn prev-btn"
         (click)="previousClicked.emit()"
         [disabled]="getActiveIndex() <= 0">
@@ -25,6 +28,7 @@
 
       <div class="dots-container">
         <button
+          title="item"
           *ngFor="let item of mapDisplayItems; let i = index"
           type="button"
           class="nav-dot"
@@ -34,7 +38,7 @@
         </button>
       </div>
 
-      <button
+      <button title="Siguiente proveedor"
         class="nav-btn next-btn"
         (click)="nextClicked.emit()"
         [disabled]="getActiveIndex() >= mapDisplayItems.length - 1">
@@ -44,11 +48,12 @@
   </div>
 
   <!-- Provider Card -->
-  <app-provider-card
-    *ngIf="showProviderCard && showProviderCardVisible && placeData"
-    class="provider-card-wrapper"
-    [@slideIn]="showProviderCardVisible ? 'visible' : 'hidden'"
-    [placeData]="placeData"
-    (submitReview)="onSubmitReview($event)">
-  </app-provider-card>
+  <div *ngIf="showProviderCard && showProviderCardVisible && placeData" class="provider-card-wrapper" #providerWrapper [style.height.px]="providerCardHeight">
+    <app-provider-card
+      class="provider-card-inner"
+      [@slideIn]="showProviderCardVisible ? 'visible' : 'hidden'"
+      [placeData]="placeData"
+      (submitReview)="onSubmitReview($event)">
+    </app-provider-card>
+  </div>
 </div>

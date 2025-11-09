@@ -1,69 +1,55 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { OptimizationResultAdapterService } from '../../../../shared/models/adapters/optimization-result-adapter.service'; // 2. Import the new adapter
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route'; // 1. Import the Route model
 import { usuarios } from '../../../../shared/models/usuarios';
-import { RouteOptimizationService } from '../../../../shared/services/route-optimization.service';
-import { RouteFilter } from '../../../../shared/services/route-filtering.service';
-import { RoutesViewComponent } from '../../../../shared/ui/components/routes-view/routes-view.component';
+import { RouteGenerationComponent } from '../../../../shared/ui/components/route-generation';
 
 
 @Component({
   selector: 'app-creador-de-rutas',
   standalone: true, // Make it standalone
-  imports: [CommonModule, RoutesViewComponent], // Add CommonModule for *ngIf
+  imports: [CommonModule, RouteGenerationComponent], // Add CommonModule for *ngIf
   templateUrl: './creador-de-rutas.component.html',
   styleUrls: ['./creador-de-rutas.component.css']
 })
 export class CreadorDeRutasComponent implements OnInit {
 
-  // This property will now hold the adapted data in the correct format
-  adaptedRoutes: Route[] = [];
-  isLoading = true;
-  error: string | null = null;
+  currentUserId?: string;
 
-  // 3. Inject the new adapter service
-  constructor(
-    private routeOptimizationService: RouteOptimizationService,
-    private resultAdapter: OptimizationResultAdapterService
-  ) {}
+    ngOnInit(): void {
+      // Obtén el ID del usuario autenticado de tu servicio de autenticación
+      // Por ejemplo:
+      // this.currentUserId = this.authService.getCurrentUser()?.id;
 
-  ngOnInit(): void {
-    this.fetchAndAdaptOptimizedRoutes();
-  }
-
-  private fetchAndAdaptOptimizedRoutes(): void {
-
-    this.isLoading = true;
-    this.error = null;
-    console.log('Fetching optimized routes...');
-
-    this.routeOptimizationService.getAllRoutes().subscribe({
-      next: (allOptimizationResults) => {
-        console.log('Rutas optimizadas obtenidas del servicio:', allOptimizationResults);
-        const resultsArray = allOptimizationResults ? (Array.isArray(allOptimizationResults) ? allOptimizationResults : [allOptimizationResults]) : [];
-
-        // 4. Use the adapter to transform the data
-        this.adaptedRoutes = this.resultAdapter.adaptAll(resultsArray);
-
-        console.log('Rutas adaptadas para el componente UI:', this.adaptedRoutes);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error al obtener rutas optimizadas', err);
-        this.error = 'No se pudieron cargar las rutas optimizadas.';
-        this.isLoading = false;
+      // O desde localStorage:
+      const user = localStorage.getItem('user');
+      if (user) {
+        const userData = JSON.parse(user);
+        this.currentUserId = userData.id || userData.userId;
       }
-    });
-  }
 
-    onRouteFiltersChanged($event: RouteFilter) {
-  console.log('Route filters changed:', $event);
-  }
-  onRouteProviderSelected(event: { route: Route; provider: usuarios }) {
-    console.log('Route provider selected:', event.route, event.provider);
-  }
-  onRouteSelected($event: RouteSelectionEvent) {
-  console.log('Route selected:', $event);
-  }
+      // TEMPORAL: Para testing, puedes usar un ID fijo:
+      // this.currentUserId = '123';
+    }
+
+    onRouteSelected(event: RouteSelectionEvent): void {
+      console.log('Turista - Ruta seleccionada:', event.route);
+
+      // Aquí puedes:
+      // - Navegar al mapa interactivo de la ruta
+      // - Iniciar navegación
+      // - Compartir la ruta
+      // - Marcar como favorita
+    }
+
+    onProviderSelected(event: { route: Route; provider: usuarios }): void {
+      console.log('Turista - Proveedor seleccionado:', event.provider);
+
+      // Aquí puedes:
+      // - Ver detalles del proveedor
+      // - Hacer una reserva
+      // - Ver reseñas
+      // - Contactar al proveedor
+    }
+
 }

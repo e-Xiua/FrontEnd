@@ -26,6 +26,7 @@ import { RouteOptimizationService } from './route-optimization.service';
 
 // Models
 import { ServicioService } from '../../features/servicios/services/servicio.service';
+import { enrichOptimizationResult as enrichOptimizationResultAdapter } from '../adapters/optimization-result.adapter';
 import { buildFallbackEnrichedProvider, normalizeEnrichedProvider } from '../adapters/provider-data.adapter';
 import {
   JobStatusResponse,
@@ -513,7 +514,7 @@ export class RouteBuilderStateService {
 
         // If completed, store result and ENRICH with provider data
         if (status.status === 'COMPLETED' && status.result) {
-          const enrichedResult = this.enrichOptimizationResult(status.result);
+          const enrichedResult = enrichOptimizationResultAdapter(status.result as OptimizationResult, this._providers$.value);
           updatedJob.result = enrichedResult;
           updatedJob.completedAt = new Date();
 
@@ -545,72 +546,6 @@ export class RouteBuilderStateService {
    * - Service information (cost, category)
    * - All metadata from EnrichedProviderData
    */
-  private enrichOptimizationResult(result: any): OptimizationResult {
-    const providers = this._providers$.value;
-
-    console.log('📊 Enriching optimization result with cached provider data...');
-    console.log('Available providers in cache:', providers.length);
-
-    // Enrich each POI in the sequence
-    const enrichedSequence = result.optimizedSequence.map((poi: any) => {
-      // Find the matching provider by poiId
-      const providerData = providers.find(p => p.provider.id === poi.poiId);
-
-      if (!providerData) {
-        console.warn(`⚠️ Provider ${poi.poiId} not found in cache, using basic data`);
-        return {
-          poiId: poi.poiId,
-          name: poi.name || 'Unknown Provider',
-          latitude: poi.latitude,
-          longitude: poi.longitude,
-          visitOrder: poi.visitOrder,
-          estimatedVisitTime: poi.estimatedVisitTime,
-          arrivalTime: poi.arrivalTime,
-          departureTime: poi.departureTime
-          // category and cost are omitted (optional properties)
-        };
-      }
-
-      // Enrich with full provider data
-      const enrichedPOI = {
-        poiId: poi.poiId,
-        name: providerData.provider.nombre_empresa, // Use actual provider name
-        latitude: providerData.provider.coordenadaX,
-        longitude: providerData.provider.coordenadaY,
-        visitOrder: poi.visitOrder,
-        estimatedVisitTime: poi.estimatedVisitTime,
-        arrivalTime: poi.arrivalTime,
-        departureTime: poi.departureTime,
-        // Add enriched data
-        category: providerData.categories.length > 0 ? providerData.categories[0] : undefined,
-        cost: providerData.averageCost,
-        // Store full provider data for map display
-        providerData: providerData
-      };
-
-      console.log(`✅ Enriched POI ${poi.poiId}:`, {
-        originalName: poi.name,
-        enrichedName: enrichedPOI.name,
-        category: enrichedPOI.category,
-        cost: enrichedPOI.cost,
-        servicesCount: providerData.services.length
-      });
-
-      return enrichedPOI;
-    });
-
-    // Return enriched result
-    return {
-      optimizedRouteId: result.optimizedRouteId,
-      optimizedSequence: enrichedSequence,
-      totalDistanceKm: result.totalDistanceKm || 0,
-      totalTimeMinutes: result.totalTimeMinutes || 0,
-      optimizationAlgorithm: result.algorithm || result.optimizationAlgorithm || 'Unknown',
-      optimizationScore: result.optimizationScore || 0,
-      generatedAt: result.processedAt || result.generatedAt || new Date().toISOString()
-    };
-  }
-
   /**
    * Update job with error message
    */
@@ -703,6 +638,14 @@ export class RouteBuilderStateService {
    */
   clearError(): void {
     this._error$.next(null);
+  }
+
+  /**
+   * Exposes a snapshot of the currently cached enriched providers. Used by
+   * other services that need enrichment data without duplicating HTTP calls.
+   */
+  getCachedProviders(): EnrichedProviderData[] {
+    return this._providers$.value;
   }
 
   // ==================================================

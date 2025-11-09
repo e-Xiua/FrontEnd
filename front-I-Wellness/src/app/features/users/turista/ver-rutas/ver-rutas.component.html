@@ -1,1 +1,11 @@
-<p>ver-rutas works!</p>
+<div class="tourist-routes-container">
+      <app-route-generation
+        title="Mis Rutas Optimizadas"
+        description="Explora las rutas personalizadas que has creado"
+        [showHeader]="true"
+        [userId]="currentUserId"
+        [maxRoutesToShow]="10"
+        (routeSelected)="onRouteSelected($event)"
+        (providerSelected)="onProviderSelected($event)">
+      </app-route-generation>
+    </div>

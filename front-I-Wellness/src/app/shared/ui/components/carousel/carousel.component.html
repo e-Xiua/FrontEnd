@@ -39,8 +39,8 @@
           [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'"
         >
           <ng-container *ngFor="let slide of [].constructor(totalSlides); let i = index">
-            <div class="carousel-slide">
-              <ng-container *ngFor="let item of items?.toArray() | slice: i * itemsPerView : (i * itemsPerView) + itemsPerView">
+            <div class="carousel-slide" [style.--items-per-view]="itemsPerView">
+              <ng-container *ngFor="let item of items.toArray() | slice: i * itemsPerView : (i * itemsPerView) + itemsPerView">
                 <ng-container [ngTemplateOutlet]="item.template"></ng-container>
               </ng-container>
             </div>
@@ -69,16 +69,18 @@
     <div class="map-linked-track" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
       <ng-container *ngFor="let s of [].constructor(totalSlides); let slideIndex = index">
         <div class="map-linked-slide">
-          <ng-container *ngFor="let it of linkedItems | slice: slideIndex * itemsPerView : (slideIndex * itemsPerView) + itemsPerView; let local = index">
-            <div class="linked-card"
-                 (click)="linkedItemChange.emit({ index: (slideIndex*itemsPerView)+local, item: it })"
-                 [attr.data-provider-id]="it.id">
-              <h4 class="title">{{ it.data?.nombre_empresa || it.data?.name || ('Proveedor ' + ((slideIndex*itemsPerView)+local+1)) }}</h4>
+          <!-- Un solo proveedor por slide -->
+          <ng-container *ngIf="linkedItems[slideIndex] as it">
+            <a class="linked-card"
+               href="#"
+               (click)="onLinkedCardSelect($event, slideIndex, it)"
+               [attr.data-provider-id]="it.id">
+          <h4 class="title">{{ it.data?.nombre_empresa || it.data?.name || ('Proveedor ' + (slideIndex+1)) }}</h4>
               <p class="coords" *ngIf="it.position">
                 {{ it.position[0] | number:'1.4-4' }}, {{ it.position[1] | number:'1.4-4' }}
               </p>
               <p class="extra" *ngIf="it.data?.categoria">{{ it.data.categoria }}</p>
-            </div>
+            </a>
           </ng-container>
         </div>
       </ng-container>

@@ -1,0 +1,43 @@
+<div class="route-generation">
+  <!-- Header (opcional) -->
+  <div class="route-generation__header" *ngIf="showHeader">
+    <h2 class="route-generation__title">{{ title }}</h2>
+    <p class="route-generation__description">{{ description }}</p>
+  </div>
+
+  <!-- Estado de carga -->
+  <div class="route-generation__status" *ngIf="isLoading$ | async">
+    <p>Cargando rutas completadas...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <div class="route-generation__error" *ngIf="error$ | async as error">
+    <p>{{ error }}</p>
+    <button
+      class="route-generation__retry"
+      (click)="onRetry()"
+      type="button">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Contenido principal: rutas -->
+  <ng-container *ngIf="(isLoading$ | async) === false && !(error$ | async)">
+    <ng-container *ngIf="routes$ | async as routes">
+      <div class="route-generation__empty" *ngIf="routes.length === 0">
+        <p>No hay rutas completadas disponibles.</p>
+      </div>
+
+      <app-show-routes-many-options
+        *ngIf="routes.length > 0"
+        [routes]="routes"
+        [displayOptions]="displayOptions"
+        [maxRoutesToShow]="maxRoutesToShow"
+        [layoutMode]="'accordion'"
+        [showRouteStats]="true"
+        (routeSelected)="onRouteSelected($event)"
+        (providerSelected)="onProviderSelected($event)">
+      </app-show-routes-many-options>
+    </ng-container>
+  </ng-container>
+</div>

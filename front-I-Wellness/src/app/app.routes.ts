@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, proveedorGuard, turistaGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, proveedorGuard } from './core/guards/auth.guard';
 
 // Landing/Public components
 import { HomeComponent } from './features/landing/home/home.component';
 import { LoginComponent } from './features/landing/login/login.component';
+import { MetricasDashboardComponent } from './features/landing/metricas-dashboard/metricas-dashboard.component';
 import { RecuperarComponent } from './features/landing/recuperar/recuperar.component';
 import { RegistroComponent } from './features/landing/registro/registro.component';
 import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 import { TemasComponent } from './features/landing/temas/temas.component';
-import { MetricasDashboardComponent } from './features/landing/metricas-dashboard/metricas-dashboard.component';
 
 // Layouts
 import { AdminLayoutComponent } from './features/users/administrador/admin-layout/admin-layout.component';
@@ -51,6 +51,7 @@ import { DashboardTestComponent } from './features/dashboard-test/dashboard-test
 import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
 import { InfoServicioComponent } from './features/users/proveedor/info-servicio/info-servicio.component';
 import { ProfilePageComponent } from './features/users/proveedor/profile-page/profile-page.component';
+import { VerRutasComponent } from './features/users/turista/ver-rutas/ver-rutas.component';
 
 export const routes: Routes = [
   // Rutas públicas
@@ -67,7 +68,7 @@ export const routes: Routes = [
   { path: 'objetivos/turista', loadComponent: () => import('./features/objetivos/objetivos-turista.component').then(m => m.ObjetivosTuristaComponent) },
   { path: 'objetivos/proveedor', loadComponent: () => import('./features/objetivos/objetivos-proveedor.component').then(m => m.ObjetivosProveedorComponent) },
   { path: 'objetivos/admin', loadComponent: () => import('./features/objetivos/objetivos-admin.component').then(m => m.ObjetivosAdminComponent) },
-  
+
   { path: 'login', component: LoginComponent },
   { path: 'registroturista', component: RegistroTuristaComponent },
   { path: 'recuperar', component: RecuperarComponent },
@@ -88,11 +89,11 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomeTuristaComponent },
       { path: 'formulariogustos', component: FormulariogustosComponent },
+      { path: 'reservar-rutas', component: VerRutasComponent},
       { path: 'perfil/:id', component: PerfilTuristaComponent },
       { path: 'edit-preferencias/:id', component: EditPreferenciasComponent },
       { path: 'proveedor/:id', component: ServiciosProveedorComponent },
       { path: 'reservas', component: VerReservasComponent },
-      { path: 'ver-rutas', component: ProveedorChatDemoComponent },
     ]
   },
 
@@ -139,40 +140,40 @@ export const routes: Routes = [
   // ===================================================
   // OBSERVATORIO DE TURISMO DE BIENESTAR - RUTAS PÚBLICAS
   // ===================================================
-  { 
-    path: 'observatorio', 
-    loadComponent: () => import('./features/observatorio/observatorio-dashboard/observatorio-dashboard.component').then(m => m.ObservatorioDashboardComponent) 
+  {
+    path: 'observatorio',
+    loadComponent: () => import('./features/observatorio/observatorio-dashboard/observatorio-dashboard.component').then(m => m.ObservatorioDashboardComponent)
   },
-  { 
-    path: 'observatorio/clima', 
-    loadComponent: () => import('./features/observatorio/clima-dashboard/clima-dashboard.component').then(m => m.ClimaDashboardComponent) 
+  {
+    path: 'observatorio/clima',
+    loadComponent: () => import('./features/observatorio/clima-dashboard/clima-dashboard.component').then(m => m.ClimaDashboardComponent)
   },
-  { 
-    path: 'observatorio/uv', 
-    loadComponent: () => import('./features/observatorio/uv-dashboard/uv-dashboard.component.js').then(m => m.UvDashboardComponent) 
+  {
+    path: 'observatorio/uv',
+    loadComponent: () => import('./features/observatorio/uv-dashboard/uv-dashboard.component.js').then(m => m.UvDashboardComponent)
   },
-  { 
-    path: 'observatorio/volcan', 
-    loadComponent: () => import('./features/observatorio/volcan-dashboard/volcan-dashboard.component').then(m => m.VolcanDashboardComponent) 
+  {
+    path: 'observatorio/volcan',
+    loadComponent: () => import('./features/observatorio/volcan-dashboard/volcan-dashboard.component').then(m => m.VolcanDashboardComponent)
   },
-  { 
-    path: 'observatorio/eventos', 
-    loadComponent: () => import('./features/observatorio/eventos-dashboard/eventos-dashboard.component').then(m => m.EventosDashboardComponent) 
+  {
+    path: 'observatorio/eventos',
+    loadComponent: () => import('./features/observatorio/eventos-dashboard/eventos-dashboard.component').then(m => m.EventosDashboardComponent)
   },
-  
+
   // Rutas legacy para compatibilidad (redirigen a las nuevas rutas)
   { path: 'hometurista', redirectTo: '/turista/home', pathMatch: 'full' },
   { path: 'perfilturista/:id', redirectTo: '/turista/perfil/:id', pathMatch: 'full' },
   { path: 'mapaempresas', redirectTo: '/turista/mapa-empresas', pathMatch: 'full' },
   { path: 'reservasturista', redirectTo: '/turista/reservas', pathMatch: 'full' },
   { path: 'editpreferencias/:id', redirectTo: '/turista/edit-preferencias/:id', pathMatch: 'full' },
-  
+
   { path: 'homeproveedor', redirectTo: '/proveedor/home', pathMatch: 'full' },
   { path: 'perfilproveedor/:id', redirectTo: '/proveedor/perfil/:id', pathMatch: 'full' },
   { path: 'agregarservicio', redirectTo: '/proveedor/agregar-servicio', pathMatch: 'full' },
   { path: 'editarservicio/:id', redirectTo: '/proveedor/editar-servicio/:id', pathMatch: 'full' },
   { path: 'dashboard', redirectTo: '/proveedor/dashboard', pathMatch: 'full' },
-  
+
   { path: 'homeadmin', redirectTo: '/admin/home', pathMatch: 'full' },
   { path: 'perfiladmin/:id', redirectTo: '/admin/perfil/:id', pathMatch: 'full' },
   { path: 'visitantes', redirectTo: '/admin/visitantes', pathMatch: 'full' },
@@ -180,7 +181,7 @@ export const routes: Routes = [
   { path: 'crearturista', redirectTo: '/admin/crear-turista', pathMatch: 'full' },
   { path: 'crearproveedor', redirectTo: '/admin/crear-proveedor', pathMatch: 'full' },
   { path: 'dashboard-admin', redirectTo: '/admin/dashboard', pathMatch: 'full' },
-  
+
   // Ruta comodín - redirige a home
   { path: '**', redirectTo: '' },
 ];

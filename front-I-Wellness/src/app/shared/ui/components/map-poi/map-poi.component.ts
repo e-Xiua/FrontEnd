@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
@@ -60,6 +60,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() showProviderCard: boolean = true;
   @Input() autoSelectFirst: boolean = false;
   @Input() mapId: string = 'map';
+  /** Porcentaje del ancho para el panel cuando visible (0-100) */
+  @Input() panelWidthPercent: number = 40;
+  /** Ratio altura/ancho del mapa basado en ancho real de su columna */
+  @Input() mapAspectRatio: number = 0.55;
+  @Input() minMapHeight: number = 360;
+  @Input() maxViewportHeightFactor: number = 0.75;
 
   @Output() itemSelected = new EventEmitter<number | string>();
   @Output() nextClicked = new EventEmitter<void>();
@@ -72,6 +78,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   showProviderCardVisible: boolean = false;
   placeData: PlaceData | null = null;
   activeItem: MapDisplayItem | null = null;
+  mapHeight: number = 360;
+  providerCardHeight: number = 360;
+
+  @ViewChild('mapContainer', { static: false }) mapContainerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('providerWrapper', { static: false }) providerWrapperRef!: ElementRef<HTMLDivElement>;
+  private resizeObs?: ResizeObserver;
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   private destroy$ = new Subject<void>();
@@ -128,10 +140,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.resizeObs?.disconnect();
   }
 
   ngAfterViewInit(): void {
     this.initMap();
+    setTimeout(() => this.setupResizeObserver(), 0);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -368,5 +382,30 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     const map = this.mapService.getMapInstance();
     if (!map) return;
     requestAnimationFrame(() => map.invalidateSize());
+  }
+
+  // ========================= Responsive height sync =========================
+  private setupResizeObserver() {
+    if (!('ResizeObserver' in window)) return;
+    if (!this.mapContainerRef) return;
+    this.resizeObs = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        this.recomputeHeights(width);
+      }
+    });
+    this.resizeObs.observe(this.mapContainerRef.nativeElement);
+    const initialWidth = this.mapContainerRef.nativeElement.offsetWidth || 0;
+    this.recomputeHeights(initialWidth);
+  }
+
+  private recomputeHeights(columnWidth: number) {
+    if (!columnWidth) return;
+    const viewportMax = window.innerHeight * this.maxViewportHeightFactor;
+    const target = columnWidth * this.mapAspectRatio;
+    this.mapHeight = Math.max(this.minMapHeight, Math.min(target, viewportMax));
+    // La altura del panel NO debe exceder la del mapa; si el contenido interno es mayor, se hará scroll
+    this.providerCardHeight = this.mapHeight;
+    this.cdr.markForCheck();
   }
 }

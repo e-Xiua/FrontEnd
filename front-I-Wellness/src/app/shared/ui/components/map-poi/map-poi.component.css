@@ -1,15 +1,20 @@
 .map-poi-container {
   width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto; /* header, mapa, nav */
+  gap: 1rem;
 }
 
 .map-container {
-  margin-top: 1rem;
-  height: 32rem;
+  margin-top: 0.5rem;
   width: 100%;
   border-radius: 1rem;
   position: relative;
   overflow: hidden;
   display: block;
+  /* Altura responsive basada en ancho de viewport, límite mínimo y máximo */
+  height: clamp(360px, 55vw, 75vh);
 }
 
 ::ng-deep .leaflet-popup-content {
@@ -116,25 +121,36 @@
 }
 
 .provider-card-wrapper {
-  margin-top: 1.25rem;
+  margin-top: 0;
 }
 
-@media (min-width: 1100px) {
-  .map-poi-container {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 1.2rem;
-    align-items: start;
-  }
-  .provider-card-wrapper {
-    position: sticky;
-    top: 90px;
-  }
+/* Layout porcentual cuando el panel está visible: 60% mapa / 40% panel */
+.map-poi-container.with-panel {
+  grid-template-columns: 60% 40%;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+}
+
+.map-poi-container.full-map {
+  grid-template-columns: 1fr;
 }
 
 .provider-card-wrapper {
-  flex: 0 0 380px;
+  position: sticky;
+  top: 90px;
+  align-self: start;
+  /* igualar visualmente altura con el mapa (el inline style.height.px tiene prioridad) */
+  height: clamp(360px, 55vw, 75vh);
+  overflow: hidden; /* evita que el contenido invada secciones inferiores */
 }
+
+.provider-card-inner .card {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* En móviles, el panel apila debajo; el mapa mantiene altura responsive */
 
 @media (max-width: 1200px) {
   .map-poi-container {

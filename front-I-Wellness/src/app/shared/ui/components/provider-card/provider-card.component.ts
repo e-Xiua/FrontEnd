@@ -35,25 +35,45 @@ export class ProviderCardComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['placeData']) {
-      console.log('=== 📊 PROVIDER CARD - RECEIVED PLACE DATA ===');
-      console.log('Provider ID:', this.placeData.id);
-      console.log('Provider Name:', this.placeData.name);
-      console.log('Contact Details:', {
+      console.groupCollapsed('=== 📊 PROVIDER CARD DATA (ID:' + this.placeData.id + ') ===');
+      console.log('Name:', this.placeData.name);
+      console.log('Contact:', {
         contactName: this.placeData.contactName,
         cargoContacto: this.placeData.cargoContacto,
         phone: this.placeData.phone,
         companyPhone: this.placeData.companyPhone,
         email: this.placeData.email
       });
-      console.log('Business Metrics:', {
+      console.log('Metrics:', {
         averageCost: this.placeData.averageCost,
         averageVisitDuration: this.placeData.averageVisitDuration,
         servicesCount: this.placeData.services?.length || 0,
         categoriesCount: this.placeData.categories?.length || 0
       });
       console.log('Categories:', this.placeData.categories);
+      // Services debug: show mapped structure for first 2 services to ensure adapter mapping
+      if (this.placeData.services && this.placeData.services.length) {
+        console.log('[ProviderCard] Services length:', this.placeData.services.length);
+        console.log('[ProviderCard] First service sample:', this.placeData.services[0]);
+        if (this.placeData.services.length > 1) {
+          console.log('[ProviderCard] Second service sample:', this.placeData.services[1]);
+        }
+        // Validate required display keys
+        const missingKeys = this.placeData.services
+          .map((s: any, idx: number) => ({
+            idx,
+            missing: ['id','title','description','image','schedule','price']
+              .filter(k => s[k] === undefined)
+          }))
+          .filter(r => r.missing.length);
+        if (missingKeys.length) {
+          console.warn('[ProviderCard] Services with missing display keys:', missingKeys);
+        }
+      } else {
+        console.log('[ProviderCard] No services available (services array empty or undefined).');
+      }
       console.log('Full PlaceData:', this.placeData);
-      console.log('=============================================');
+      console.groupEnd();
       this.cdr.markForCheck();
     }
   }
@@ -64,7 +84,9 @@ export class ProviderCardComponent implements OnChanges {
   }
 
   ngOnInit() {
-    console.log('ProviderCardComponent initialized with data:', this.placeData);
+    console.groupCollapsed('ProviderCardComponent init');
+    console.log('Initial data:', this.placeData);
+    console.groupEnd();
   }
 
   /**
