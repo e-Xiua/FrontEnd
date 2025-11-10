@@ -1,6 +1,6 @@
 /**
  * Provider Models
- * 
+ *
  * These interfaces define the structure for provider and service data
  * used throughout the route optimization feature.
  */
@@ -22,6 +22,8 @@ export interface Service {
 export interface Provider {
   id: number;
   nombre_empresa: string
+  foto?: string;
+  correo?: string
   coordenadaX: number; // Latitude
   coordenadaY: number; // Longitude
   cargoContacto?: string;

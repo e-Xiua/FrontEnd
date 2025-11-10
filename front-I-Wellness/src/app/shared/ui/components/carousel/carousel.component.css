@@ -41,9 +41,11 @@
 .carousel-slide {
   flex: 0 0 100%;
   display: grid;
-  grid-template-columns: repeat(var(--items-per-view, 2), 1fr);
-  gap: 2rem;
-  padding: 0 4rem;
+  /* Ensure columns shrink properly within tight containers (e.g., side panel) */
+  grid-template-columns: repeat(var(--items-per-view, 2), minmax(0, 1fr));
+  gap: 1.25rem;
+  /* Make horizontal padding responsive so two items fit on narrow cards */
+  padding: 0 clamp(0.5rem, 2vw, 1rem);
 }
 
 .carousel-dot {
@@ -140,6 +142,7 @@
   justify-content: center;
   color: #333;
   height: 100%;
+  text-decoration: none;
 }
 
 .linked-card:hover {

@@ -1,0 +1,49 @@
+.route-generation {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.route-generation__header {
+  margin-bottom: 1.5rem;
+}
+
+.route-generation__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.route-generation__description {
+  margin: 0;
+  color: #4b5563;
+}
+
+.route-generation__status,
+.route-generation__empty p,
+.route-generation__error p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.route-generation__error {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.route-generation__retry {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.route-generation__retry:hover {
+  background-color: #1d4ed8;
+}

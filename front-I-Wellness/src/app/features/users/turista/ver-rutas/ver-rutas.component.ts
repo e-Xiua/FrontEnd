@@ -1,11 +1,50 @@
 import { Component } from '@angular/core';
+import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
+import { usuarios } from '../../../../shared/models/usuarios';
+import { RouteGenerationComponent } from '../../../../shared/ui/components/route-generation';
 
 @Component({
   selector: 'app-ver-rutas',
-  imports: [],
+  imports: [RouteGenerationComponent],
   templateUrl: './ver-rutas.component.html',
-  styleUrl: './ver-rutas.component.css'
+  styleUrls: ['./ver-rutas.component.css']
 })
 export class VerRutasComponent {
+   currentUserId?: string;
 
+    ngOnInit(): void {
+      // Obtén el ID del usuario autenticado de tu servicio de autenticación
+      // Por ejemplo:
+      // this.currentUserId = this.authService.getCurrentUser()?.id;
+
+      // O desde localStorage:
+      const user = localStorage.getItem('user');
+      if (user) {
+        const userData = JSON.parse(user);
+        this.currentUserId = userData.id || userData.userId;
+      }
+
+      // TEMPORAL: Para testing, puedes usar un ID fijo:
+      // this.currentUserId = '123';
+    }
+
+    onRouteSelected(event: RouteSelectionEvent): void {
+      console.log('Turista - Ruta seleccionada:', event.route);
+
+      // Aquí puedes:
+      // - Navegar al mapa interactivo de la ruta
+      // - Iniciar navegación
+      // - Compartir la ruta
+      // - Marcar como favorita
+    }
+
+    onProviderSelected(event: { route: Route; provider: usuarios }): void {
+      console.log('Turista - Proveedor seleccionado:', event.provider);
+
+      // Aquí puedes:
+      // - Ver detalles del proveedor
+      // - Hacer una reserva
+      // - Ver reseñas
+      // - Contactar al proveedor
+    }
 }
