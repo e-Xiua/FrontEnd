@@ -1,0 +1,100 @@
+
+<ng-container *ngIf="pagedMode; else mapLinkedTpl">
+<section class="carousel-section">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Header -->
+    <div class="text-center mb-12" *ngIf="showHeader && (title || description)">
+      <h2 class="text-4xl font-bold text-foreground mb-4" *ngIf="title">
+        {{ title }}
+      </h2>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto" *ngIf="description">
+        {{ description }}
+      </p>
+    </div>
+
+    <!-- Carousel Container -->
+    <div class="relative">
+      <!-- Navigation Buttons -->
+      <button
+        (click)="prevSlide()"
+        [disabled]="isAnimating"
+        class="carousel-nav-btn left-4"
+      >
+        &#10094;
+      </button>
+
+      <button
+        (click)="nextSlide()"
+        [disabled]="isAnimating"
+        class="carousel-nav-btn right-4"
+      >
+        &#10095;
+      </button>
+
+      <!-- Cards Container -->
+      <div class="overflow-hidden rounded-2xl">
+        <div
+          #carouselContainer
+          class="carousel-track"
+          [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'"
+        >
+          <ng-container *ngFor="let slide of [].constructor(totalSlides); let i = index">
+            <div class="carousel-slide">
+              <ng-container *ngFor="let item of items?.toArray() | slice: i * itemsPerView : (i * itemsPerView) + itemsPerView">
+                <ng-container [ngTemplateOutlet]="item.template"></ng-container>
+              </ng-container>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Dots Indicator -->
+      <div class="flex justify-center gap-2 mt-8" *ngIf="totalSlides > 1">
+        <button
+          title="Go to slide {{ i + 1 }}"
+          *ngFor="let dot of [].constructor(totalSlides); let i = index"
+          (click)="goToSlide(i)"
+          [class.active]="i === currentIndex"
+          class="carousel-dot"
+        ></button>
+      </div>
+    </div>
+  </div>
+</section>
+</ng-container>
+
+<ng-template #mapLinkedTpl>
+<div class="map-linked-wrapper">
+  <div class="map-linked-track-wrapper">
+    <div class="map-linked-track" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
+      <ng-container *ngFor="let s of [].constructor(totalSlides); let slideIndex = index">
+        <div class="map-linked-slide">
+          <ng-container *ngFor="let it of linkedItems | slice: slideIndex * itemsPerView : (slideIndex * itemsPerView) + itemsPerView; let local = index">
+            <div class="linked-card"
+                 (click)="linkedItemChange.emit({ index: (slideIndex*itemsPerView)+local, item: it })"
+                 [attr.data-provider-id]="it.id">
+              <h4 class="title">{{ it.data?.nombre_empresa || it.data?.name || ('Proveedor ' + ((slideIndex*itemsPerView)+local+1)) }}</h4>
+              <p class="coords" *ngIf="it.position">
+                {{ it.position[0] | number:'1.4-4' }}, {{ it.position[1] | number:'1.4-4' }}
+              </p>
+              <p class="extra" *ngIf="it.data?.categoria">{{ it.data.categoria }}</p>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+    </div>
+ </div>
+
+   <div class="map-linked-nav" *ngIf="totalSlides > 1">
+    <button class="mini-btn" (click)="prevSlide()" [disabled]="isAnimating || totalSlides<=1">&#10094;</button>
+    <div class="dots">
+      <button
+      title="Go to slide {{ i + 1 }}"
+      *ngFor="let d of [].constructor(totalSlides); let i = index"
+              (click)="goToSlide(i)"
+              [class.active]="i === currentIndex"></button>
+    </div>
+    <button class="mini-btn" (click)="nextSlide()" [disabled]="isAnimating || totalSlides<=1">&#10095;</button>
+  </div>
+</div>
+</ng-template>

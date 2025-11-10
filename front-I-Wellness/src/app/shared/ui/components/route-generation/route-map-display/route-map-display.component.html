@@ -1,0 +1,37 @@
+<div class="route-map-container">
+  <!-- Carousel (Left side - 30%) -->
+  <div class="carousel-column" *ngIf="showCarousel && mapDisplayItems.length > 0">
+    <app-carousel
+      mode="map-linked"
+      [showHeader]="false"
+      [itemsPerView]="1"
+      [linkedItems]="mapDisplayItems"
+      (linkedItemChange)="onCarouselProviderChange($event)">
+    </app-carousel>
+  </div>
+
+  <!-- Right side: Map + Provider Card (70%) -->
+  <div class="map-provider-column">
+    <!-- Map -->
+    <div class="map-container full">
+      <div [id]="mapId" class="map-leaflet-wrapper"></div>
+    </div>
+
+    <!-- Provider Card -->
+    <app-provider-card
+      *ngIf="showProviderCard && showProviderCardVisible && placeData"
+      class="provider-card-wrapper"
+      [placeData]="placeData"
+      (submitReview)="onSubmitReview($event)">
+    </app-provider-card>
+  </div>
+
+  <!-- Empty State (no route) -->
+  <div class="empty-state" *ngIf="!optimizedRoute">
+    <div class="empty-icon">
+      <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3>No Optimized Route to Display</h3>
+    <p>Build and optimize a route to see it on the map</p>
+  </div>
+</div>

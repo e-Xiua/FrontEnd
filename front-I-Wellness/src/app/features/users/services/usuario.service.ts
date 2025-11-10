@@ -1,9 +1,8 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { usuarios } from '../../../shared/models/usuarios';
-import { catchError, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 
-const API_URL = 'http://localhost:8082/usuarios';  
+const API_URL = 'http://localhost:8082/usuarios';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +27,31 @@ export class UsuarioService {
   obtenerPorId(id: number): Observable<any> {
     const headers = this.obtenerHeaders(); // Agregar token en los headers
     return this.http.get(`${API_URL}/buscar/${id}`, { headers });
+  }
+
+  obtenerPorIdPublico(id: number): Observable<any> {
+    const headers = this.obtenerHeaders(); // Agregar token en los headers
+    return this.http.get(`${API_URL}/perfil-publico/${id}`, { headers });
+  }
+
+    /**
+   * Añade un usuario a la lista de contactos del usuario actual.
+   * @param ownerId El ID del usuario que está añadiendo el contacto.
+   * @param contactId El ID del usuario que será añadido.
+   */
+  addContact(ownerId: number, contactId: number): Observable<void> {
+    const headers = this.obtenerHeaders();
+    // Llama al endpoint POST /api/users/{ownerId}/contacts/{contactId}
+    return this.http.post<void>(`${API_URL}/${ownerId}/contacts/${contactId}`, {}, { headers });
+  }
+
+    /**
+   * Obtiene la lista de contactos de un usuario específico.
+   * @param userId El ID del usuario del cual se quieren obtener los contactos.
+   */
+  getContacts(userId: number): Observable<any[]> {
+    const headers = this.obtenerHeaders();
+    return this.http.get<any[]>(`${API_URL}/${userId}/contacts`, { headers });
   }
 
   // NUEVO MÉTODO PARA OBTENER EL PERFIL DEL USUARIO ACTUAL

@@ -1,0 +1,78 @@
+<div class="review-display-container">
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Cargando reseñas...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-state" *ngIf="error && !isLoading">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{ error }}</p>
+    <button (click)="reload()" class="retry-button" type="button">
+      <i class="fas fa-redo"></i> Reintentar
+    </button>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!isLoading && !error">
+    <!-- Header with average rating -->
+    <div class="reviews-header" *ngIf="reviews.length > 0">
+    <h2 class="reviews-title">
+      Reseñas de {{ entityType === 'proveedor' ? 'Proveedor' : 'Servicio' }}
+      <span class="review-count">({{ totalReviews || reviews.length }})</span>
+    </h2>
+
+    <div class="average-rating" *ngIf="averageRating > 0">
+      <div class="rating-stars">
+        <i
+          *ngFor="let filled of getStarArray(averageRating)"
+          class="fas fa-star"
+          [class.filled]="filled">
+        </i>
+      </div>
+      <span class="rating-value">{{ averageRating.toFixed(1) }}</span>
+    </div>
+  </div>
+
+  <!-- Reviews list -->
+  <div class="reviews-list" *ngIf="reviews.length > 0; else noReviews">
+    <div *ngFor="let review of reviews" class="review-item">
+      <div class="review-header">
+        <img
+          title="Review"
+          [src]="review.avatar"
+          [alt]="'Avatar de ' + review.author"
+          [title]="review.author"
+          class="review-avatar">
+
+        <div class="review-author-info">
+          <div class="author-rating-row">
+            <h4 class="author-name">{{ review.author }}</h4>
+            <div class="review-stars">
+              <i
+                *ngFor="let filled of getStarArray(review.rating)"
+                class="fas fa-star"
+                [class.filled]="filled">
+              </i>
+            </div>
+          </div>
+          <p class="review-date">{{ formatDate(review.date) }}</p>
+        </div>
+      </div>
+
+      <p class="review-comment">{{ review.comment }}</p>
+
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <ng-template #noReviews>
+    <div class="no-reviews">
+      <i class="fas fa-comment-slash empty-icon"></i>
+      <p class="empty-text">Aún no hay reseñas para este {{ entityType === 'proveedor' ? 'proveedor' : 'servicio' }}.</p>
+      <p class="empty-subtext">Sé el primero en dejar tu opinión.</p>
+    </div>
+  </ng-template>
+  </ng-container>
+</div>

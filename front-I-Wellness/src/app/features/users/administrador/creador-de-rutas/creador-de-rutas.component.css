@@ -1,0 +1,79 @@
+.routes-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+  margin: 1rem 0;
+}
+
+.selected-route-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.3s ease-out;
+}
+
+.selected-route-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.selected-route-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.selected-route-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.selected-route-description {
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.selected-route-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+#map,
+.map-leaflet-wrapper {
+  width: 100%;
+  height: 450px;
+  border-radius: inherit; /* aplica el mismo radio */
+}
+.below-map-bar {
+  width: 100%;
+}
+.provider-card-wrapper {
+  margin-top: 1.25rem;
+}
+@media (min-width: 1100px) {
+  .general-container {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.2rem;
+    align-items: start;
+  }
+  .provider-card-wrapper {
+    position: sticky;
+    top: 90px;
+  }
+}

@@ -1,0 +1,63 @@
+<div class="routes-view-container">
+  <!-- Controles de filtros -->
+  <div class="route-filters" *ngIf="currentFilters$ | async as filters">
+    <div class="filter-controls">
+      <!-- Búsqueda por texto -->
+      <div class="filter-group">
+        <input
+          type="text"
+          class="filter-search"
+          placeholder="Buscar rutas..."
+          [value]="filters.searchText || ''"
+          (input)="onSearchInput($event)">
+      </div>
+
+      <!-- Filtro por categoría -->
+      <div class="filter-group" *ngIf="categories.length > 0">
+        <select
+          class="filter-select"
+          title="Filtrar por categoría"
+          [value]="filters.category || ''"
+          (change)="onCategoryChange($event)">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro por dificultad -->
+      <div class="filter-group">
+        <select
+          class="filter-select"
+          title="Filtrar por dificultad"
+          [value]="filters.difficulty || ''"
+          (change)="onDifficultyChange($event)">
+          <option value="">Toda dificultad</option>
+          <option *ngFor="let difficulty of difficulties" [value]="difficulty">
+            {{ difficulty | titlecase }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Botón limpiar filtros -->
+      <button
+        class="clear-filters-btn"
+        (click)="clearFilters()"
+        [disabled]="!hasFilters(filters)">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <app-show-routes-many-options
+    [routes]="(filteredRoutes$ | async) || []"
+    [displayOptions]="displayOptions"
+    [maxRoutesToShow]="maxRoutesToShow"
+    [showFilters]="false"
+    [showRouteStats]="showRouteStats"
+    [layoutMode]="layoutMode"
+    (routeSelected)="onRouteSelectedInChild($event)"
+    (providerSelected)="onProviderSelectedInChild($event)">
+  </app-show-routes-many-options>
+</div>

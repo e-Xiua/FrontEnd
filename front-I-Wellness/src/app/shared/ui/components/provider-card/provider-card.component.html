@@ -1,0 +1,103 @@
+<div class="card">
+  <div class="scroll-area">
+    <div class="p-0">
+      <!-- Header Image -->
+      <div class="image-container">
+        <img
+          alt="Place"
+          [src]="placeData.foto"
+          [alt]="placeData.name"
+          [title]="placeData.name"
+          class="header-image"
+        />
+        <!-- Show all categories if available, otherwise show single category -->
+          <span class="badge" *ngIf="placeData.categories && placeData.categories.length > 0">
+            {{ placeData.categories.join(', ') }}
+          </span>
+          <span class="badge" *ngIf="!placeData.categories || placeData.categories.length === 0">
+            {{ placeData.category }}
+          </span>
+      </div>
+
+      <div class="card-header">
+        <h3 class="card-title">{{ placeData.name }}</h3>
+
+        <div class="rating-container">
+          <div class="stars">
+            <span *ngFor="let star of [1,2,3,4,5]"
+                  class="star" [class.filled]="star <= placeData.rating">★</span>
+          </div>
+          <span class="rating-value">{{ placeData.rating }}</span>
+          <span>({{ placeData.totalReviews }} reviews)</span>
+        </div>
+
+        <div class="details">
+          <div class="detail-item">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>{{ placeData.totalReviews }}</span>
+          </div>
+          <div class="detail-item">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>{{ placeData.hours }}</span>
+          </div>
+        </div>
+
+        <p class="description">
+          {{ placeData.description }}
+        </p>
+
+        <!-- Nueva sección: Información de Contacto -->
+        <div class="contact-section">
+          <h4>Contacto</h4>
+          <p><strong>Nombre:</strong> {{ placeData.contactName }}</p>
+          <p><strong>Email:</strong> {{ placeData.email }}</p>
+          <p><strong>Teléfono:</strong> {{ placeData.phone }}</p>
+          <p><strong>Teléfono Empresa:</strong> {{ placeData.companyPhone }}</p>
+          <p><strong>Cargo:</strong> {{ placeData.cargoContacto }}</p>
+        </div>
+
+      <div class="card-content">
+        <!-- Carousel de Servicios (ya muestra images como URLs) -->
+        <app-carousel [itemsPerView]="2">
+          <ng-container *ngFor="let service of placeData.services">
+            <ng-template appCarouselItem>
+              <app-service-card
+                [id]="service.id || service._idServicio"
+                [title]="service.title"
+                [description]="service.description"
+                [image]="service.image"
+                [schedule]="service.schedule"
+                [duration]="service.duration"
+                [price]="service.price">
+              </app-service-card>
+            </ng-template>
+          </ng-container>
+        </app-carousel>
+
+        <!-- Review Form Section -->
+        <div class="section">
+          <app-review-form
+            [entityType]="'proveedor'"
+            [entityId]="placeData.id">
+          </app-review-form>
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- Reviews Display Section -->
+        <div class="section">
+          <app-review-display
+            [entityType]="'proveedor'"
+            [entityId]="placeData.id">
+            </app-review-display>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

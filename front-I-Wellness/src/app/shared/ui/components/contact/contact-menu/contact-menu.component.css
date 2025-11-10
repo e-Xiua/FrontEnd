@@ -1,0 +1,94 @@
+.contact-button {
+  flex: 1;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  min-width: 0 !important;
+}
+
+.contact-button mat-icon {
+  margin-right: 4px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.compact .contact-button {
+  padding: 0 8px !important;
+  min-height: 32px !important;
+}
+
+.compact .contact-button mat-icon {
+  margin-right: 2px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.contact-menu {
+  min-width: 160px;
+}
+
+::ng-deep .contact-menu .mat-mdc-menu-panel {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+::ng-deep .cdk-overlay-container {
+  z-index: 9999 !important;
+}
+
+::ng-deep .cdk-overlay-backdrop {
+  z-index: 9998 !important;
+}
+
+::ng-deep .mat-mdc-menu-panel.contact-menu {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+::ng-deep .cdk-overlay-pane {
+  z-index: 9999 !important;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.menu-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.whatsapp-icon {
+  color: #25d366;
+}
+
+.telegram-icon {
+  color: #0088cc;
+}
+
+.email-icon {
+  color: #ea4335;
+}
+
+.whatsapp-item:hover .whatsapp-icon {
+  color: #128c7e;
+}
+
+.telegram-item:hover .telegram-icon {
+  color: #006699;
+}
+
+.email-item:hover .email-icon {
+  color: #d33b2c;
+}

@@ -1,0 +1,109 @@
+<div class="review-form-container">
+  <!-- Checking permissions state -->
+  <div class="checking-permissions" *ngIf="isCheckingPermissions">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Verificando permisos...</p>
+  </div>
+
+  <!-- No permissions message -->
+  <div class="no-permissions" *ngIf="!isCheckingPermissions && !hasPermissions && permissionMessage">
+    <i class="fas fa-info-circle"></i>
+    <p>{{ permissionMessage }}</p>
+  </div>
+
+  <!-- Form (only show if has permissions) -->
+  <ng-container *ngIf="!isCheckingPermissions && hasPermissions">
+    <!-- Edit mode notice -->
+    <div class="edit-notice" *ngIf="canEdit">
+      <i class="fas fa-edit"></i>
+      <p>Estás editando tu reseña existente</p>
+    </div>
+
+    <div class="form-header">
+      <h3 class="form-title">
+        <i class="fas fa-pen-to-square"></i>
+        {{ canEdit ? 'Editar' : 'Escribir' }} reseña sobre {{ entityType === 'proveedor' ? 'el proveedor' : 'el servicio' }}
+      </h3>
+    </div>
+
+  <form (ngSubmit)="onSubmit()" class="review-form">
+    <!-- Star Rating Section -->
+    <div class="rating-section">
+      <fieldset class="rating-fieldset">
+        <legend class="rating-label">
+          Calificación <span class="required">*</span>
+        </legend>
+        <div class="stars-container">
+          <button
+            *ngFor="let star of stars"
+            type="button"
+            class="star-button"
+            [class.filled]="isStarFilled(star)"
+            [class.hover]="hoverRating >= star"
+            (click)="setRating(star)"
+            (mouseenter)="setHoverRating(star)"
+            (mouseleave)="clearHoverRating()"
+            [title]="star + ' estrella' + (star > 1 ? 's' : '')">
+            <i class="fas fa-star"></i>
+            <span class="sr-only">{{ star }} estrella{{ star > 1 ? 's' : '' }}</span>
+          </button>
+        </div>
+        <p class="rating-text" *ngIf="rating > 0">
+          Has seleccionado <strong>{{ rating }}</strong> {{ rating === 1 ? 'estrella' : 'estrellas' }}
+        </p>
+      </fieldset>
+    </div>
+
+    <!-- Comment Section -->
+    <div class="comment-section">
+      <label for="review-comment" class="comment-label">
+        Tu opinión <span class="required">*</span>
+      </label>
+      <textarea
+        id="review-comment"
+        name="comment"
+        [(ngModel)]="comment"
+        class="comment-textarea"
+        placeholder="Comparte tu experiencia sobre {{ entityType === 'proveedor' ? 'este proveedor' : 'este servicio' }}... (mínimo 10 caracteres)"
+        rows="6"
+        maxlength="1000"
+        [disabled]="isSubmitting">
+      </textarea>
+      <div class="character-count">
+        <span [class.warning]="getCharacterCount() > 900" [class.error]="getCharacterCount() > 1000">
+          {{ getCharacterCount() }} / 1000 caracteres
+        </span>
+        <span class="remaining" *ngIf="getCharacterCount() < 1000">
+          ({{ getRemainingCharacters() }} restantes)
+        </span>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">
+      <i class="fas fa-circle-exclamation"></i>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="resetForm()"
+        [disabled]="isSubmitting">
+        <i class="fas fa-rotate-left"></i>
+        Limpiar
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!isFormValid() || isSubmitting">
+        <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+        <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+        {{ isSubmitting ? 'Enviando...' : (canEdit ? 'Actualizar reseña' : 'Publicar reseña') }}
+      </button>
+    </div>
+  </form>
+  </ng-container>
+</div>

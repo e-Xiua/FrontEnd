@@ -35,11 +35,11 @@ describe('Registro de Turista', () => {
     // 4. Click en crear cuenta
     cy.contains('button', 'Crear cuenta').click();
 
-    // 5. Hacer clic en "Soy Visitante"
+    // 5. Hacer clic en "Aceptar" en el Sweet Alert
     cy.contains('button', 'Aceptar').click();
 
-    // 6. dirigir al formulario de gustos
-    cy.url().should('include', 'http://localhost:4200/formulariogustos');
+    // 6. Verificar que se redirige al formulario de gustos
+    cy.url().should('include', '/turista/formulariogustos');
 
     // 7. Seleccionar al menos 3 gustos (suponiendo que se muestran como botones o tarjetas clicables)
     cy.get('.card') // Ajusta el selector al que usas (puede ser .card, .item, etc.)
@@ -59,7 +59,7 @@ describe('Registro de Turista', () => {
     cy.contains('button', 'Continuar').click(); // Aceptar SweetAlert
 
     // 10. Verifica redirección final
-    cy.url().should('include', '/hometurista');
+    cy.url().should('include', '/turista/home');
 
   });
 });

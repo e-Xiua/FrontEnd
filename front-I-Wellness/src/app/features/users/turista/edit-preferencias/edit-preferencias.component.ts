@@ -1,9 +1,9 @@
+import { CommonModule, Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule, Location } from '@angular/common';
+import Swal from 'sweetalert2';
 import { PreferenciasService } from '../../../preferencias/services/preferencias/preferencias.service';
 import { TuristaXPreferenciaService } from '../../../preferencias/services/turistaXpreferencias/turista-xpreferencia.service';
-import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-edit-preferencias',
@@ -27,7 +27,7 @@ export class EditPreferenciasComponent {
     }
   }
 
-  constructor(  
+  constructor(
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
@@ -131,8 +131,8 @@ export class EditPreferenciasComponent {
       });
     });
   }
-  
-  
+
+
 
   finalizarGuardado(exitos: number, errores: number) {
     if (exitos === this.peticiones.length) {
@@ -152,13 +152,13 @@ export class EditPreferenciasComponent {
     }
 
     // Obtener el rol del usuario desde el localStorage
-    const rol = localStorage.getItem('rol'); 
+    const rol = localStorage.getItem('rol');
 
     // Verificar el rol y redirigir a la página correspondiente
     if (rol === 'Admin') {
       this.router.navigate(['/visitantes']);
     } else if (rol === 'Turista') {
-      this.router.navigate(['/hometurista']);
-    } 
+      this.router.navigate(['/turista/home']);
+    }
   }
 }
