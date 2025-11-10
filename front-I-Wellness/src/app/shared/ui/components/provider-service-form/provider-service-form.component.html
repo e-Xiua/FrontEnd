@@ -1,0 +1,125 @@
+<div class="provider-service-form">
+  <div class="form-box">
+    <h2>Nuevo servicio</h2>
+  <form class="form-content" (ngSubmit)="submitForm.emit()" novalidate>
+      <div class="image-upload">
+        <label for="imageInput">
+          <div
+            class="image-placeholder"
+            [ngStyle]="{ 'background-image': imagePreview ? 'url(' + imagePreview + ')' : 'none' }"
+          ></div>
+          <p>{{ imagePreview ? 'Imagen seleccionada' : 'Agregar imagen' }}</p>
+        </label>
+        <input id="imageInput" type="file" (change)="imageSelected.emit($event)" accept="image/*" hidden />
+      </div>
+
+      <div class="form-fields">
+        <input
+          type="text"
+          placeholder="Nombre"
+          aria-label="Nombre del servicio"
+          [ngModel]="service?.nombre || ''"
+          (ngModelChange)="nombreChange.emit($event)"
+          required
+          name="nombre"
+        />
+
+        <textarea
+          placeholder="Descripción"
+          aria-label="Descripción del servicio"
+          [ngModel]="service?.descripcion || ''"
+          (ngModelChange)="descripcionChange.emit($event)"
+          required
+          name="descripcion"
+        ></textarea>
+
+        <p class="form-section-title">Horarios disponibles:</p>
+        <div class="days-selection">
+          <div class="day-item" *ngFor="let day of days; index as i; trackBy: trackByDayName">
+            <label class="day-option">
+              <input
+                #dayCheckbox
+                type="checkbox"
+                [checked]="day.selected"
+                (change)="daySelectionChange.emit({ index: i, selected: dayCheckbox.checked })"
+              />
+              <span>{{ day.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="time-selection">
+          <label for="start-time-input">Hora de apertura:</label>
+          <input
+            #startTimeInput
+            id="start-time-input"
+            type="time"
+            [value]="startTime"
+            (change)="startTimeChange.emit(startTimeInput.value)"
+            required
+          />
+          <label for="end-time-input">Hora de cierre:</label>
+          <input
+            #endTimeInput
+            id="end-time-input"
+            type="time"
+            [value]="endTime"
+            (change)="endTimeChange.emit(endTimeInput.value)"
+            required
+          />
+        </div>
+
+        <label for="price-input">Precio:</label>
+        <input
+          #priceInput
+          id="price-input"
+          type="number"
+          placeholder="Ingresa el precio o 0 si es gratuito"
+            aria-label="Precio del servicio"
+          [value]="service?.precio ?? ''"
+          (input)="precioChange.emit(parseNumeric(priceInput.value))"
+          name="precio"
+        />
+
+        <label for="duration-input">Tiempo aproximado de visita (minutos):</label>
+        <input
+          #durationInput
+          id="duration-input"
+          type="number"
+          placeholder="Ej: 60, 90, 120 (opcional, por defecto 30 min)"
+          aria-label="Tiempo aproximado de visita"
+          [value]="service?.tiempoAproximado ?? ''"
+          (input)="tiempoAproximadoChange.emit(parseNumeric(durationInput.value))"
+          min="1"
+          max="480"
+          step="15"
+          name="tiempoAproximado"
+        />
+        <small class="helper-text">
+          Si no se especifica, el sistema usará 30 minutos por defecto
+        </small>
+
+        <div class="preferencias-section">
+          <h3>
+            Selecciona tus preferencias <span class="preference-hint">(mínimo {{ minPreferences }}, máximo {{ maxPreferences }})</span>:
+          </h3>
+          <div class="preferencias-list">
+            <label *ngFor="let pref of preferences">
+              <input
+                #prefCheckbox
+                type="checkbox"
+                [value]="pref._idPreferencias"
+                [checked]="isPreferenceChecked(pref._idPreferencias)"
+                [disabled]="isPreferenceDisabled(pref._idPreferencias)"
+                (change)="preferenceToggle.emit({ id: pref._idPreferencias, checked: prefCheckbox.checked })"
+              />
+              {{ pref.nombre }}
+            </label>
+          </div>
+        </div>
+
+        <button class="save-btn" type="submit" [disabled]="disableSubmit">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

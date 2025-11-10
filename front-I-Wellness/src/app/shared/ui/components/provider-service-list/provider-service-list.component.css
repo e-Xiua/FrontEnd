@@ -1,0 +1,215 @@
+:host {
+  display: block;
+  color: #1c1c1c;
+}
+
+.provider-service-list {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.provider-service-list__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 10px 10px 0 0;
+}
+
+.provider-service-list__title {
+  margin: 0;
+  color: #1c1c1c;
+  font-size: 1.5rem;
+}
+
+.provider-service-list__add-button {
+  background-color: #48a6a7;
+  color: #fff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.provider-service-list__add-button:hover,
+.provider-service-list__add-button:focus {
+  background-color: #3b8e8e;
+  outline: none;
+}
+
+.provider-service-list__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 0 0 10px 10px;
+  gap: 15px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.provider-service-list__grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.provider-service-list__grid::-webkit-scrollbar-track {
+  background: #f5f4f1;
+  border-radius: 10px;
+}
+
+.provider-service-list__grid::-webkit-scrollbar-thumb {
+  background: #cdcac2;
+  border-radius: 10px;
+}
+
+.provider-service-card {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
+}
+
+.provider-service-card__image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.provider-service-card__details {
+  padding: 10px;
+  text-align: center;
+}
+
+.provider-service-card__name {
+  font-size: 1rem;
+  color: #333;
+  margin: 10px 0 5px;
+}
+
+.provider-service-card__description {
+  font-size: 0.875rem;
+  color: #777;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provider-service-card__price {
+  font-weight: 600;
+  color: #48a6a7;
+  margin-top: 8px;
+}
+
+.provider-service-card__actions {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px;
+  background: #f8f8f8;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.provider-service-card__action {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.provider-service-card__action:hover,
+.provider-service-card__action:focus {
+  opacity: 0.7;
+  outline: none;
+}
+
+.provider-service-card__action--edit {
+  color: #ffc107;
+}
+
+.provider-service-card__action--delete {
+  color: #e74c3c;
+}
+
+.provider-service-card__switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+}
+
+.provider-service-card__switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.provider-service-card__slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.provider-service-card__slider:before {
+  position: absolute;
+  content: '';
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #fff;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.provider-service-card__switch input:checked + .provider-service-card__slider {
+  background-color: #2196f3;
+}
+
+.provider-service-card__switch input:checked + .provider-service-card__slider:before {
+  transform: translateX(16px);
+}
+
+.provider-service-list__feedback {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1c1c1c;
+  padding: 24px;
+  border-radius: 10px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .provider-service-list__grid {
+    justify-content: center;
+  }
+
+  .provider-service-card {
+    width: 100%;
+    max-width: 280px;
+  }
+}

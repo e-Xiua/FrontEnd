@@ -1,13 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, take, takeUntil } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
+import { usuarios } from '../../../../shared/models/usuarios';
+import { MakeNetworkingContactComponent } from '../../../../shared/ui/components/make-networking-contact/make-networking-contact.component';
+import { ProviderServiceListContainerComponent } from '../../../../shared/ui/components/provider-service-list/provider-service-list.container';
+import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
+import { ReviewFormComponent } from '../../../../shared/ui/components/review-form/review-form.component';
+import { RouteGenerationComponent } from '../../../../shared/ui/components/route-generation/route-generation.component';
+import { ServicioService } from '../../../servicios/services/servicio.service';
+import { ContactService } from '../../services/contact.service';
 import { UsuarioService } from '../../services/usuario.service';
 
-import { AuthService } from '../../../../core/services/auth/auth.service';
-import { ChatRealtimeService } from '../../../../shared/services/chat-realtime.service';
-import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
-import { ReviewFormComponent } from "../../../../shared/ui/components/review-form/review-form.component";
-import { ServicioService } from '../../../servicios/services/servicio.service';
 
 interface PlaceData {
   id: number;
@@ -29,162 +35,211 @@ interface PlaceData {
   licenciasPermisos?: string[] | null;
 }
 
-interface Review {
-  id: number;
-  author: string;
-  avatar: string;
-  date: string;
-  rating: number;
-  comment: string;
-  helpful: number;
-  notHelpful: number;
-}
-
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   imports: [
     CommonModule,
     ReviewDisplayComponent,
-    ReviewFormComponent
+    ReviewFormComponent,
+    ProviderServiceListContainerComponent,
+    MakeNetworkingContactComponent,
+    RouteGenerationComponent
 ],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css'
 })
-export class ProfilePageComponent implements OnInit {
+export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() providerId: number | null = null;
+  @Input() showServiceManager = false;
+  @Input() showNetworkingCard = false;
+  @Input() showRouteGeneration = false;
+
+  @Output() routeSelected = new EventEmitter<RouteSelectionEvent>();
+  @Output() providerSelected = new EventEmitter<{ route: Route; provider: usuarios }>();
+
   provider: PlaceData | null = null;
   services: any[] = [];
-  reviews: Review[] = [];
   isLoading: boolean = true;
   error: string | null = null;
   isAddingContact = false;
   isContact = false;
   currentUserId: number | null = null;
 
-  // Mock reviews data (since we don't have this in the backend yet)
-  mockReviews: Review[] = [
-    {
-      id: 1,
-      author: 'Laura González',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Laura',
-      date: '2024-10-01',
-      rating: 5,
-      comment: 'Excelente servicio, muy profesional y puntual. Definitivamente lo recomiendo.',
-      helpful: 12,
-      notHelpful: 0
-    },
-    {
-      id: 2,
-      author: 'Carlos Méndez',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos',
-      date: '2024-09-28',
-      rating: 4,
-      comment: 'Muy buen servicio, aunque el tiempo de respuesta podría mejorar un poco.',
-      helpful: 8,
-      notHelpful: 1
-    },
-    {
-      id: 3,
-      author: 'Ana Patricia',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana',
-      date: '2024-09-25',
-      rating: 5,
-      comment: 'Increíble experiencia, superó todas mis expectativas. ¡Volveré sin duda!',
-      helpful: 15,
-      notHelpful: 0
-    }
-  ];
-
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private usuarioService: UsuarioService,
-    private servicioService: ServicioService,
-    private authService: AuthService,
-    private chatRealtimeService: ChatRealtimeService
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly usuarioService: UsuarioService,
+    private readonly servicioService: ServicioService,
+    private readonly authService: AuthService,
+    private readonly contactService: ContactService
   ) {}
 
+  private readonly destroy$ = new Subject<void>();
+  private lastLoadedId: number | null = null;
+
   ngOnInit(): void {
+    this.subscribeToContactState();
+    this.authService
+      .getCurrentUserId()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(id => {
+        this.currentUserId = id;
+        this.tryLoadContactState();
+      });
 
-    this.authService.getCurrentUserId().subscribe(id => {
-      this.currentUserId = id;
-    });
+    if (this.providerId !== null) {
+      this.loadProviderDataIfNeeded(this.providerId);
+      return;
+    }
 
-    this.route.paramMap.subscribe(params => {
-      const id = Number(params.get('id'));
-      if (id) {
-        this.loadProviderData(id);
-      }
-    });
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const idFromRoute = Number(params.get('id'));
+
+        if (idFromRoute) {
+          this.loadProviderDataIfNeeded(idFromRoute);
+        } else {
+          this.resolveCurrentUserProfile();
+        }
+      });
   }
 
-    addContact(): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    if ('providerId' in changes) {
+      const id = changes['providerId'].currentValue as number | null;
+
+      if (id !== null && !changes['providerId'].firstChange) {
+        this.loadProviderDataIfNeeded(id);
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  addContact(): void {
     if (!this.currentUserId || !this.provider) {
       console.error('No se puede añadir contacto: falta el ID del usuario actual o del proveedor.');
       return;
     }
 
-    this.isAddingContact = true;
-    this.usuarioService.addContact(this.currentUserId, this.provider.id).subscribe({
-      next: () => {
-        console.log('Contacto añadido con éxito');
-        this.isContact = true; // Marcar como contacto
-        this.isAddingContact = false;
+    if (this.isAddingContact || this.isContact) {
+      return;
+    }
 
-        // 🔔 NUEVO: Forzar actualización en tiempo real para reflejar el cambio inmediatamente
-        console.log('ProfilePage: Notificando cambio de contactos al sistema en tiempo real');
-        this.chatRealtimeService.forceRefresh().subscribe({
-          next: () => {
-            console.log('ProfilePage: ✅ Actualización en tiempo real completada - sidebar y modal se actualizarán automáticamente');
-          },
-          error: (err) => {
-            console.warn('ProfilePage: Error en actualización en tiempo real (no crítico):', err);
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Error al añadir contacto:', err);
-        this.isAddingContact = false;
-      }
-    });
+    this.contactService
+      .addContact(this.currentUserId, this.provider.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('Contacto añadido con éxito');
+        },
+        error: (err: unknown) => {
+          console.error('Error al añadir contacto:', err);
+        }
+      });
   }
 
-  private loadProviderData(id: number): void {
+  private loadProviderDataIfNeeded(id: number): void {
+    if (!id || id === this.lastLoadedId) {
+      return;
+    }
+
+    this.lastLoadedId = id;
+    this.contactService.resetContactState();
+    this.requestProviderData(id);
+  }
+
+  private resolveCurrentUserProfile(): void {
+    this.authService
+      .getCurrentUserId()
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe({
+        next: id => {
+          if (id) {
+            this.providerId = id;
+            this.loadProviderDataIfNeeded(id);
+          }
+        },
+        error: (err: unknown) => {
+          console.error('No se pudo obtener el ID del usuario actual:', err);
+        }
+      });
+  }
+
+  private subscribeToContactState(): void {
+    this.contactService.isAddingContact$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isAdding: boolean) => {
+        this.isAddingContact = isAdding;
+      });
+
+    this.contactService.isContact$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isContact: boolean) => {
+        this.isContact = isContact;
+      });
+  }
+
+  private requestProviderData(id: number): void {
     this.isLoading = true;
     this.error = null;
 
-    this.usuarioService.obtenerPorIdPublico(id).subscribe({
-      next: (userData) => {
-        console.log('Datos del usuario obtenidos:', userData);
-        this.provider = this.mapUserToPlaceData(userData);
-        this.reviews = this.mockReviews; // Using mock reviews
-        this.loadProviderServices(id);
-      },
-      error: (err) => {
-        console.error('Error al obtener datos del proveedor:', err);
-        this.error = 'No se pudo cargar la información del proveedor.';
-        this.isLoading = false;
-      }
-    });
+    this.usuarioService
+      .obtenerPorIdPublico(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: userData => {
+          console.log('Datos del usuario obtenidos:', userData);
+          this.provider = this.mapUserToPlaceData(userData);
+          this.tryLoadContactState(id);
+
+          if (this.showServiceManager) {
+            this.services = [];
+            this.isLoading = false;
+          } else {
+            this.loadProviderServices(id);
+          }
+        },
+        error: (err: unknown) => {
+          console.error('Error al obtener datos del proveedor:', err);
+          this.error = 'No se pudo cargar la información del proveedor.';
+          this.isLoading = false;
+        }
+      });
   }
 
   private loadProviderServices(providerId: number): void {
-    this.servicioService.obtenerServiciosPorProveedor(providerId).subscribe({
-      next: (services: any) => {
-        console.log('Servicios del proveedor:', services);
-        this.services = services || [];
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        console.error('Error al obtener servicios:', err);
-        this.services = [];
-        this.isLoading = false;
-      }
-    });
+    this.servicioService
+      .obtenerServiciosPorProveedor(providerId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (services: any) => {
+          console.log('Servicios del proveedor:', services);
+          this.services = services || [];
+          this.isLoading = false;
+        },
+        error: (err: unknown) => {
+          console.error('Error al obtener servicios:', err);
+          this.services = [];
+          this.isLoading = false;
+        }
+      });
   }
 
   private mapUserToPlaceData(userData: any): PlaceData {
     const proveedorInfo = userData.proveedorInfo || {};
+    let totalReviews = 0;
+
+    if (typeof proveedorInfo.total_resenas === 'number') {
+      totalReviews = proveedorInfo.total_resenas;
+    } else if (Array.isArray(proveedorInfo.resenas)) {
+      totalReviews = proveedorInfo.resenas.length;
+    }
 
     return {
       id: userData.id,
@@ -194,7 +249,7 @@ export class ProfilePageComponent implements OnInit {
       foto: userData.foto || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userData.nombre || 'U')}`,
       category: proveedorInfo.categoria || 'General',
       rating: 4.5, // Mock rating
-      totalReviews: this.mockReviews.length,
+      totalReviews,
       address: proveedorInfo.direccion || 'Dirección no disponible',
       hours: proveedorInfo.horario || 'Lunes a Viernes 9:00 AM - 6:00 PM',
       description: proveedorInfo.descripcion || 'Proveedor de servicios profesionales con amplia experiencia en el sector.',
@@ -207,7 +262,26 @@ export class ProfilePageComponent implements OnInit {
     };
   }
 
+  private tryLoadContactState(providerId?: number): void {
+    if (!this.currentUserId) {
+      return;
+    }
 
+    const targetProviderId = providerId ?? this.provider?.id;
+
+    if (!targetProviderId) {
+      return;
+    }
+
+    this.contactService
+      .loadContactState(this.currentUserId, targetProviderId)
+      .pipe(take(1))
+      .subscribe({
+        error: (err: unknown) => {
+          console.error('No se pudo verificar el estado del contacto:', err);
+        }
+      });
+  }
 
   goBack(): void {
     this.router.navigate(['/proveedor/home']);

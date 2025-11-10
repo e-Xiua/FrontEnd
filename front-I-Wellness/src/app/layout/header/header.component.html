@@ -9,10 +9,17 @@
       </ul>
   </nav>
 
+  <!-- Provider Search Component - Only visible for provider role -->
+  <div *ngIf="showProviderSearch" class="provider-search-wrapper">
+    <app-provider-search
+      (providerSelected)="onProviderSelected($event)"
+    ></app-provider-search>
+  </div>
+
   <div class="search-login">
     <button class="login-btn" routerLink="/login">Log In</button>
     <button class="register-btn" routerLink="/registro">Registro</button>
-</div>
+  </div>
 
 </header>
 

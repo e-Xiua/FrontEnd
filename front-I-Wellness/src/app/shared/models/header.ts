@@ -36,6 +36,11 @@ export interface BaseHeader {
    * Configuración de estilos
    */
   theme?: 'light' | 'dark' | 'auto';
+
+  /**
+   * Mostrar buscador de proveedores
+   */
+  showProviderSearch?: boolean;
 }
 
 export interface NavigationItem {

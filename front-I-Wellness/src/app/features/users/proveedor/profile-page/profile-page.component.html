@@ -14,11 +14,6 @@
     <div class="text-center animate-fade-in">
       <h1 class="text-2xl font-bold text-foreground mb-2">Error al cargar el perfil</h1>
       <p class="text-muted-foreground mb-4">{{ error }}</p>
-      <button
-        class="btn btn-primary"
-        (click)="goBack()">
-        Volver
-      </button>
     </div>
   </div>
 
@@ -27,11 +22,6 @@
     <div class="text-center animate-fade-in">
       <h1 class="text-2xl font-bold text-foreground mb-2">Proveedor no encontrado</h1>
       <p class="text-muted-foreground mb-4">El proveedor que buscas no existe.</p>
-      <button
-        class="btn btn-primary"
-        (click)="goBack()">
-        Volver al inicio
-      </button>
     </div>
   </div>
 
@@ -40,12 +30,6 @@
     <!-- Header -->
     <header class="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
       <div class="container mx-auto px-4 py-4">
-        <button
-          class="btn btn-ghost gap-2"
-          (click)="goBack()">
-          <i class="fas fa-arrow-left w-4 h-4"></i>
-          Volver
-        </button>
       </div>
     </header>
 
@@ -58,7 +42,7 @@
 
         <div class="px-8 pb-6">
           <!-- Profile Photo & Basic Info -->
-          <div class="flex flex-col md:flex-row gap-6 -mt-16 mb-6">
+          <div class="flex flex-col xl:flex-row gap-6 -mt-16 mb-6">
             <img
               title="Avatar de {{ provider.contactName }}"
               [src]="provider.foto"
@@ -100,6 +84,12 @@
                 <span class="text-sm">{{ provider.address }}</span>
               </div>
             </div>
+
+            <app-make-networking-contact
+              *ngIf="showNetworkingCard"
+              class="w-full md:max-w-xs xl:self-start xl:mt-20"
+              (connect)="startConversation()"
+            ></app-make-networking-contact>
           </div>
         </div>
       </div>
@@ -182,25 +172,41 @@
         </div>
       </div>
 
+      <section *ngIf="showRouteGeneration && provider" class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
+        <h2 class="text-2xl font-bold text-foreground mb-6">Rutas generadas</h2>
+        <app-route-generation
+          [showHeader]="false"
+          [userId]="provider.id"
+          (routeSelected)="routeSelected.emit($event)"
+          (providerSelected)="providerSelected.emit($event)"
+        ></app-route-generation>
+      </section>
+
       <!-- Services Section -->
       <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
         <h2 class="text-2xl font-bold text-foreground mb-6">Servicios Ofrecidos</h2>
 
-        <div *ngIf="services.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div *ngFor="let service of services" class="bg-muted/30 rounded-lg p-6 hover:shadow-lg transition-shadow">
-            <h3 class="text-lg font-semibold text-foreground mb-2">{{ service.nombre || 'Servicio sin nombre' }}</h3>
-            <p class="text-muted-foreground text-sm mb-3">{{ service.descripcion || 'Sin descripción disponible' }}</p>
-            <div class="flex items-center justify-between">
-              <span class="text-primary font-semibold">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
-              <span class="text-xs text-muted-foreground">{{ service.categoria || 'General' }}</span>
+        <ng-container *ngIf="showServiceManager; else providerServicesDefault">
+          <app-provider-service-list-container></app-provider-service-list-container>
+        </ng-container>
+
+        <ng-template #providerServicesDefault>
+          <div *ngIf="services.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let service of services" class="bg-muted/30 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <h3 class="text-lg font-semibold text-foreground mb-2">{{ service.nombre || 'Servicio sin nombre' }}</h3>
+              <p class="text-muted-foreground text-sm mb-3">{{ service.descripcion || 'Sin descripción disponible' }}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-primary font-semibold">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span class="text-xs text-muted-foreground">{{ service.categoria || 'General' }}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div *ngIf="services.length === 0" class="text-center py-8">
-          <i class="fas fa-box-open text-4xl text-muted-foreground mb-4"></i>
-          <p class="text-muted-foreground">No hay servicios disponibles para mostrar.</p>
-        </div>
+          <div *ngIf="services.length === 0" class="text-center py-8">
+            <i class="fas fa-box-open text-4xl text-muted-foreground mb-4"></i>
+            <p class="text-muted-foreground">No hay servicios disponibles para mostrar.</p>
+          </div>
+        </ng-template>
       </div>
 
       <!-- Reviews Section -->
@@ -214,32 +220,6 @@
                 [entityType]="'proveedor'"
                 [entityId]="provider.id">
         </app-review-display>
-      </div>
-
-      <!-- Placeholder for Future Routes -->
-      <div class="bg-card rounded-2xl shadow-card p-12 mb-6 text-center animate-fade-in-5 border-2 border-dashed border-muted">
-        <div class="max-w-md mx-auto">
-          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-file-alt w-8 h-8 text-primary"></i>
-          </div>
-          <h3 class="text-xl font-semibold text-foreground mb-2">Características Adicionales Próximamente</h3>
-          <p class="text-muted-foreground mb-4">
-            Próximamente implementaremos rutas. Estamos trabajando para traerte más funcionalidades.
-          </p>
-          <div class="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-            <i class="fas fa-clock w-4 h-4"></i>
-            En Desarrollo
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA Section -->
-      <div class="text-center animate-fade-in-6">
-        <button
-          class="btn btn-primary btn-lg px-8 py-3 text-lg"
-          (click)="startConversation()">
-          Iniciar Conversación
-        </button>
       </div>
     </main>
   </div>

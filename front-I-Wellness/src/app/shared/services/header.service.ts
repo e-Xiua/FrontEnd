@@ -118,11 +118,10 @@ export class HeaderService {
         title: 'Panel de Proveedor',
         logoUrl: '/assets/logo.png',
         theme: 'light',
+        showProviderSearch: true,
         navigationItems: [
           { label: 'Dashboard', route: '/proveedor/dashboard', icon: 'dashboard' },
-          { label: 'Servicios', route: '/proveedor/home', icon: 'room_service' },
-          { label: 'Agregar Servicio', route: '/proveedor/agregar-servicio', icon: 'add_business' },
-          { label: 'Chat', route: '/proveedor/chat-demo', icon: 'chat' },
+          { label: 'Perfil Principal', route: '/proveedor/home', icon: 'room_service' },
           { label: 'Rutas', route: '/proveedor/rutas', icon: 'map' },
         ],
         actions: [

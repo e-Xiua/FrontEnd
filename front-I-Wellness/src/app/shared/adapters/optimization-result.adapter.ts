@@ -53,7 +53,11 @@ export function enrichOptimizationResult(
   return result;
 }
 
-function mapProviderDataToUsuario(enriched: EnrichedProviderData): usuarios {
+/**
+ * Map EnrichedProviderData to the legacy usuarios model format.
+ * Used by components that need to work with the standard user/provider interface.
+ */
+export function mapProviderDataToUsuario(enriched: EnrichedProviderData): usuarios {
   return {
     id: enriched.provider.id,
     nombre: enriched.provider.nombre_empresa,
