@@ -13,6 +13,8 @@ export function normalizeEnrichedProvider(dto: BackendEnrichedProviderDTO): Enri
 
 	const normalizedProvider: Provider = {
 		id: provider.id,
+    foto: provider.foto,
+    correo: provider.correo,
 		nombre_empresa: provider.nombre_empresa,
 		coordenadaX: provider.coordenadaX,
 		coordenadaY: provider.coordenadaY,
@@ -40,6 +42,7 @@ export function buildFallbackEnrichedProvider(raw: any): EnrichedProviderData {
 
 	const normalizedProvider: Provider = {
 		id: provider.id,
+    foto: provider.foto,
 		nombre_empresa: provider.nombre_empresa,
 		coordenadaX: provider.coordenadaX,
 		coordenadaY: provider.coordenadaY,
@@ -61,6 +64,8 @@ export function buildFallbackEnrichedProvider(raw: any): EnrichedProviderData {
 
 function mergeProviderInfo(raw: BackendProviderDTO): {
 	id: number;
+  foto?: string;
+  correo?: string;
 	nombre_empresa: string;
 	coordenadaX: number;
 	coordenadaY: number;
@@ -94,6 +99,8 @@ function mergeProviderInfo(raw: BackendProviderDTO): {
 	return {
 		id: Number.isNaN(id) ? 0 : id,
 		nombre_empresa,
+    foto: top.foto ?? undefined,
+    correo: top.correo ?? undefined,
 		coordenadaX: Number.isNaN(coordenadaX) ? 0 : coordenadaX,
 		coordenadaY: Number.isNaN(coordenadaY) ? 0 : coordenadaY,
 		cargoContacto,

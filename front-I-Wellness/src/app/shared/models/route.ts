@@ -1,5 +1,5 @@
-import { usuarios } from './usuarios';
 import { OptimizationResult } from './optimization-job.models';
+import { usuarios } from './usuarios';
 
 export interface Route {
   id: string;
@@ -14,6 +14,8 @@ export interface Route {
   color?: string; // Color para diferenciar rutas en el mapa
   icon?: string; // Icono representativo
   tags?: string[]; // e.g., ["aventura", "naturaleza", "cultural"]
+  providerCategories?: string[];
+  averageProviderCost?: number;
   startLocation?: [number, number]; // Coordenadas de inicio
   endLocation?: [number, number]; // Coordenadas de fin
   isActive?: boolean;

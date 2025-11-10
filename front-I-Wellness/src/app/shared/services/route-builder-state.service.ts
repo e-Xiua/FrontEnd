@@ -175,6 +175,7 @@ export class RouteBuilderStateService {
           console.log(JSON.stringify(enrichedProviders[0], null, 2));
           console.log('Provider details:', {
             id: enrichedProviders[0].provider.id,
+            correo: enrichedProviders[0].provider.correo,
             name: enrichedProviders[0].provider.nombre_empresa,
             coordinates: [enrichedProviders[0].provider.coordenadaX, enrichedProviders[0].provider.coordenadaY],
             servicesCount: enrichedProviders[0].services.length,

@@ -17,7 +17,7 @@ import { ShowRoutesManyOptionsComponent } from '../show-routes-many-options/show
 export class RouteGenerationComponent implements OnInit, OnChanges {
   @Input() title = 'Rutas generadas';
   @Input() description = 'Explora las rutas optimizadas disponibles.';
-  @Input() showHeader = true;
+  @Input() showHeader = false;
   @Input() userId?: string | number;
   @Input() maxRoutesToShow = 0;
 

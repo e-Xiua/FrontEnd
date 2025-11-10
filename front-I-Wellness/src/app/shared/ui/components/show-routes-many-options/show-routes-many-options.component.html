@@ -29,8 +29,84 @@
       </div>
     </div>
 
-    <!-- Controles de filtros (se mantiene por si se usa standalone) -->
-    <ng-content select="[filters]"></ng-content>
+    <!-- Controles de filtros -->
+    <div class="filter-controls" *ngIf="showFilters">
+      <div class="filter-group">
+        <label for="route-search">Buscar</label>
+        <input
+          #searchInput
+          id="route-search"
+          class="filter-search"
+          type="text"
+          [value]="currentFilters.searchText || ''"
+          (input)="onSearchChange(searchInput.value)"
+        />
+      </div>
+
+      <div class="filter-group" *ngIf="availableCategories.length > 0">
+        <label for="route-category">Categoría</label>
+        <select
+          #categorySelect
+          id="route-category"
+          class="filter-select"
+          [value]="currentFilters.category || ''"
+          (change)="onCategoryChange(categorySelect.value)"
+        >
+          <option value="">Todas</option>
+          <option *ngFor="let category of availableCategories" [value]="category">{{ category }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="min-duration">Duración mínima (min)</label>
+        <input
+          #minDurationInput
+          id="min-duration"
+          class="filter-search filter-numeric"
+          type="number"
+          min="0"
+          [value]="currentFilters.minDuration ?? ''"
+          (input)="onMinDurationChange(minDurationInput.value)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="max-duration">Duración máxima (min)</label>
+        <input
+          #maxDurationInput
+          id="max-duration"
+          class="filter-search filter-numeric"
+          type="number"
+          min="0"
+          [value]="currentFilters.maxDuration ?? ''"
+          (input)="onMaxDurationChange(maxDurationInput.value)"
+        />
+      </div>
+
+      <div class="filter-group tag-filter-group" *ngIf="availableTags.length > 0">
+        <span class="filter-label">Etiquetas</span>
+        <div class="tag-filter-list">
+          <label class="tag-filter-option" *ngFor="let tag of availableTags">
+            <input
+              #tagCheckbox
+              type="checkbox"
+              [checked]="isTagSelected(tag)"
+              (change)="onTagToggle(tag, tagCheckbox.checked)"
+            />
+            {{ tag }}
+          </label>
+        </div>
+      </div>
+
+      <button
+        class="clear-filters-btn"
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="filtersEmpty"
+      >
+        Limpiar filtros
+      </button>
+    </div>
 
   </div>
 
@@ -77,12 +153,6 @@
             <div class="meta-item" *ngIf="route.estimatedDistance">
               <i class="meta-icon">📍</i>
               <span>{{ formatDistance(route.estimatedDistance) }}</span>
-            </div>
-            <div class="meta-item" *ngIf="route.difficulty">
-              <i class="meta-icon">🏔️</i>
-              <span class="difficulty-badge" [class]="getDifficultyClass(route.difficulty)">
-                {{ route.difficulty | titlecase }}
-              </span>
             </div>
             <div class="meta-item" *ngIf="route.rating">
               <div class="rating-display">

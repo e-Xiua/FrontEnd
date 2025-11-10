@@ -42,7 +42,7 @@ export class ProviderCardComponent implements OnChanges {
         cargoContacto: this.placeData.cargoContacto,
         phone: this.placeData.phone,
         companyPhone: this.placeData.companyPhone,
-        email: this.placeData.email
+        correo: this.placeData.correo
       });
       console.log('Metrics:', {
         averageCost: this.placeData.averageCost,
@@ -97,7 +97,7 @@ export class ProviderCardComponent implements OnChanges {
       this.placeData?.contactName ||
       this.placeData?.phone ||
       this.placeData?.companyPhone ||
-      this.placeData?.email
+      this.placeData?.correo
     );
   }
 

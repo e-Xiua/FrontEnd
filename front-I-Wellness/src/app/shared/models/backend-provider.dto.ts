@@ -19,14 +19,11 @@ export interface BackendProveedorInfoDTO {
 
 export interface BackendProviderDTO {
   id: number | string;
+  foto?: string | null;
+  correo?: string | null;
   idProveedor?: number | string;
   nombre?: string | null;
   nombre_empresa?: string | null;
-  coordenadaX?: string | number | null;
-  coordenadaY?: string | number | null;
-  cargoContacto?: string | null;
-  telefono?: string | null;
-  telefonoEmpresa?: string | null;
   proveedorInfo?: BackendProveedorInfoDTO | null;
   // Any additional fields passed through
   [key: string]: any;

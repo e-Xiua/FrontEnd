@@ -57,8 +57,8 @@ function mapProviderDataToUsuario(enriched: EnrichedProviderData): usuarios {
   return {
     id: enriched.provider.id,
     nombre: enriched.provider.nombre_empresa,
-    correo: '',
-    foto: undefined,
+    correo: enriched.provider.correo ?? '',
+    foto: enriched.provider.foto ?? '',
     rol: undefined,
     proveedorInfo: enriched
   };
@@ -71,6 +71,9 @@ function mapProviderDataToUsuario(enriched: EnrichedProviderData): usuarios {
  */
 export function mapOptimizationResultToRoute(result: OptimizationResult): Route {
   const providersMap = new Map<number, usuarios>();
+  const providerCategories = new Set<string>();
+  let costAccumulator = 0;
+  let costSamples = 0;
 
   for (const poi of result.optimizedSequence) {
     const providerData = poi.providerData as EnrichedProviderData | undefined;
@@ -80,6 +83,17 @@ export function mapOptimizationResultToRoute(result: OptimizationResult): Route 
     if (!providersMap.has(providerData.provider.id)) {
       providersMap.set(providerData.provider.id, mapProviderDataToUsuario(providerData));
     }
+
+    for (const category of providerData.categories ?? []) {
+      if (category) {
+        providerCategories.add(category);
+      }
+    }
+
+    if (typeof providerData.averageCost === 'number' && !Number.isNaN(providerData.averageCost)) {
+      costAccumulator += providerData.averageCost;
+      costSamples += 1;
+    }
   }
 
   const providersArray = Array.from(providersMap.values());
@@ -87,13 +101,20 @@ export function mapOptimizationResultToRoute(result: OptimizationResult): Route 
   const metadata = (result as any).metadata ?? {};
   const name: string = metadata.routeName || metadata.name || `Ruta optimizada ${result.optimizedRouteId ?? ''}`;
   const description: string | undefined = metadata.description;
+  const tags = Array.from(providerCategories.values());
+  const category: string | undefined = metadata.category || (tags.length > 0 ? tags[0] : undefined);
+  const averageCost = costSamples > 0 ? costAccumulator / costSamples : undefined;
 
   return {
     id: result.optimizedRouteId,
     name,
     description,
+    category,
     estimatedTime: result.totalTimeMinutes,
     estimatedDistance: result.totalDistanceKm,
+    tags,
+    providerCategories: tags,
+    averageProviderCost: averageCost,
     providers: providersArray,
     optimizationResult: result
   };

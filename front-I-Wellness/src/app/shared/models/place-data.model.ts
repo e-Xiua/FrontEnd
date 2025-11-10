@@ -12,7 +12,7 @@ export interface PlaceData {
   id: number;
   name: string; // Nombre comercial del proveedor
   contactName?: string; // Nombre del contacto principal
-  email?: string; // Email si disponible
+  correo?: string; // Email si disponible
   foto?: string | null; // URL/base64 foto
   category?: string; // Categoría principal
   rating: number; // Rating calculado o fijo
@@ -46,10 +46,10 @@ export interface ExtendedPlaceData extends PlaceData {
  * Defaults helper – can be used in templates or adapters to supply UI fallbacks
  */
 export const placeDataDefaults: Required<Pick<PlaceData,
-  'contactName' | 'email' | 'category' | 'address' | 'hours' | 'description' | 'phone' | 'companyPhone' | 'cargoContacto'
+  'contactName' | 'correo' | 'category' | 'address' | 'hours' | 'description' | 'phone' | 'companyPhone' | 'cargoContacto'
 >> = {
   contactName: 'N/D',
-  email: 'N/D',
+  correo: 'N/D',
   category: 'Sin categoría',
   address: 'Dirección no disponible',
   hours: 'Horario no disponible',
