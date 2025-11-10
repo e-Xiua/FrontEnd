@@ -1,75 +1,197 @@
-<body>
-    <div class="container">
-        <div class="form-box">
-            <h2>Nuevo servicio</h2>
-            <div class="form-content">
-                <div class="image-upload">
-                    <label for="imageInput">
-                      <div class="image-placeholder" [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : 'none'}"></div>
-                      <p>{{ imagePreview ? 'Imagen seleccionada' : 'Agregar imagen' }}</p>
-                    </label>
-                    <input id="imageInput" type="file" (change)="onImageSelected($event)" accept="image/*" hidden>
-                  </div>
-                  <div class="form-fields">
-                    <input type="text" placeholder="Nombre" [(ngModel)]="nuevoServicio.nombre" required>
-                    
-                    <textarea placeholder="Descripción" [(ngModel)]="nuevoServicio.descripcion" required></textarea>
-                  
-                    <!-- Horario -->
-                    <label>Horarios disponibles:</label>
-                    <div class="days-selection">
-                      <div class="day-item" *ngFor="let day of days">
-                        <input type="checkbox" [(ngModel)]="day.selected" id="{{ day.name }}">
-                        <label for="{{ day.name }}">{{ day.name }}</label>
-                      </div>
-                    </div>
-                  
-                    <div class="time-selection">
-                      <label>Hora de apertura:</label>
-                      <input type="time" [(ngModel)]="startTime" required>
-                      <label>Hora de cierre:</label>
-                      <input type="time" [(ngModel)]="endTime" required>
-                    </div>
-                  
-                    <!-- Precio -->
-                    <label>Precio:</label>
-                    <input type="number" placeholder="Ingresa el precio o 0 si es gratuito" [(ngModel)]="nuevoServicio.precio" required>
-                  
-                    <!-- Tiempo Aproximado -->
-                    <label>Tiempo aproximado de visita (minutos):</label>
-                    <input 
-                      type="number" 
-                      placeholder="Ej: 60, 90, 120 (opcional, por defecto 30 min)" 
-                      [(ngModel)]="nuevoServicio.tiempoAproximado" 
-                      min="1" 
-                      max="480"
-                      step="15">
-                    <small style="color: #666; font-size: 0.85em; margin-top: -10px; display: block;">
-                      Si no se especifica, el sistema usará 30 minutos por defecto
-                    </small>
-                  
-                    <!-- Preferencias -->
-                    <div class="preferencias-section">
-                      <h3>Selecciona tus preferencias <span style="font-weight: normal;">(mínimo 2, máximo 5)</span>:</h3> 
-                      <div class="preferencias-list">
-                        <label *ngFor="let pref of preferencias">
-                          <input
-                            type="checkbox"
-                            [value]="pref._idPreferencias"
-                            [checked]="selectedPreferences.includes(pref._idPreferencias)"
-                            (change)="onPreferenceChange($event, pref._idPreferencias)"
-                            [disabled]="
-                              !selectedPreferences.includes(pref._idPreferencias) && selectedPreferences.length >= 5
-                            ">
-                          {{ pref.nombre }}
-                        </label>
-                      </div>
-                    </div>
-                  
-                    <!-- Botón -->
-                    <button class="save-btn" (click)="guardarServicio()">Guardar</button>
-                  </div>
-            </div>
-        </div>
+<div class="servicio-form-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-plus-circle"></i>
+      </div>
+      <h1>Nuevo Servicio de Bienestar</h1>
+      <p class="hero-subtitle">Completa la información para agregar tu servicio</p>
     </div>
-</body>
+  </section>
+
+  <!-- Formulario -->
+  <section class="form-section">
+    <div class="form-card">
+      <div class="form-layout">
+        <!-- Columna Izquierda: Imagen -->
+        <div class="image-section">
+          <h3 class="section-title">
+            <i class="fas fa-image"></i>
+            Imagen del Servicio
+          </h3>
+          <div class="image-upload-container">
+            <label for="imageInput" class="image-upload-label">
+              <div 
+                class="image-preview" 
+                [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : 'none'}"
+                [class.has-image]="imagePreview">
+                <div class="upload-placeholder" *ngIf="!imagePreview">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Click para subir imagen</p>
+                  <span>JPG, PNG o WEBP</span>
+                </div>
+              </div>
+            </label>
+            <input 
+              id="imageInput" 
+              type="file" 
+              (change)="onImageSelected($event)" 
+              accept="image/*" 
+              hidden>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario -->
+        <div class="form-fields-section">
+          <!-- Información Básica -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Información Básica
+            </h3>
+            
+            <div class="input-group">
+              <label for="nombre">Nombre del Servicio *</label>
+              <input 
+                id="nombre"
+                type="text" 
+                placeholder="Ej: Masaje Relajante, Yoga Matutino" 
+                [(ngModel)]="nuevoServicio.nombre" 
+                required>
+            </div>
+
+            <div class="input-group">
+              <label for="descripcion">Descripción *</label>
+              <textarea 
+                id="descripcion"
+                placeholder="Describe tu servicio en detalle..." 
+                [(ngModel)]="nuevoServicio.descripcion" 
+                rows="4"
+                required></textarea>
+            </div>
+
+            <div class="input-row">
+              <div class="input-group">
+                <label for="precio">Precio (USD) *</label>
+                <input 
+                  id="precio"
+                  type="number" 
+                  placeholder="0 para gratuito" 
+                  [(ngModel)]="nuevoServicio.precio" 
+                  min="0"
+                  required>
+              </div>
+
+              <div class="input-group">
+                <label for="tiempo">Duración (min)</label>
+                <input 
+                  id="tiempo"
+                  type="number" 
+                  placeholder="30" 
+                  [(ngModel)]="nuevoServicio.tiempoAproximado" 
+                  min="1" 
+                  max="480"
+                  step="15">
+              </div>
+            </div>
+            <small class="helper-text">
+              <i class="fas fa-info-circle"></i>
+              Si no especificas duración, se usarán 30 minutos por defecto
+            </small>
+          </div>
+
+          <!-- Horarios -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i>
+              Horarios Disponibles
+            </h3>
+            
+            <p class="helper-text" style="margin-bottom: 1rem;">
+              <i class="fas fa-calendar-check"></i>
+              Selecciona los días en que ofreces este servicio
+            </p>
+
+            <div class="calendar-container">
+              <div class="days-grid">
+                <label class="day-checkbox" *ngFor="let day of days">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="day.selected" 
+                    [id]="day.name">
+                  <span class="day-label">{{ day.name.substring(0, 3) }}</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="time-inputs">
+              <div class="input-group">
+                <label for="startTime">
+                  <i class="fas fa-sun"></i>
+                  Hora Apertura
+                </label>
+                <input 
+                  id="startTime"
+                  type="time" 
+                  [(ngModel)]="startTime" 
+                  required>
+              </div>
+
+              <div class="input-group">
+                <label for="endTime">
+                  <i class="fas fa-moon"></i>
+                  Hora Cierre
+                </label>
+                <input 
+                  id="endTime"
+                  type="time" 
+                  [(ngModel)]="endTime" 
+                  required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferencias -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-heart"></i>
+              Categorías de Bienestar
+            </h3>
+            <p class="helper-text">Selecciona entre 2 y 5 categorías relacionadas</p>
+            
+            <div class="preferencias-grid">
+              <label class="preferencia-chip" *ngFor="let pref of preferencias">
+                <input
+                  type="checkbox"
+                  [value]="pref._idPreferencias"
+                  [checked]="selectedPreferences.includes(pref._idPreferencias)"
+                  (change)="onPreferenceChange($event, pref._idPreferencias)"
+                  [disabled]="
+                    !selectedPreferences.includes(pref._idPreferencias) && selectedPreferences.length >= 5
+                  ">
+                <span class="chip-content">
+                  <i class="fas fa-check-circle"></i>
+                  {{ pref.nombre }}
+                </span>
+              </label>
+            </div>
+            <div class="preferences-counter">
+              <span [class.valid]="selectedPreferences.length >= 2 && selectedPreferences.length <= 5">
+                {{ selectedPreferences.length }} / 5 seleccionadas
+              </span>
+            </div>
+          </div>
+
+          <!-- Botón Guardar -->
+          <div class="form-actions">
+            <button class="btn-save" (click)="guardarServicio()">
+              <i class="fas fa-save"></i>
+              Guardar Servicio
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

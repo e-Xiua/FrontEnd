@@ -1,31 +1,91 @@
-<body>
-    <div class="container">
-        <h2>Aquí está tu lista de servicios:</h2>
-        <div class="add-button-wrapper">
-            <button class="add-service-btn" (click)="agregar('agregarservicio')">
-              Añadir nuevo servicio <span>+</span>
-            </button>
-          </div>
-        <div class="services-box">
-            <ng-container *ngFor="let servicio of servicios">
-                <div class="service-card">
-                    <img [src]="servicio.imagen" alt="{{ servicio.nombre }}" class="service-image">
-                    <div class="service-info">
-                        <h3>{{ servicio.nombre }}</h3>
-                        <p>{{ servicio.descripcion }}</p>
-                        <p class="price">{{ servicio.precio === 0 ? 'Gratis' : servicio.precio + ' USD' }}</p>
-                    </div>
-                    <div class="service-actions">
-                        <button class="visibility-btn" (click)="navigateTo('infoservicio', servicio._idServicio)">👁</button>
-                        <button class="edit-btn" (click)="navigateTo('editarservicio', servicio._idServicio)">✏️</button>
-                        <button type="button" class="delete-btn" (click)="eliminarServicio(servicio)">🗑</button>
-                        <label class="switch">
-                            <input type="checkbox" [checked]="servicio.estado" (change)="cambiarEstado(servicio)">
-                            <span class="slider round"></span>
-                          </label>
-                    </div>
-                </div>
-            </ng-container> 
-        </div>
+<div class="servicios-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-concierge-bell"></i>
+      </div>
+      <h1>Mis Servicios</h1>
+      <p class="hero-subtitle">Gestiona tu oferta de servicios de bienestar</p>
+      <button class="add-service-btn" (click)="agregar('agregarservicio')">
+        <i class="fas fa-plus-circle"></i>
+        Añadir Nuevo Servicio
+      </button>
     </div>
-</body>
+  </section>
+
+  <!-- Servicios Grid -->
+  <section class="servicios-section">
+    <div class="section-header" *ngIf="servicios.length > 0">
+      <h2>Servicios Disponibles</h2>
+      <p>Total: {{ servicios.length }} {{ servicios.length === 1 ? 'servicio' : 'servicios' }}</p>
+    </div>
+
+    <!-- Estado Vacío -->
+    <div class="empty-state" *ngIf="servicios.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-spa"></i>
+      </div>
+      <h3>No tienes servicios registrados</h3>
+      <p>Comienza agregando tu primer servicio de bienestar</p>
+      <button class="add-service-btn-secondary" (click)="agregar('agregarservicio')">
+        <i class="fas fa-plus"></i>
+        Crear Primer Servicio
+      </button>
+    </div>
+
+    <!-- Grid de Servicios -->
+    <div class="services-grid" *ngIf="servicios.length > 0">
+      <div class="service-card" *ngFor="let servicio of servicios" [class.inactive]="!servicio.estado">
+        <div class="service-image-container">
+          <img [src]="servicio.imagen" [alt]="servicio.nombre" class="service-image">
+          <div class="service-badge" [class.active]="servicio.estado" [class.inactive]="!servicio.estado">
+            {{ servicio.estado ? 'Activo' : 'Inactivo' }}
+          </div>
+        </div>
+        
+        <div class="service-content">
+          <div class="service-header">
+            <h3>{{ servicio.nombre }}</h3>
+            <span class="service-price">
+              {{ servicio.precio === 0 ? 'Gratis' : '$' + servicio.precio }}
+            </span>
+          </div>
+          
+          <p class="service-description">{{ servicio.descripcion }}</p>
+          
+          <div class="service-footer">
+            <div class="service-actions">
+              <button 
+                class="action-btn view-btn" 
+                (click)="navigateTo('infoservicio', servicio._idServicio)"
+                title="Ver detalles">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button 
+                class="action-btn edit-btn" 
+                (click)="navigateTo('editarservicio', servicio._idServicio)"
+                title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                class="action-btn delete-btn" 
+                (click)="eliminarServicio(servicio)"
+                title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+            
+            <label class="toggle-switch" title="Activar/Desactivar servicio">
+              <input 
+                type="checkbox" 
+                [checked]="servicio.estado" 
+                (change)="cambiarEstado(servicio)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

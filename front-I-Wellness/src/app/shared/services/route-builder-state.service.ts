@@ -576,8 +576,8 @@ export class RouteBuilderStateService {
           estimatedVisitTime: poi.estimatedVisitTime,
           arrivalTime: poi.arrivalTime,
           departureTime: poi.departureTime,
-          category: undefined,
-          cost: undefined
+          category: undefined as string | undefined,
+          cost: undefined as number | undefined
         };
       }
       
