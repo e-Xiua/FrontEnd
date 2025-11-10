@@ -1,0 +1,7 @@
+.messages-root{padding:12px}
+.messages-list{max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.bubble{background:#f5f7fb;padding:10px;border-radius:10px;max-width:80%}
+.bubble.mine{align-self:flex-end;background:#d1f7d6}
+.bubble .meta{font-size:11px;color:#666;margin-bottom:6px}
+.send-form{display:flex;gap:8px;align-items:center;margin-top:8px}
+.full{flex:1}

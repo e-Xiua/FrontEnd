@@ -33,6 +33,7 @@ import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-
 import { DashboardAdminComponent } from './features/users/administrador/dashboard-admin/dashboard-admin.component';
 import { RestablecerComponent } from './features/landing/restablecer/restablecer.component';
 
+
 export const routes: Routes = [
     // Rutas públicas
     { path: '', component: HomeComponent},
@@ -65,6 +66,12 @@ export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent, canActivate: [proveedorGuard] },
     { path: 'headerproveedor', component: HeaderProveedorComponent, canActivate: [proveedorGuard] },
     { path: 'perfilproveedor/:id', component: PerfilProveedorComponent, canActivate: [proveedorGuard] },
+    // Módulo de tareas - carga perezosa
+    {
+      path: 'tasks',
+      loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
+      canActivate: [authGuard]
+    },
     
     // Rutas específicas para Administradores
     { path: 'headeradmin', component: HeaderAdminComponent, canActivate: [adminGuard] },
