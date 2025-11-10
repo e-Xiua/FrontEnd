@@ -15,12 +15,6 @@ import { MessagePanelComponent } from './message-panel/message-panel.component';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
-  declarations: [
-    TaskListComponent,
-    TaskDetailComponent,
-    TaskFormComponent,
-    MessagePanelComponent,
-  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -32,7 +26,10 @@ import { RouterModule } from '@angular/router';
     MatChipsModule,
     MatMenuModule,
     DragDropModule,
-  ],
-  exports: [TaskListComponent, TaskDetailComponent],
+    TaskListComponent,
+    TaskDetailComponent,
+    TaskFormComponent,
+    MessagePanelComponent
+  ]
 })
 export class TasksModule {}
