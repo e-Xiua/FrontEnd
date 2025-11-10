@@ -23,6 +23,7 @@ export class RouteGenerationComponent implements OnInit, OnChanges {
 
   @Output() routeSelected = new EventEmitter<RouteSelectionEvent>();
   @Output() providerSelected = new EventEmitter<{ route: Route; provider: usuarios }>();
+  @Output() emptyRoutes = new EventEmitter<void>();
 
   get routes$() {
     return this.state.routes$;

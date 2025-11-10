@@ -50,6 +50,16 @@ nav ul li a.active {
     padding-bottom: 5px;
 }
 
+/* Provider Search Wrapper */
+.provider-search-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 20px;
+}
+
 .search-login {
     display: flex;
     align-items: center;
@@ -77,13 +87,6 @@ nav ul li a.active {
 .search-login input:focus {
     width: 180px;
     border-color: white;
-}
-
-/* Icono de búsqueda */
-.search-login {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Espaciado entre elementos */
 }
 
 /* Contenedor del campo de búsqueda */

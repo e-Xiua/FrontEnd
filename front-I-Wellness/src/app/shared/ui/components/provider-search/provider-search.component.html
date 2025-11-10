@@ -1,0 +1,74 @@
+<div class="provider-search-container">
+  <div class="search-input-wrapper">
+    <input
+      type="text"
+      class="search-input"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange()"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      placeholder="Buscar proveedores por nombre o categoría..."
+      [disabled]="isLoading"
+    />
+
+    <button
+      *ngIf="searchQuery"
+      class="clear-button"
+      (click)="clearSearch()"
+      type="button"
+      aria-label="Limpiar búsqueda"
+    >
+      ✕
+    </button>
+
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <div *ngIf="showResults" class="search-results">
+    <div *ngIf="filteredProviders.length === 0 && !isLoading" class="no-results">
+      <p>No se encontraron proveedores que coincidan con "{{ searchQuery }}"</p>
+    </div>
+
+    <div *ngIf="filteredProviders.length > 0" class="results-list">
+      <button
+        *ngFor="let provider of filteredProviders"
+        class="provider-card"
+        (click)="selectProvider(provider)"
+        type="button"
+        [attr.aria-label]="'Seleccionar proveedor ' + provider.nombre"
+      >
+        <div class="provider-photo">
+          <img
+            [src]="provider.foto || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(provider.nombre || 'P')"
+            [alt]="'Foto de ' + (provider.nombre || 'Proveedor')"
+            [title]="provider.nombre || 'Proveedor'"
+            (error)="$any($event.target).src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(provider.nombre || 'P')"
+          />
+        </div>
+
+        <div class="provider-info">
+          <h3 class="provider-name">{{ provider.nombre || 'Sin nombre' }}</h3>
+
+          <div *ngIf="provider.proveedorInfo?.categories?.length" class="provider-categories">
+            <span
+              *ngFor="let category of provider.proveedorInfo.categories.slice(0, 3)"
+              class="category-badge"
+            >
+              {{ category }}
+            </span>
+          </div>
+
+          <p *ngIf="provider.correo" class="provider-email">
+            {{ provider.correo }}
+          </p>
+        </div>
+
+        <div class="arrow-icon">
+          →
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

@@ -20,16 +20,16 @@
             <p>Hola, {{proveedor.nombre}}</p>
             <ul>
                 <li class="active">📝 Editar perfil</li>
-                <li><a [routerLink]="['/servicios', proveedor.id]">🛎️ Servicios</a></li>
+                <li><a [routerLink]="['proveedor/agregar-servicio', proveedor.id]">🛎️ Servicios</a></li>
             </ul>
         </aside>
         <main class="content">
             <div class="profile-header">
                 <h1>Editar perfil</h1>
                 <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
-                <img 
-                    [src]="fotoPreview || proveedor.foto" 
-                    alt="Profile Picture" 
+                <img
+                    [src]="fotoPreview || proveedor.foto"
+                    alt="Profile Picture"
                     class="profile-pic"
                     (click)="seleccionarFoto()"
                     title="Haz clic para cambiar tu foto de perfil">

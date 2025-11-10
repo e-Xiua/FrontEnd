@@ -1,0 +1,79 @@
+<section class="provider-service-list">
+  <header class="provider-service-list__header">
+    <h2 class="provider-service-list__title">{{ title }}</h2>
+    <button
+      type="button"
+      class="provider-service-list__add-button"
+      (click)="create.emit()"
+    >
+      Añadir nuevo servicio <span aria-hidden="true">+</span>
+    </button>
+  </header>
+
+  <ng-container *ngIf="!isLoading; else loading">
+    <ng-container *ngIf="services.length; else empty">
+      <div class="provider-service-list__grid">
+        <article
+          class="provider-service-card"
+          *ngFor="let servicio of services; trackBy: trackByServiceId"
+        >
+          <img
+            class="provider-service-card__image"
+            [src]="servicio.imagen"
+            [attr.alt]="servicio.nombre || 'Servicio sin nombre'"
+          />
+          <div class="provider-service-card__details">
+            <h3 class="provider-service-card__name">{{ servicio.nombre }}</h3>
+            <p class="provider-service-card__description">{{ servicio.descripcion }}</p>
+            <p class="provider-service-card__price">
+              {{ servicio.precio === 0 ? 'Gratis' : (servicio.precio ?? 0) + ' USD' }}
+            </p>
+          </div>
+          <div class="provider-service-card__actions">
+            <button
+              type="button"
+              class="provider-service-card__action"
+              aria-label="Ver servicio"
+              (click)="view.emit(servicio._idServicio)"
+            >
+              👁
+            </button>
+            <button
+              type="button"
+              class="provider-service-card__action provider-service-card__action--edit"
+              aria-label="Editar servicio"
+              (click)="edit.emit(servicio._idServicio)"
+            >
+              ✏️
+            </button>
+            <button
+              type="button"
+              class="provider-service-card__action provider-service-card__action--delete"
+              aria-label="Eliminar servicio"
+              (click)="delete.emit(servicio)"
+            >
+              🗑
+            </button>
+            <label class="provider-service-card__switch">
+              <input
+                type="checkbox"
+                [checked]="servicio.estado"
+                (change)="handleToggle($event, servicio)"
+                aria-label="Cambiar estado de servicio"
+              />
+              <span class="provider-service-card__slider" aria-hidden="true"></span>
+            </label>
+          </div>
+        </article>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="provider-service-list__feedback">Cargando servicios...</div>
+  </ng-template>
+
+  <ng-template #empty>
+    <div class="provider-service-list__feedback">{{ emptyMessage }}</div>
+  </ng-template>
+</section>
