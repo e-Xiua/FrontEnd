@@ -1,0 +1,38 @@
+<div class="tasks-root">
+  <div class="tasks-toolbar">
+    <h2>Tareas</h2>
+    <button mat-flat-button color="primary" routerLink="/tasks/new">Crear tarea</button>
+  </div>
+
+  <div class="kanban">
+    <div class="column" cdkDropList id="pending" [cdkDropListData]="pending" [cdkDropListConnectedTo]="['inprogress','completed']" (cdkDropListDropped)="drop($event)">
+      <h3>Pending</h3>
+      <ng-container *ngFor="let t of pending">
+        <mat-card class="task-card pending" cdkDrag (click)="open(t)">
+          <mat-card-title>{{ t.title }}</mat-card-title>
+          <mat-card-subtitle>{{ t.responsibleName || 'Sin responsable' }}</mat-card-subtitle>
+        </mat-card>
+      </ng-container>
+    </div>
+
+    <div class="column" cdkDropList id="inprogress" [cdkDropListData]="inProgress" [cdkDropListConnectedTo]="['pending','completed']" (cdkDropListDropped)="drop($event)">
+      <h3>In Progress</h3>
+      <ng-container *ngFor="let t of inProgress">
+        <mat-card class="task-card inprogress" cdkDrag (click)="open(t)">
+          <mat-card-title>{{ t.title }}</mat-card-title>
+          <mat-card-subtitle>{{ t.responsibleName || 'Sin responsable' }}</mat-card-subtitle>
+        </mat-card>
+      </ng-container>
+    </div>
+
+    <div class="column" cdkDropList id="completed" [cdkDropListData]="completed" [cdkDropListConnectedTo]="['pending','inprogress']" (cdkDropListDropped)="drop($event)">
+      <h3>Completed</h3>
+      <ng-container *ngFor="let t of completed">
+        <mat-card class="task-card completed" cdkDrag (click)="open(t)">
+          <mat-card-title>{{ t.title }}</mat-card-title>
+          <mat-card-subtitle>{{ t.responsibleName || 'Sin responsable' }}</mat-card-subtitle>
+        </mat-card>
+      </ng-container>
+    </div>
+  </div>
+</div>
