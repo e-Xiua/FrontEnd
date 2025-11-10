@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ExtendedPlaceData, placeDataDefaults } from '../../../models/place-data.model';
 import { CarouselItemDirective } from '../carousel/carousel-item.directive';
 import { CarouselComponent } from '../carousel/carousel.component';
 import { ReviewDisplayComponent } from '../review-display/review-display.component';
 import { ReviewFormComponent, ReviewSubmission } from '../review-form/review-form.component';
 import { ServiceCardComponent } from '../service-card/service-card.component';
-import { ExtendedPlaceData } from '../../../models/place-data.model';
 
 @Component({
   selector: 'app-provider-card',
@@ -28,29 +28,52 @@ export class ProviderCardComponent implements OnChanges {
 
   @Output() submitReview = new EventEmitter<ReviewSubmission>();
 
+  // Defaults available to template
+  readonly defaults = placeDataDefaults;
+
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['placeData']) {
-      console.log('=== 📊 PROVIDER CARD - RECEIVED PLACE DATA ===');
-      console.log('Provider ID:', this.placeData.id);
-      console.log('Provider Name:', this.placeData.name);
-      console.log('Contact Details:', {
+      console.groupCollapsed('=== 📊 PROVIDER CARD DATA (ID:' + this.placeData.id + ') ===');
+      console.log('Name:', this.placeData.name);
+      console.log('Contact:', {
         contactName: this.placeData.contactName,
         cargoContacto: this.placeData.cargoContacto,
         phone: this.placeData.phone,
         companyPhone: this.placeData.companyPhone,
-        email: this.placeData.email
+        correo: this.placeData.correo
       });
-      console.log('Business Metrics:', {
+      console.log('Metrics:', {
         averageCost: this.placeData.averageCost,
         averageVisitDuration: this.placeData.averageVisitDuration,
         servicesCount: this.placeData.services?.length || 0,
         categoriesCount: this.placeData.categories?.length || 0
       });
       console.log('Categories:', this.placeData.categories);
+      // Services debug: show mapped structure for first 2 services to ensure adapter mapping
+      if (this.placeData.services && this.placeData.services.length) {
+        console.log('[ProviderCard] Services length:', this.placeData.services.length);
+        console.log('[ProviderCard] First service sample:', this.placeData.services[0]);
+        if (this.placeData.services.length > 1) {
+          console.log('[ProviderCard] Second service sample:', this.placeData.services[1]);
+        }
+        // Validate required display keys
+        const missingKeys = this.placeData.services
+          .map((s: any, idx: number) => ({
+            idx,
+            missing: ['id','title','description','image','schedule','price']
+              .filter(k => s[k] === undefined)
+          }))
+          .filter(r => r.missing.length);
+        if (missingKeys.length) {
+          console.warn('[ProviderCard] Services with missing display keys:', missingKeys);
+        }
+      } else {
+        console.log('[ProviderCard] No services available (services array empty or undefined).');
+      }
       console.log('Full PlaceData:', this.placeData);
-      console.log('=============================================');
+      console.groupEnd();
       this.cdr.markForCheck();
     }
   }
@@ -61,7 +84,9 @@ export class ProviderCardComponent implements OnChanges {
   }
 
   ngOnInit() {
-    console.log('ProviderCardComponent initialized with data:', this.placeData);
+    console.groupCollapsed('ProviderCardComponent init');
+    console.log('Initial data:', this.placeData);
+    console.groupEnd();
   }
 
   /**
@@ -69,10 +94,10 @@ export class ProviderCardComponent implements OnChanges {
    */
   hasValidContactInfo(): boolean {
     return !!(
-      (this.placeData.contactName && this.placeData.contactName !== 'N/A') ||
-      (this.placeData.phone && this.placeData.phone !== 'N/A') ||
-      (this.placeData.companyPhone && this.placeData.companyPhone !== 'N/A') ||
-      (this.placeData.email && this.placeData.email !== 'N/A')
+      this.placeData?.contactName ||
+      this.placeData?.phone ||
+      this.placeData?.companyPhone ||
+      this.placeData?.correo
     );
   }
 
@@ -103,7 +128,7 @@ export class ProviderCardComponent implements OnChanges {
     if (this.placeData.categories && this.placeData.categories.length > 0) {
       return this.placeData.categories.join(', ');
     }
-    return this.placeData.category || 'N/A';
+    return this.placeData.category || this.defaults.category;
   }
 
   /**

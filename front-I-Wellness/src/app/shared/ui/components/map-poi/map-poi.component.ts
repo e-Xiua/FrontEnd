@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../features/servicios/services/servicio.service';
+import { adaptEnrichedProviderToMapItem } from '../../../adapters/map-display.adapter';
+import { MapDisplayItem } from '../../../models/map-display.model';
+import { PlaceData } from '../../../models/place-data.model';
 import { EnrichedProviderData } from '../../../models/provider.models';
 import { LayoutAdapterService } from '../../../services/layout-adapter.service';
 import { ProviderDisplayStrategy } from '../../animations/model/display-strategy';
 import { slideInAnimation } from '../../animations/slide.animations';
 import { SlidePanelStrategy } from '../../animations/strategies/slide-panel-strategy';
 import { ProviderCardComponent } from '../provider-card/provider-card.component';
-import { MapDisplayItem } from '../../../models/map-display.model';
-import { PlaceData } from '../../../models/place-data.model';
-import { adaptEnrichedProviderToMapItem } from '../../../adapters/map-display.adapter';
 
 export interface MapConfig {
   center?: [number, number];
@@ -60,6 +60,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() showProviderCard: boolean = true;
   @Input() autoSelectFirst: boolean = false;
   @Input() mapId: string = 'map';
+  /** Porcentaje del ancho para el panel cuando visible (0-100) */
+  @Input() panelWidthPercent: number = 40;
+  /** Ratio altura/ancho del mapa basado en ancho real de su columna */
+  @Input() mapAspectRatio: number = 0.55;
+  @Input() minMapHeight: number = 360;
+  @Input() maxViewportHeightFactor: number = 0.75;
 
   @Output() itemSelected = new EventEmitter<number | string>();
   @Output() nextClicked = new EventEmitter<void>();
@@ -72,6 +78,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   showProviderCardVisible: boolean = false;
   placeData: PlaceData | null = null;
   activeItem: MapDisplayItem | null = null;
+  mapHeight: number = 360;
+  providerCardHeight: number = 360;
+
+  @ViewChild('mapContainer', { static: false }) mapContainerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('providerWrapper', { static: false }) providerWrapperRef!: ElementRef<HTMLDivElement>;
+  private resizeObs?: ResizeObserver;
 
   private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   private destroy$ = new Subject<void>();
@@ -128,10 +140,12 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.resizeObs?.disconnect();
   }
 
   ngAfterViewInit(): void {
     this.initMap();
+    setTimeout(() => this.setupResizeObserver(), 0);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -139,7 +153,7 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
       console.log('=== 🔍 MAP POI COMPONENT - RAW ENRICHED PROVIDER DATA ===');
       console.log('Total items received:', this.items.length);
       console.log('Full items array:', JSON.stringify(this.items, null, 2));
-      
+
       if (this.items.length > 0) {
         console.log('📋 First item detailed structure:');
         console.log('  - Full object:', this.items[0]);
@@ -155,7 +169,7 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
         console.log('  - averageVisitDuration:', this.items[0].averageVisitDuration);
       }
       console.log('========================================================');
-      
+
       this.mapDisplayItems = this.items.map(provider => {
         console.log('🔄 Adaptando proveedor a MapDisplayItem:', provider);
         const adapted = adaptEnrichedProviderToMapItem(provider);
@@ -164,6 +178,16 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
         return adapted;
       });
       this.handleProvidersChange();
+      // Asegurar selección/activación tras remapeo de items
+      if (this.mapDisplayItems.length > 0) {
+        if (this.activeItemId != null) {
+          this.setActiveItem(this.activeItemId);
+        } else if (this.autoSelectFirst) {
+          const firstId = this.mapDisplayItems[0].id;
+          this.itemSelected.emit(firstId);
+          this.setActiveItem(firstId);
+        }
+      }
     }
     if (changes['activeItemId'] && this.mapDisplayItems.length > 0) {
       this.setActiveItem(this.activeItemId);
@@ -245,11 +269,11 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     // Try proveedorInfo first (nested), then fall back to top-level provider properties
     const latStr = provider.proveedorInfo?.coordenadaX || provider.coordenadaX;
     const lngStr = provider.proveedorInfo?.coordenadaY || provider.coordenadaY;
-    
+
     // Parse to floats, with fallback to default Costa Rica coordinates
     const latitud = latStr ? parseFloat(latStr) : 10.501005998543437;
     const longitud = lngStr ? parseFloat(lngStr) : -84.6972559489806;
-    
+
     return [latitud, longitud];
   }
 
@@ -293,7 +317,27 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.showProviderCardVisible = visible;
     if (visible && data && data.originalData) {
       // data.originalData is already PlaceData from the adapter
-      this.placeData = data.originalData;
+      // Defensive: clone and sanitize to avoid later mutations (e.g., legacy adapters writing 'N/A')
+      const incoming = data.originalData as any;
+      // Debug trace to compare before/after
+      console.log('➡️ updateProviderCardVisibility incoming PlaceData:', incoming);
+      const sanitizeNa = (v: unknown) => (v === 'N/A' ? undefined : v);
+      this.placeData = {
+        ...incoming,
+        // Normalize known string placeholders to undefined so template defaults apply
+        name: sanitizeNa(incoming.name),
+        contactName: sanitizeNa(incoming.contactName),
+        cargoContacto: sanitizeNa(incoming.cargoContacto),
+        phone: sanitizeNa(incoming.phone),
+        companyPhone: sanitizeNa(incoming.companyPhone),
+        email: sanitizeNa(incoming.email),
+        address: sanitizeNa(incoming.address),
+        hours: sanitizeNa(incoming.hours),
+        category: sanitizeNa(incoming.category),
+        description: sanitizeNa(incoming.description),
+        foto: incoming.foto ?? null
+      } as PlaceData;
+      console.log('✅ updateProviderCardVisibility normalized PlaceData:', this.placeData);
     }
     this.cdr.markForCheck();
   }
@@ -338,5 +382,30 @@ export class MapPoiComponent implements AfterViewInit, OnChanges, OnDestroy {
     const map = this.mapService.getMapInstance();
     if (!map) return;
     requestAnimationFrame(() => map.invalidateSize());
+  }
+
+  // ========================= Responsive height sync =========================
+  private setupResizeObserver() {
+    if (!('ResizeObserver' in window)) return;
+    if (!this.mapContainerRef) return;
+    this.resizeObs = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        this.recomputeHeights(width);
+      }
+    });
+    this.resizeObs.observe(this.mapContainerRef.nativeElement);
+    const initialWidth = this.mapContainerRef.nativeElement.offsetWidth || 0;
+    this.recomputeHeights(initialWidth);
+  }
+
+  private recomputeHeights(columnWidth: number) {
+    if (!columnWidth) return;
+    const viewportMax = window.innerHeight * this.maxViewportHeightFactor;
+    const target = columnWidth * this.mapAspectRatio;
+    this.mapHeight = Math.max(this.minMapHeight, Math.min(target, viewportMax));
+    // La altura del panel NO debe exceder la del mapa; si el contenido interno es mayor, se hará scroll
+    this.providerCardHeight = this.mapHeight;
+    this.cdr.markForCheck();
   }
 }

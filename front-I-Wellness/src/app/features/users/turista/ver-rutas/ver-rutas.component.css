@@ -1,0 +1,12 @@
+.tourist-routes-container {
+      padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    ::ng-deep .route-generation {
+      background: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }

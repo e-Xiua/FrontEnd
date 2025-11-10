@@ -4,10 +4,10 @@
       <!-- Header Image -->
       <div class="image-container">
         <img
-          alt="Place"
-          [src]="placeData.foto"
-          [alt]="placeData.name"
-          [title]="placeData.name"
+          alt="Proveedor"
+          [src]="placeData.foto || 'assets/img/placeholder-provider.svg'"
+          [alt]="placeData.name || 'Proveedor'"
+          [title]="placeData.name || 'Proveedor'"
           class="header-image"
         />
         <!-- Show all categories if available, otherwise show single category -->
@@ -15,7 +15,7 @@
             {{ placeData.categories.join(', ') }}
           </span>
           <span class="badge" *ngIf="!placeData.categories || placeData.categories.length === 0">
-            {{ placeData.category }}
+            {{ placeData.category || defaults.category }}
           </span>
       </div>
 
@@ -44,28 +44,28 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>{{ placeData.hours }}</span>
+            <span>{{ placeData.hours || defaults.hours }}</span>
           </div>
         </div>
 
         <p class="description">
-          {{ placeData.description }}
+          {{ placeData.description || defaults.description }}
         </p>
 
         <!-- Nueva sección: Información de Contacto -->
         <div class="contact-section">
           <h4>Contacto</h4>
-          <p><strong>Nombre:</strong> {{ placeData.contactName }}</p>
-          <p><strong>Email:</strong> {{ placeData.email }}</p>
-          <p><strong>Teléfono:</strong> {{ placeData.phone }}</p>
-          <p><strong>Teléfono Empresa:</strong> {{ placeData.companyPhone }}</p>
-          <p><strong>Cargo:</strong> {{ placeData.cargoContacto }}</p>
+          <p><strong>Nombre:</strong> {{ placeData.contactName || defaults.contactName }}</p>
+          <p><strong>Email:</strong> {{ placeData.correo || defaults.correo }}</p>
+          <p><strong>Teléfono:</strong> {{ placeData.phone || defaults.phone }}</p>
+          <p><strong>Teléfono Empresa:</strong> {{ placeData.companyPhone || defaults.companyPhone }}</p>
+          <p><strong>Cargo:</strong> {{ placeData.cargoContacto || defaults.cargoContacto }}</p>
         </div>
 
       <div class="card-content">
         <!-- Carousel de Servicios (ya muestra images como URLs) -->
         <app-carousel [itemsPerView]="2">
-          <ng-container *ngFor="let service of placeData.services">
+          <ng-container *ngFor="let service of placeData.services || []">
             <ng-template appCarouselItem>
               <app-service-card
                 [id]="service.id || service._idServicio"

@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable, catchError, interval, map, mergeMap, of, switchMap, takeWhile } from 'rxjs';
 import {
@@ -155,15 +155,35 @@ export class RouteOptimizationService {
   /**
    * Get all routes completed so far
    */
-  getAllRoutes(): Observable<OptimizationResult> {
-    return this.http.get<OptimizationResult>(`${this.baseUrl}/routes/completed`);
+  getCompletedRoutes(userId?: string): Observable<OptimizationResult[]> {
+    const options = userId ? { params: new HttpParams().set('userId', userId) } : {};
+
+    return this.http.get<any>(`${this.baseUrlJobStatus}/routes/completed`, options).pipe(
+      map((response: any) => {
+        const payload = Array.isArray(response) ? response : (response ? [response] : []);
+        return payload.map(route => this.mapToOptimizationResult(route));
+      })
+    );
+  }
+
+  getCompletedRoutesByUser(userId: string): Observable<OptimizationResult[]> {
+    return this.getCompletedRoutes(userId);
   }
 
   /**
-   * Get all routes completed so far by user ID
+   * @deprecated Use getCompletedRoutes instead.
    */
-  getAllRoutesByUser(userId: string): Observable<OptimizationResult> {
-    return this.http.get<OptimizationResult>(`${this.baseUrl}/routes/completed?userId=${userId}`);
+  getAllRoutes(): Observable<OptimizationResult[]> {
+    console.warn('RouteOptimizationService.getAllRoutes is deprecated. Use getCompletedRoutes instead.');
+    return this.getCompletedRoutes();
+  }
+
+  /**
+   * @deprecated Use getCompletedRoutesByUser instead.
+   */
+  getAllRoutesByUser(userId: string): Observable<OptimizationResult[]> {
+    console.warn('RouteOptimizationService.getAllRoutesByUser is deprecated. Use getCompletedRoutesByUser instead.');
+    return this.getCompletedRoutesByUser(userId);
   }
 
   // ==================================================
@@ -208,14 +228,16 @@ export class RouteOptimizationService {
    * Maps snake_case backend result to camelCase OptimizationResult model.
    */
   private mapToOptimizationResult(backendResult: BackendOptimizationResult): OptimizationResult {
+    const optimizedSequence = backendResult.optimizedSequence || backendResult.optimized_sequence || [];
+
     return {
-      optimizedRouteId: backendResult.optimizedRouteId,
-      optimizedSequence: backendResult.optimizedSequence.map((poi: any) => this.mapToOptimizedPOI(poi)),
-      totalDistanceKm: backendResult.totalDistanceKm,
-      totalTimeMinutes: backendResult.totalTimeMinutes,
-      optimizationAlgorithm: backendResult.optimizationAlgorithm,
-      optimizationScore: backendResult.optimizationScore,
-      generatedAt: backendResult.generatedAt,
+      optimizedRouteId: backendResult.optimizedRouteId || backendResult.optimized_route_id || backendResult.routeId,
+      optimizedSequence: optimizedSequence.map((poi: any) => this.mapToOptimizedPOI(poi)),
+      totalDistanceKm: backendResult.totalDistanceKm ?? backendResult.total_distance_km ?? 0,
+      totalTimeMinutes: backendResult.totalTimeMinutes ?? backendResult.total_time_minutes ?? 0,
+      optimizationAlgorithm: backendResult.optimizationAlgorithm || backendResult.optimization_algorithm || 'Unknown',
+      optimizationScore: backendResult.optimizationScore ?? backendResult.optimization_score ?? 0,
+      generatedAt: backendResult.generatedAt || backendResult.generated_at || new Date().toISOString(),
     };
   }
 
@@ -224,14 +246,14 @@ export class RouteOptimizationService {
    */
   private mapToOptimizedPOI(backendPOI: any): OptimizedPOI {
     return {
-      poiId: backendPOI.poiId,
+      poiId: backendPOI.poiId ?? backendPOI.poi_id,
       name: backendPOI.name,
-      latitude: backendPOI.latitude,
-      longitude: backendPOI.longitude,
-      visitOrder: backendPOI.visitOrder,
-      estimatedVisitTime: backendPOI.estimatedVisitTime,
-      arrivalTime: backendPOI.arrivalTime,
-      departureTime: backendPOI.departureTime,
+      latitude: backendPOI.latitude ?? backendPOI.lat,
+      longitude: backendPOI.longitude ?? backendPOI.lng,
+      visitOrder: backendPOI.visitOrder ?? backendPOI.visit_order ?? 0,
+      estimatedVisitTime: backendPOI.estimatedVisitTime ?? backendPOI.estimated_visit_time ?? 0,
+      arrivalTime: backendPOI.arrivalTime ?? backendPOI.arrival_time,
+      departureTime: backendPOI.departureTime ?? backendPOI.departure_time,
     };
   }
 }

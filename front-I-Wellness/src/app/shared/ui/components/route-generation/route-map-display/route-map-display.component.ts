@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
+import { Subject, takeUntil } from 'rxjs';
 import { MapService, mapServiceFactory } from '../../../../../features/servicios/map/map.service';
 import { ProveedorMapService } from '../../../../../features/servicios/map/proveedores-map.service';
 import { ServicioService } from '../../../../../features/servicios/services/servicio.service';
@@ -14,19 +14,19 @@ import { MapConfig } from '../../map-poi/map-poi.component';
 import { ProviderCardComponent } from "../../provider-card/provider-card.component";
 
 // Import new models
-import { OptimizationResult, OptimizedPOI } from '../../../../models/optimization-job.models';
-import { MapDisplayItem } from '../../../../models/map-display.model';
-import { PlaceData } from '../../../../models/place-data.model';
 import {
   adaptOptimizedPoiToMapItem
 } from '../../../../adapters/map-display.adapter';
+import { MapDisplayItem } from '../../../../models/map-display.model';
+import { OptimizationResult } from '../../../../models/optimization-job.models';
+import { PlaceData } from '../../../../models/place-data.model';
 
 /**
  * Route Map Display Component (Dumb/Presentational)
- * 
+ *
  * Displays an optimized route on a Leaflet map with markers and polylines.
  * Refactored from route-pois-show to work with OptimizationResult.
- * 
+ *
  * This is a pure presentational component that receives data via @Input
  * and emits events via @Output.
  */
@@ -61,6 +61,12 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   @Input() showProviderCard: boolean = true;
   @Input() mapId: string = 'route-map';
   @Input() adaptToLayout: boolean = true;
+  // Layout controls
+  @Input() panelWidthPercent: number = 40; // provider panel width when visible
+  @Input() mapAspectRatio: number = 0.75;  // map height = width * ratio
+  @Input() minMapHeight: number = 420;     // minimum map height
+  @Input() maxViewportHeightFactor: number = 0.85; // cap by viewport
+  @Input() providerHeightPercent: number = 60; // provider vs carousel split in the panel
 
   // ========== OUTPUTS (Events to parent) ==========
 
@@ -76,11 +82,20 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   showProviderCardVisible: boolean = false;
   placeData: PlaceData | null = null;
   activeItem: MapDisplayItem | null = null;
+  // Computed layout heights
+  mapHeight: number = 0;
+  providerSectionHeight: number = 0;
+  carouselSectionHeight: number = 0;
+  // Memoization: track last route to avoid recreating mapDisplayItems unnecessarily
+  private lastOptimizedRouteId: string | null = null;
 
 
-  private displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
+  private readonly displayStrategy: ProviderDisplayStrategy = new SlidePanelStrategy();
   @ViewChild(CarouselComponent) providerCarousel!: CarouselComponent;
-  private destroy$ = new Subject<void>();
+  @ViewChild('mapContainer') mapContainerEl!: ElementRef<HTMLDivElement>;
+  @ViewChild('panelWrapper') panelWrapperEl!: ElementRef<HTMLDivElement>;
+  private readonly destroy$ = new Subject<void>();
+  private resizeObserver?: ResizeObserver;
 
   // Layout adapter properties
   containerStyles: any = {};
@@ -89,12 +104,12 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   // ========== LIFECYCLE HOOKS ==========
 
   constructor(
-    private mapService: MapService,
-    private proveedorMapService: ProveedorMapService,
-    private servicioService: ServicioService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef,
-    private layoutAdapter: LayoutAdapterService
+    private readonly mapService: MapService,
+    private readonly proveedorMapService: ProveedorMapService,
+    private readonly servicioService: ServicioService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly layoutAdapter: LayoutAdapterService
   ) {}
 
   @HostListener('window:resize')
@@ -103,19 +118,32 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
     if (map) {
       map.invalidateSize();
     }
+    this.recomputeHeights();
   }
 
   ngAfterViewInit(): void {
     this.initMap();
     this.subscribeToLayoutAdapter();
+    this.setupResizeObserver();
+    setTimeout(() => this.recomputeHeights(), 0);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['optimizedRoute'] && this.optimizedRoute) {
+      const currentRouteId = this.optimizedRoute.optimizedRouteId;
+
+      // 🎯 OPTIMIZATION: Solo recrear mapDisplayItems si cambió realmente la ruta
+      if (currentRouteId === this.lastOptimizedRouteId) {
+        console.log('[RouteMapDisplay] Same route ID, skipping mapDisplayItems recreation', { routeId: currentRouteId });
+        return;
+      }
+
+      this.lastOptimizedRouteId = currentRouteId;
+
       // 🗺️ LOGGING: Optimized route data received for map display
-      console.log('=== 🗺️ ROUTE MAP DISPLAY - OPTIMIZED ROUTE RECEIVED ===');
+      console.log('=== 🗺️ ROUTE MAP DISPLAY - NEW OPTIMIZED ROUTE ===');
       console.log('Full optimized route object:', JSON.stringify(this.optimizedRoute, null, 2));
-      
+
       console.log('Route summary:', {
         optimizedRouteId: this.optimizedRoute.optimizedRouteId,
         totalDistanceKm: this.optimizedRoute.totalDistanceKm,
@@ -126,7 +154,7 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
         generatedAt: this.optimizedRoute.generatedAt,
         hasMetadata: !!this.optimizedRoute.metadata
       });
-      
+
       console.log('Optimized sequence details:', this.optimizedRoute.optimizedSequence.map((poi, idx) => ({
         sequenceOrder: idx + 1,
         poiId: poi.poiId,
@@ -140,9 +168,9 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
         category: poi.category,
         hasProviderData: !!poi.providerData
       })));
-      
+
       console.log('========================================================');
-      
+
       // Use NgZone to ensure proper change detection
       this.ngZone.run(() => {
         this.mapDisplayItems = this.optimizedRoute!.optimizedSequence.map((poi, index) => adaptOptimizedPoiToMapItem(poi, index));
@@ -155,6 +183,9 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   }
 
   ngOnDestroy(): void {
+    if (this.resizeObserver) {
+      try { this.resizeObserver.disconnect(); } catch {}
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -263,6 +294,10 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
     index: number;item: LinkedItem
   }) {
     if (!ev?.item) return;
+    const name = (ev.item as any)?.data?.nombre_empresa || (ev.item as any)?.data?.name || (ev.item as any)?.title;
+    console.log('[RouteMapDisplay] carousel -> provider change', { index: ev.index, id: (ev.item as any)?.id, name });
+    // Activar el item en el mapa y abrir su card
+    this.setActiveItem(ev.item.id);
     this.itemSelected.emit(ev.item.id);
   }
 
@@ -304,10 +339,31 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
   // Method called by display strategy to update visibility
   updateProviderCardVisibility(visible: boolean, data?: MapDisplayItem): void {
     this.showProviderCardVisible = visible;
-    if (visible && data && data.originalData) {
+    if (visible && data?.originalData) {
       // data.originalData is already PlaceData from the adapter
-      this.placeData = data.originalData;
+      // Defensive: clone and sanitize to avoid later mutations (e.g., legacy adapters writing 'N/A')
+      const incoming = data.originalData as any;
+      // Debug trace to compare before/after
+      console.log('➡️ [ROUTE-MAP] updateProviderCardVisibility incoming PlaceData:', incoming);
+      const sanitizeNa = (v: unknown) => (v === 'N/A' ? undefined : v);
+      this.placeData = {
+        ...incoming,
+        // Normalize known string placeholders to undefined so template defaults apply
+        name: sanitizeNa(incoming.name),
+        contactName: sanitizeNa(incoming.contactName),
+        cargoContacto: sanitizeNa(incoming.cargoContacto),
+        phone: sanitizeNa(incoming.phone),
+        companyPhone: sanitizeNa(incoming.companyPhone),
+        email: sanitizeNa(incoming.email),
+        address: sanitizeNa(incoming.address),
+        hours: sanitizeNa(incoming.hours),
+        category: sanitizeNa(incoming.category),
+        description: sanitizeNa(incoming.description),
+        foto: incoming.foto ?? null
+      } as PlaceData;
+      console.log('✅ [ROUTE-MAP] updateProviderCardVisibility normalized PlaceData:', this.placeData);
     }
+    this.recomputeHeights();
     this.cdr.markForCheck();
   }
 
@@ -346,6 +402,37 @@ export class RouteMapDisplayComponent implements AfterViewInit, OnChanges, OnDes
     const map = this.mapService.getMapInstance();
     if (!map) return;
     requestAnimationFrame(() => map.invalidateSize());
+  }
+
+  private setupResizeObserver(): void {
+    const target = this.mapContainerEl?.nativeElement;
+    if (!target || typeof ResizeObserver === 'undefined') return;
+    this.resizeObserver = new ResizeObserver(() => {
+      this.recomputeHeights();
+    });
+    try { this.resizeObserver.observe(target); } catch {}
+  }
+
+  private recomputeHeights(): void {
+    const container = this.mapContainerEl?.nativeElement;
+    if (!container) return;
+    const width = container.clientWidth || 0;
+    const vpMax = Math.floor(window.innerHeight * this.maxViewportHeightFactor);
+    let desired = Math.floor(width * this.mapAspectRatio);
+    if (!Number.isFinite(desired) || desired <= 0) desired = this.minMapHeight;
+    this.mapHeight = Math.max(this.minMapHeight, Math.min(desired, vpMax));
+
+    if (this.showProviderCard && this.showProviderCardVisible) {
+      // Panel mode: provider card + carousel stacked
+      // Carousel ahora está fuera del panel pero calculamos su altura para el inline style
+      const prov = Math.floor((this.mapHeight * this.providerHeightPercent) / 100);
+      this.providerSectionHeight = Math.max(160, prov);
+      this.carouselSectionHeight = Math.max(120, this.mapHeight - this.providerSectionHeight);
+    } else {
+      // Overlay mode: no provider card, carousel height auto (no inline height needed)
+      this.providerSectionHeight = 0;
+      this.carouselSectionHeight = 0; // carousel será auto-height en overlay
+    }
   }
 
   private subscribeToLayoutAdapter(): void {
