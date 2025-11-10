@@ -547,6 +547,73 @@ export class RouteBuilderStateService {
    * - Service information (cost, category)
    * - All metadata from EnrichedProviderData
    */
+  private enrichOptimizationResult(result: any): OptimizationResult {
+    const providers = this._providers$.value;
+    
+    console.log('📊 Enriching optimization result with cached provider data...');
+    console.log('Available providers in cache:', providers.length);
+    
+    // Enrich each POI in the sequence
+    const enrichedSequence = result.optimizedSequence.map((poi: any) => {
+      // Find the matching provider by poiId
+      const providerData = providers.find(p => p.provider.id === poi.poiId);
+      
+      if (!providerData) {
+        console.warn(`⚠️ Provider ${poi.poiId} not found in cache, using basic data`);
+        return {
+          poiId: poi.poiId,
+          name: poi.name || 'Unknown Provider',
+          latitude: poi.latitude,
+          longitude: poi.longitude,
+          visitOrder: poi.visitOrder,
+          estimatedVisitTime: poi.estimatedVisitTime,
+          arrivalTime: poi.arrivalTime,
+          departureTime: poi.departureTime,
+          category: undefined as string | undefined,
+          cost: undefined as number | undefined
+        };
+      }
+      
+      // Enrich with full provider data
+      const enrichedPOI = {
+        poiId: poi.poiId,
+        name: providerData.provider.nombre_empresa, // Use actual provider name
+        latitude: providerData.provider.coordenadaX,
+        longitude: providerData.provider.coordenadaY,
+        visitOrder: poi.visitOrder,
+        estimatedVisitTime: poi.estimatedVisitTime,
+        arrivalTime: poi.arrivalTime,
+        departureTime: poi.departureTime,
+        // Add enriched data
+        category: providerData.categories.length > 0 ? providerData.categories[0] : undefined,
+        cost: providerData.averageCost,
+        // Store full provider data for map display
+        providerData: providerData
+      };
+      
+      console.log(`✅ Enriched POI ${poi.poiId}:`, {
+        originalName: poi.name,
+        enrichedName: enrichedPOI.name,
+        category: enrichedPOI.category,
+        cost: enrichedPOI.cost,
+        servicesCount: providerData.services.length
+      });
+      
+      return enrichedPOI;
+    });
+    
+    // Return enriched result
+    return {
+      optimizedRouteId: result.optimizedRouteId,
+      optimizedSequence: enrichedSequence,
+      totalDistanceKm: result.totalDistanceKm || 0,
+      totalTimeMinutes: result.totalTimeMinutes || 0,
+      optimizationAlgorithm: result.algorithm || result.optimizationAlgorithm || 'Unknown',
+      optimizationScore: result.optimizationScore || 0,
+      generatedAt: result.processedAt || result.generatedAt || new Date().toISOString()
+    };
+  }
+
   /**
    * Update job with error message
    */
