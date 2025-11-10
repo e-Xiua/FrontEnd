@@ -66,9 +66,14 @@ export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent, canActivate: [proveedorGuard] },
     { path: 'headerproveedor', component: HeaderProveedorComponent, canActivate: [proveedorGuard] },
     { path: 'perfilproveedor/:id', component: PerfilProveedorComponent, canActivate: [proveedorGuard] },
-    // Módulo de tareas - carga perezosa
+    // Módulo de tareas - carga perezosa (alias en inglés y español)
     {
       path: 'tasks',
+      loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
+      canActivate: [authGuard]
+    },
+    {
+      path: 'tareas',
       loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
       canActivate: [authGuard]
     },

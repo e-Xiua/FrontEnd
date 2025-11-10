@@ -3,7 +3,7 @@
       <ul>
           <li><a class ="nav-link" routerLink="" [ngClass]="{active: menuOption == 'home'}" (click)="onOption('home')">Home</a></li>
           <li><a class ="nav-link" routerLink="temas" [ngClass]="{active: menuOption == 'temas'}" (click)="onOption('temas')">Temas</a></li>
-          <li><a class ="nav-link" routerLink="/tasks" [ngClass]="{active: menuOption == 'tasks'}" (click)="onOption('tasks')">Tareas</a></li>
+          <li *ngIf="authService.isAuthenticated()"><a class ="nav-link" routerLink="/tareas" [ngClass]="{active: menuOption == 'tasks'}" (click)="onOption('tasks')">Tareas</a></li>
       </ul>
   </nav>
 

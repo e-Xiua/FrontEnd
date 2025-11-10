@@ -6,8 +6,9 @@ import { TaskFormComponent } from './task-form/task-form.component';
 import { authGuard } from '../core/guards/auth.guard';
 
 const routes: Routes = [
-  { 
-    path: 'tasks',
+  // Module is lazy-loaded by the app; inside the module we expose '' as root.
+  {
+    path: '',
     children: [
       { path: '', component: TaskListComponent },
       { path: 'new', component: TaskFormComponent },

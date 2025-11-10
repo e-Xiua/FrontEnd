@@ -13,6 +13,7 @@ import { TaskDetailComponent } from './task-detail/task-detail.component';
 import { TaskFormComponent } from './task-form/task-form.component';
 import { MessagePanelComponent } from './message-panel/message-panel.component';
 import { RouterModule } from '@angular/router';
+import { TasksRoutingModule } from './tasks-routing.module';
 
 @NgModule({
   imports: [
@@ -29,7 +30,8 @@ import { RouterModule } from '@angular/router';
     TaskListComponent,
     TaskDetailComponent,
     TaskFormComponent,
-    MessagePanelComponent
+    MessagePanelComponent,
+    TasksRoutingModule
   ]
 })
 export class TasksModule {}
