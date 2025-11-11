@@ -1,93 +1,143 @@
-<div
-  class="chat-sidebar"
-  [class.visible]="(layoutState$ | async)?.sidebarVisible"
-  [attr.aria-hidden]="!((layoutState$ | async)?.sidebarVisible)"
->
-  <header class="sidebar-header">
-    <button mat-icon-button (click)="onToggleSidebar()">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <h2>Contactos</h2>
-    <button
-      mat-icon-button
-      (click)="onRefresh()"
-      [disabled]="(isLoading$ | async) ?? false"
-      aria-label="Actualizar contactos"
-    >
-      <mat-icon>refresh</mat-icon>
-    </button>
-  </header>
+<ng-container *ngIf="{
+    visible: (isVisible$ | async),
+    loading: (isLoading$ | async),
+    error: (error$ | async),
+    providers: (paginatedProviders$ | async),
+    total: (totalProviders$ | async),
+    page: (pageState$ | async)
+  } as vm">
+  <div class="chat-sidebar" [class.visible]="vm.visible">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">
+        <mat-icon>contacts</mat-icon>
+        Proveedores
+      </h2>
 
-  <section class="filters">
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar</mat-label>
-      <input
-        matInput
-        [formControl]="searchControl"
-        placeholder="Proveedor, contacto o servicio"
-      />
-      <button mat-icon-button matSuffix *ngIf="searchControl.value" (click)="onClearSearch()">
+      <button
+        mat-icon-button
+        class="close-button"
+        (click)="onToggleSidebar()"
+        [attr.aria-label]="'Cerrar sidebar'">
         <mat-icon>close</mat-icon>
       </button>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Ordenar por</mat-label>
-      <mat-select [formControl]="sortControl">
-        <mat-option *ngFor="let option of sortOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Filtrar</mat-label>
-      <mat-select [formControl]="filterControl">
-        <mat-option *ngFor="let option of filterOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </section>
-
-  <ng-container *ngIf="(isLoading$ | async); else sidebarContent">
-    <div class="loading-container">
-      <mat-progress-spinner diameter="48" mode="indeterminate"></mat-progress-spinner>
-      <p>Cargando contactos…</p>
-    </div>
-  </ng-container>
-
-  <ng-template #sidebarContent>
-    <div *ngIf="(error$ | async) as error" class="error-state">
-      <p>{{ error }}</p>
-      <button mat-button color="primary" (click)="onRefresh()">Reintentar</button>
     </div>
 
-    <ng-container *ngIf="(paginatedProviders$ | async) as providers">
-      <div class="empty-state" *ngIf="providers.length === 0">
-        <p>No tienes contactos para mostrar.</p>
+    <!-- Search and Filters -->
+    <div class="filters-section">
+      <!-- Search Bar -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar proveedores</mat-label>
+        <input
+          matInput
+          [formControl]="searchControl"
+          placeholder="Nombre, contacto o servicio..."
+          autocomplete="off">
+        <mat-icon matPrefix>search</mat-icon>
+        <button
+          *ngIf="searchControl.value"
+          matSuffix
+          mat-icon-button
+          (click)="onClearSearch()"
+          [attr.aria-label]="'Limpiar búsqueda'">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Filter Controls -->
+      <div class="filter-controls">
+        <mat-form-field appearance="outline" class="sort-field">
+          <mat-label>Ordenar por</mat-label>
+          <mat-select [formControl]="sortControl">
+            <mat-option
+              *ngFor="let option of sortOptions"
+              [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filtrar</mat-label>
+          <mat-select [formControl]="filterControl">
+            <mat-option
+              *ngFor="let option of filterOptions"
+              [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <div class="providers-list" *ngIf="providers.length > 0">
+      <!-- Results Summary -->
+      <div class="results-summary">
+        <span class="results-count">
+          {{ vm.total ?? 0 }} {{ (vm.total ?? 0) === 1 ? 'proveedor' : 'proveedores' }}
+        </span>
+        <button
+          mat-icon-button
+          class="refresh-button"
+          (click)="onRefresh()"
+          [disabled]="vm.loading"
+          [attr.aria-label]="'Actualizar lista'">
+          <mat-icon [class.rotating]="vm.loading">refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Provider List -->
+    <div class="provider-list">
+      <!-- Loading State -->
+      <div *ngIf="vm.loading" class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando proveedores...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="!vm.loading && vm.error" class="error-state">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p>{{ vm.error }}</p>
+        <button mat-button color="primary" (click)="onRefresh()">
+          Reintentar
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!vm.loading && !vm.error && (vm.providers?.length ?? 0) === 0" class="empty-state">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <p>No se encontraron proveedores</p>
+        <p class="empty-subtitle">Intenta ajustar tus filtros de búsqueda</p>
+      </div>
+
+      <!-- Provider Cards -->
+      <div *ngIf="!vm.loading && !vm.error && (vm.providers?.length ?? 0) > 0" class="cards-container">
         <app-contact-card
-          *ngFor="let provider of providers; let i = index; trackBy: trackByProvider"
+          *ngFor="let provider of vm.providers; let i = index; trackBy: trackByProvider"
           [provider]="provider"
-          class="provider-card"
-          [ngClass]="getAnimationClass(i)"
-          tabindex="0"
-          (click)="onProviderSelect(provider)"
-          (keydown.enter)="onProviderSelect(provider)"
-          (keydown.space)="onProviderSelect(provider)"
-        ></app-contact-card>
+          [isSelected]="selectedProvider?.id === provider.id"
+          [animationClass]="getAnimationClass(i)"
+          [compactMode]="true"
+          [showServices]="true"
+          (cardClick)="onProviderSelect(provider)"
+          (chatClick)="onProviderChat(provider)"
+          (profileClick)="onProviderProfile(provider)">
+        </app-contact-card>
       </div>
+    </div>
 
+    <!-- Pagination -->
+    <div
+      *ngIf="!vm.loading && !vm.error && vm.total && vm.page && vm.total > vm.page.pageSize"
+      class="pagination-section">
       <mat-paginator
-        [length]="(totalProviders$ | async) ?? 0"
-        [pageIndex]="(pageState$ | async)?.pageIndex ?? 0"
-        [pageSize]="(pageState$ | async)?.pageSize ?? 10"
-        [pageSizeOptions]="[5, 10, 20]"
+        [length]="vm.total"
+        [pageSize]="vm.page.pageSize"
+        [pageIndex]="vm.page.pageIndex"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        [showFirstLastButtons]="true"
         (page)="onPageChange($event)"
-      ></mat-paginator>
-    </ng-container>
-  </ng-template>
-</div>
+        aria-label="Seleccionar página de proveedores">
+      </mat-paginator>
+    </div>
+  </div>
+</ng-container>
