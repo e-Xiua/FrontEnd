@@ -257,6 +257,10 @@
     margin-right: 0.3rem;
 }
 
+.helper-text--spaced {
+    margin-bottom: 1rem;
+}
+
 /* Days Grid - Estilo Calendario */
 .calendar-container {
     margin-bottom: 1.5rem;

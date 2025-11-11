@@ -57,6 +57,36 @@ export class ProviderServiceFormComponent {
     return day.name;
   }
 
+  onPrecioInput(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? null;
+    this.precioChange.emit(this.parseNumeric(value));
+  }
+
+  onTiempoAproximadoInput(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? null;
+    this.tiempoAproximadoChange.emit(this.parseNumeric(value));
+  }
+
+  onDayChange(index: number, event: Event): void {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    this.daySelectionChange.emit({ index, selected: checked });
+  }
+
+  onStartTimeChange(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.startTimeChange.emit(value);
+  }
+
+  onEndTimeChange(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.endTimeChange.emit(value);
+  }
+
+  onPreferenceChange(id: number, event: Event): void {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    this.preferenceToggle.emit({ id, checked });
+  }
+
   isPreferenceChecked(id: number): boolean {
     return this.selectedPreferences.includes(id);
   }
