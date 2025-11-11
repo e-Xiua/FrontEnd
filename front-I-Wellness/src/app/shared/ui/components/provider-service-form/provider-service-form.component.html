@@ -1,0 +1,214 @@
+<div class="servicio-form-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-plus-circle"></i>
+      </div>
+      <h1>Nuevo Servicio de Bienestar</h1>
+      <p class="hero-subtitle">Completa la información para agregar tu servicio</p>
+    </div>
+  </section>
+
+  <!-- Formulario -->
+  <section class="form-section">
+    <div class="form-card">
+      <form class="form-layout" (ngSubmit)="submitForm.emit()" novalidate>
+        <!-- Columna Izquierda: Imagen -->
+        <div class="image-section">
+          <h3 class="section-title">
+            <i class="fas fa-image"></i>
+            Imagen del Servicio
+          </h3>
+          <div class="image-upload-container">
+            <label for="imageInput" class="image-upload-label">
+              <div
+                class="image-preview"
+                [ngStyle]="{ 'background-image': imagePreview ? 'url(' + imagePreview + ')' : 'none' }"
+                [class.has-image]="imagePreview"
+              >
+                <div class="upload-placeholder" *ngIf="!imagePreview">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Click para subir imagen</p>
+                  <span>JPG, PNG o WEBP</span>
+                </div>
+              </div>
+            </label>
+            <input
+              id="imageInput"
+              type="file"
+              (change)="imageSelected.emit($event)"
+              accept="image/*"
+              hidden
+            />
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario -->
+        <div class="form-fields-section">
+          <!-- Información Básica -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Información Básica
+            </h3>
+
+            <div class="input-group">
+              <label for="nombre">Nombre del Servicio *</label>
+              <input
+                id="nombre"
+                type="text"
+                placeholder="Ej: Masaje Relajante, Yoga Matutino"
+                [ngModel]="service?.nombre || ''"
+                (ngModelChange)="nombreChange.emit($event)"
+                required
+                name="nombre"
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="descripcion">Descripción *</label>
+              <textarea
+                id="descripcion"
+                placeholder="Describe tu servicio en detalle..."
+                [ngModel]="service?.descripcion || ''"
+                (ngModelChange)="descripcionChange.emit($event)"
+                rows="4"
+                required
+                name="descripcion"
+              ></textarea>
+            </div>
+
+            <div class="input-row">
+              <div class="input-group">
+                <label for="precio">Precio (USD) *</label>
+                <input
+                  id="precio"
+                  type="number"
+                  placeholder="0 para gratuito"
+                  [value]="service?.precio ?? ''"
+                  (input)="onPrecioInput($event)"
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="tiempo">Duración (min)</label>
+                <input
+                  id="tiempo"
+                  type="number"
+                  placeholder="30"
+                  [value]="service?.tiempoAproximado ?? ''"
+                  (input)="onTiempoAproximadoInput($event)"
+                  min="1"
+                  max="480"
+                  step="15"
+                />
+              </div>
+            </div>
+            <small class="helper-text">
+              <i class="fas fa-info-circle"></i>
+              Si no especificas duración, se usarán 30 minutos por defecto
+            </small>
+          </div>
+
+          <!-- Horarios -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i>
+              Horarios Disponibles
+            </h3>
+
+            <p class="helper-text helper-text--spaced">
+              <i class="fas fa-calendar-check"></i>
+              Selecciona los días en que ofreces este servicio
+            </p>
+
+            <div class="calendar-container">
+              <div class="days-grid">
+                <label class="day-checkbox" *ngFor="let day of days; let i = index; trackBy: trackByDayName">
+                  <input
+                    type="checkbox"
+                    [checked]="day.selected"
+                    (change)="onDayChange(i, $event)"
+                    [id]="day.name"
+                  />
+                  <span class="day-label">{{ day.name | slice:0:3 }}</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="time-inputs">
+              <div class="input-group">
+                <label for="startTime">
+                  <i class="fas fa-sun"></i>
+                  Hora Apertura
+                </label>
+                <input
+                  id="startTime"
+                  type="time"
+                  [value]="startTime"
+                  (change)="onStartTimeChange($event)"
+                  required
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="endTime">
+                  <i class="fas fa-moon"></i>
+                  Hora Cierre
+                </label>
+                <input
+                  id="endTime"
+                  type="time"
+                  [value]="endTime"
+                  (change)="onEndTimeChange($event)"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferencias -->
+          <div class="form-group">
+            <h3 class="section-title">
+              <i class="fas fa-heart"></i>
+              Categorías de Bienestar
+            </h3>
+            <p class="helper-text">Selecciona entre {{ minPreferences }} y {{ maxPreferences }} categorías relacionadas</p>
+
+            <div class="preferencias-grid">
+              <label class="preferencia-chip" *ngFor="let pref of preferences">
+                <input
+                  type="checkbox"
+                  [value]="pref._idPreferencias"
+                  [checked]="isPreferenceChecked(pref._idPreferencias)"
+                  [disabled]="isPreferenceDisabled(pref._idPreferencias)"
+                  (change)="onPreferenceChange(pref._idPreferencias, $event)"
+                />
+                <span class="chip-content">
+                  <i class="fas fa-check-circle"></i>
+                  {{ pref.nombre }}
+                </span>
+              </label>
+            </div>
+            <div class="preferences-counter">
+              <span [class.valid]="selectedPreferences.length >= minPreferences && selectedPreferences.length <= maxPreferences">
+                {{ selectedPreferences.length }} / {{ maxPreferences }} seleccionadas
+              </span>
+            </div>
+          </div>
+
+          <!-- Botón Guardar -->
+          <div class="form-actions">
+            <button class="btn-save" type="submit" [disabled]="disableSubmit">
+              <i class="fas fa-save"></i>
+              Guardar Servicio
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

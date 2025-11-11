@@ -1,12 +1,15 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+
+  private readonly userIdSubject = new BehaviorSubject<number | null>(this.getCurrentUserIdSynchronous());
+  readonly userId$ = this.userIdSubject.asObservable();
 
   private apiUrl = 'http://localhost:8082/auth'; // URL completa al backend
   //private apiUrl = 'http://localhost:8765/api/auth';
@@ -41,6 +44,7 @@ export class AuthService {
           // Store the role as well
           localStorage.setItem('rol', userInfo.rol || ''); // FIX: Changed from userInfo.role to userInfo.rol
           console.log('Role stored in localStorage:', userInfo.rol); // Log para confirmar el rol
+          this.userIdSubject.next(userInfo.id);
         }),
         map((userInfo: any) => {
           return {
@@ -200,6 +204,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('USER_ID');
+    localStorage.removeItem('rol');
+    this.userIdSubject.next(null);
   }
 
   getUserInfo(): Observable<any> {

@@ -9,7 +9,9 @@ import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { BaseHeader, HeaderAction, HeaderConfig } from '../../models/header';
+import { usuarios } from '../../models/usuarios';
 import { HeaderService } from '../../services/header.service';
+import { ProviderSearchComponent } from '../../ui/components/provider-search/provider-search.component';
 
 /**
  * Componente de header reutilizable usando el patrón Strategy
@@ -25,7 +27,8 @@ import { HeaderService } from '../../services/header.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatTooltipModule
+    MatTooltipModule,
+    ProviderSearchComponent
   ],
   template: `
     <mat-toolbar [class]="getThemeClass()">
@@ -49,6 +52,13 @@ import { HeaderService } from '../../services/header.service';
           {{ item.label }}
         </a>
       </nav>
+
+      <!-- Búsqueda de proveedores (solo para proveedores) -->
+      <div class="provider-search-wrapper" *ngIf="config?.showProviderSearch">
+        <app-provider-search
+          (providerSelected)="onProviderSelected($event)">
+        </app-provider-search>
+      </div>
 
       <!-- Spacer -->
       <span class="spacer"></span>
@@ -105,6 +115,12 @@ import { HeaderService } from '../../services/header.service';
       background-color: rgba(255, 255, 255, 0.1);
     }
 
+    .provider-search-wrapper {
+      margin-left: 2rem;
+      max-width: 400px;
+      flex-shrink: 0;
+    }
+
     .spacer {
       flex: 1 1 auto;
     }
@@ -144,6 +160,10 @@ import { HeaderService } from '../../services/header.service';
         display: none;
       }
 
+      .provider-search-wrapper {
+        display: none;
+      }
+
       .user-name {
         display: none;
       }
@@ -159,12 +179,12 @@ export class UniversalHeaderComponent implements OnInit, OnDestroy {
   @Input() customConfig?: BaseHeader;
 
   config: BaseHeader | null = null;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private headerService: HeaderService,
-    private authService: AuthService,
-    private router: Router
+    private readonly headerService: HeaderService,
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -208,5 +228,13 @@ export class UniversalHeaderComponent implements OnInit, OnDestroy {
   getThemeClass(): string {
     const theme = this.config?.theme || 'light';
     return `theme-${theme}`;
+  }
+
+  onProviderSelected(provider: usuarios): void {
+    console.log('Proveedor seleccionado desde el header:', provider);
+    // Navegar al perfil del proveedor seleccionado
+    if (provider.id) {
+      this.router.navigate(['/proveedor/ver-perfil', provider.id]);
+    }
   }
 }
