@@ -9,7 +9,7 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<TaskDto[]> {
-    return this.http.get<TaskDto[]>(this.base);
+    return this.http.get<TaskDto[]>(`${this.base}/all`);
   }
 
   getById(id: number): Observable<TaskDetailDto> {

@@ -36,7 +36,7 @@ export class TaskFormComponent implements OnInit {
       description: [this.initial?.description || ''],
       responsibleName: [this.initial?.responsibleName || ''],
       dueDate: [this.initial?.dueDate || ''],
-      status: [this.initial?.status || 'PENDING'],
+      status: [this.initial?.status || 'TODO'],
     });
 
     // If route contains an id param, load it for editing

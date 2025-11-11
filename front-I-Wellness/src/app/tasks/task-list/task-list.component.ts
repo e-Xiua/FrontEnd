@@ -36,9 +36,9 @@ export class TaskListComponent implements OnInit, OnDestroy {
   load() {
     this.sub.add(
       this.taskService.getAll().subscribe((tasks: TaskDto[]) => {
-        this.pending = tasks.filter((t: TaskDto) => t.status === 'PENDING');
+        this.pending = tasks.filter((t: TaskDto) => t.status === 'TODO');
         this.inProgress = tasks.filter((t: TaskDto) => t.status === 'IN_PROGRESS');
-        this.completed = tasks.filter((t: TaskDto) => t.status === 'COMPLETED');
+        this.completed = tasks.filter((t: TaskDto) => t.status === 'DONE');
       })
     );
   }
@@ -71,7 +71,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
 
   private statusForContainer(id: string): TaskDto['status'] {
     if (id === 'inprogress') return 'IN_PROGRESS';
-    if (id === 'completed') return 'COMPLETED';
-    return 'PENDING';
+    if (id === 'completed') return 'DONE';
+    return 'TODO';
   }
 }

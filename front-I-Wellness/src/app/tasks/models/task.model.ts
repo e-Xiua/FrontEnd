@@ -5,7 +5,10 @@ export interface TaskDto {
   responsibleId?: string;
   responsibleName?: string;
   dueDate?: string; // ISO date
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  project?: string;
+  progress?: number;
   createdAt?: string;
   updatedAt?: string;
 }
