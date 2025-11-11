@@ -1,0 +1,32 @@
+<form [formGroup]="form" class="task-form" (ngSubmit)="submit()">
+  <h2>{{ isEditing ? 'Editar tarea' : 'Crear tarea' }}</h2>
+
+  <mat-form-field appearance="fill" class="full">
+    <mat-label>Título</mat-label>
+    <input matInput formControlName="title" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full">
+    <mat-label>Descripción</mat-label>
+    <textarea matInput formControlName="description"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Responsable</mat-label>
+    <input matInput formControlName="responsibleName" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Due date</mat-label>
+    <input matInput type="date" formControlName="dueDate" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Status</mat-label>
+    <input matInput formControlName="status" />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-flat-button color="primary" type="submit">{{ isEditing ? 'Actualizar' : 'Crear' }}</button>
+  </div>
+</form>

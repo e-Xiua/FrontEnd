@@ -1,0 +1,49 @@
+<div class="dashboard-container">
+  <h2>📋 Gestor de Tareas</h2>
+  <p class="dashboard-subtitle">Organiza y sigue el progreso de tu equipo</p>
+
+  <!-- Zona de creación -->
+  <div class="new-task block interactive-block">
+    <input [(ngModel)]="newTaskTitle" placeholder="Título de la tarea" />
+    <textarea [(ngModel)]="newTaskDescription" placeholder="Descripción"></textarea>
+    <button class="btn" (click)="addTask()">Agregar tarea</button>
+  </div>
+
+  <!-- Columnas tipo Notion -->
+  <div class="columns">
+    <div class="column">
+      <h3>🕐 Por hacer</h3>
+      <div class="task-card card" *ngFor="let task of getTasksByStatus('todo')">
+        <h4>{{ task.title }}</h4>
+        <p>{{ task.description }}</p>
+        <div class="actions">
+          <button class="btn" (click)="moveTask(task, 'inprogress')">Iniciar</button>
+          <button class="btn" (click)="deleteTask(task)">🗑️</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h3>🚧 En progreso</h3>
+      <div class="task-card card" *ngFor="let task of getTasksByStatus('inprogress')">
+        <h4>{{ task.title }}</h4>
+        <p>{{ task.description }}</p>
+        <div class="actions">
+          <button class="btn" (click)="moveTask(task, 'done')">Completar</button>
+          <button class="btn" (click)="deleteTask(task)">🗑️</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h3>✅ Completadas</h3>
+      <div class="task-card card" *ngFor="let task of getTasksByStatus('done')">
+        <h4>{{ task.title }}</h4>
+        <p>{{ task.description }}</p>
+        <div class="actions">
+          <button class="btn" (click)="deleteTask(task)">🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

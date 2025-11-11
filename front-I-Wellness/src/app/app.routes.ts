@@ -53,6 +53,7 @@ import { InfoServicioComponent } from './features/users/proveedor/info-servicio/
 import { ProfilePageComponent } from './features/users/proveedor/profile-page/profile-page.component';
 import { VerRutasComponent } from './features/users/turista/ver-rutas/ver-rutas.component';
 
+
 export const routes: Routes = [
   // Rutas públicas
   { path: '', component: HomeComponent },
@@ -181,7 +182,20 @@ export const routes: Routes = [
   { path: 'crearturista', redirectTo: '/admin/crear-turista', pathMatch: 'full' },
   { path: 'crearproveedor', redirectTo: '/admin/crear-proveedor', pathMatch: 'full' },
   { path: 'dashboard-admin', redirectTo: '/admin/dashboard', pathMatch: 'full' },
-
+  
+  // Módulo de tareas - carga perezosa (alias en inglés y español)
+    {
+      path: 'tasks',
+      loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
+      canActivate: [authGuard]
+    },
+    {
+      path: 'tareas',
+      loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
+      canActivate: [authGuard]
+    },
+  
+  
   // Ruta comodín - redirige a home
   { path: '**', redirectTo: '' },
 ];
