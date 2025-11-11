@@ -25,7 +25,7 @@ Los servicios del módulo tasks están configurados para usar rutas relativas:
 **TaskService** (`task.service.ts`):
 - Base URL: `/api/tasks`
 - Endpoints:
-  - `GET /api/tasks` - Lista de tareas
+  - `GET /api/tasks/all` - Lista de tareas
   - `GET /api/tasks/{id}` - Detalle de tarea
   - `POST /api/tasks` - Crear tarea
   - `PUT /api/tasks/{id}` - Actualizar tarea
