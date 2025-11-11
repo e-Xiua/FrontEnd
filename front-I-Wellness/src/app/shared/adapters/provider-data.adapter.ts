@@ -1,5 +1,7 @@
 import { BackendEnrichedProviderDTO, BackendProviderDTO } from "../models/backend-provider.dto";
+import { ExtendedPlaceData, placeDataDefaults } from "../models/place-data.model";
 import { EnrichedProviderData, Provider } from "../models/provider.models";
+import { usuarios } from "../models/usuarios";
 
 /**
  * Normalize a backend enriched provider payload into EnrichedProviderData
@@ -59,6 +61,93 @@ export function buildFallbackEnrichedProvider(raw: any): EnrichedProviderData {
 		categories: []
 	};
 }
+
+export function mapUsuarioToExtendedPlaceData(user: usuarios): ExtendedPlaceData {
+	if (!user) {
+		throw new Error('mapUsuarioToExtendedPlaceData: user is required');
+	}
+
+	const proveedorInfo = user.proveedorInfo ?? {};
+	const normalizedId = typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
+	const providerName = proveedorInfo.nombre_empresa
+		?? proveedorInfo.nombreEmpresa
+		?? user.nombre
+		?? placeDataDefaults.contactName;
+
+	const categories = Array.isArray(proveedorInfo.categorias)
+		? proveedorInfo.categorias.filter(Boolean)
+		: proveedorInfo.categoria
+			? [proveedorInfo.categoria]
+			: [];
+
+	const totalReviews = typeof proveedorInfo.total_resenas === 'number'
+		? proveedorInfo.total_resenas
+		: Array.isArray(proveedorInfo.resenas)
+			? proveedorInfo.resenas.length
+			: 0;
+
+	const contactName = user.nombre ?? proveedorInfo.cargo_contacto ?? placeDataDefaults.contactName;
+	const photoSeed = contactName || providerName;
+	const foto = user.foto
+		?? proveedorInfo.foto
+		?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(photoSeed)}`;
+
+	return {
+		id: Number.isNaN(normalizedId) ? 0 : normalizedId,
+		name: providerName,
+		contactName,
+		correo: user.correo ?? placeDataDefaults.correo,
+		foto,
+		category: categories[0] ?? placeDataDefaults.category,
+		rating: coerceNumber(proveedorInfo.promedioCalificacion ?? proveedorInfo.rating) ?? 0,
+		totalReviews,
+		address: proveedorInfo.direccion ?? placeDataDefaults.address,
+		hours: proveedorInfo.horario ?? placeDataDefaults.hours,
+		description: proveedorInfo.descripcion ?? placeDataDefaults.description,
+		phone: proveedorInfo.telefono ?? placeDataDefaults.phone,
+		companyPhone: proveedorInfo.telefono_empresa ?? proveedorInfo.telefono ?? placeDataDefaults.companyPhone,
+		cargoContacto: proveedorInfo.cargo_contacto ?? placeDataDefaults.cargoContacto,
+		certificadosCalidad: proveedorInfo.certificados_calidad ?? null,
+		identificacionFiscal: proveedorInfo.identificacion_fiscal ?? null,
+		licenciasPermisos: proveedorInfo.licencias_permisos ?? null,
+		services: Array.isArray(proveedorInfo.servicios) ? proveedorInfo.servicios : [],
+		reviews: Array.isArray(proveedorInfo.resenas) ? proveedorInfo.resenas : [],
+		categories,
+		averageCost: coerceNumber(
+			proveedorInfo.promedioCosto
+				?? proveedorInfo.costo_promedio
+				?? proveedorInfo.costoPromedio
+		) ?? undefined,
+		averageVisitDuration: coerceNumber(
+			proveedorInfo.promedioDuracion
+				?? proveedorInfo.tiempo_promedio
+				?? proveedorInfo.tiempoPromedio
+		) ?? undefined,
+		provider: {
+			id: Number.isNaN(normalizedId) ? 0 : normalizedId,
+			foto: user.foto ?? null,
+			correo: user.correo ?? null,
+			nombre: user.nombre ?? null,
+			nombre_empresa: providerName,
+			proveedorInfo
+		}
+	};
+}
+
+	function coerceNumber(value: unknown): number | undefined {
+		if (typeof value === 'number' && !Number.isNaN(value)) {
+			return value;
+		}
+
+		if (typeof value === 'string' && value.trim().length > 0) {
+			const parsed = Number(value);
+			if (!Number.isNaN(parsed)) {
+				return parsed;
+			}
+		}
+
+		return undefined;
+	}
 
 // Helpers
 
