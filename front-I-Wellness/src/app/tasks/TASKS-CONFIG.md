@@ -67,7 +67,7 @@ cd /home/estudiante/Tesis/tasks_api
 
 O manualmente:
 ```bash
-curl http://localhost:8091/api/tasks
+curl http://localhost:8091/api/tasks/all
 ```
 
 ### 2. Verificar el proxy del frontend
