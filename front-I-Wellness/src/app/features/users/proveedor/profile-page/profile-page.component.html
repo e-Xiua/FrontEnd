@@ -63,11 +63,11 @@
                 <button
                   class="btn btn-outline btn-primary gap-2"
                   (click)="addContact()"
-                  [disabled]="isAddingContact || isContact">
-                  <i *ngIf="!isAddingContact && !isContact" class="fas fa-user-plus w-4 h-4"></i>
-                  <span *ngIf="isAddingContact" class="loading loading-spinner"></span>
-                  <span *ngIf="!isContact">Seguir</span>
-                  <span *ngIf="isContact">Siguiendo</span>
+                  [disabled]="(isAddingContact$ | async) || (isContact$ | async)">
+                  <i *ngIf="!(isAddingContact$ | async) && !(isContact$ | async)" class="fas fa-user-plus w-4 h-4"></i>
+                  <span *ngIf="(isAddingContact$ | async)" class="loading loading-spinner"></span>
+                  <span *ngIf="!(isContact$ | async)">Seguir</span>
+                  <span *ngIf="(isContact$ | async)">Siguiendo</span>
                 </button>
               </div>
               </div>
