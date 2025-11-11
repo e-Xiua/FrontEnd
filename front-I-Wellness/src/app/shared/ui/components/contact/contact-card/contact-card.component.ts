@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ChatProvider } from '../../../../models/chat';
 import { AnimationContext } from '../../../../services/animation-strategy.service';
 import { ChatIntegrationService } from '../../../../services/chat-integration.service';
 import { ContactMenuComponent } from '../contact-menu/contact-menu.component';
+import { EmailBulkModalComponent } from '../email-bulk-modal/email-bulk-modal.component';
 
 @Component({
   selector: 'app-contact-card',
@@ -28,6 +30,8 @@ export class ContactCardComponent {
   @Output() cardClick = new EventEmitter<ChatProvider>();
   @Output() chatClick = new EventEmitter<ChatProvider>();
   @Output() profileClick = new EventEmitter<ChatProvider>();
+
+  private dialog = inject(MatDialog);
 
   constructor(
     private router: Router,
@@ -138,5 +142,34 @@ export class ContactCardComponent {
     };
 
     return iconMap[category.toLowerCase()] || iconMap['default'];
+  }
+
+  onBulkEmailClick(event: Event): void {
+    event.stopPropagation();
+    const dialogRef = this.dialog.open(EmailBulkModalComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: false,
+      autoFocus: true,
+      data: {
+        initialEmail: this.provider.email || ''
+      }
+    });
+
+    dialogRef.afterOpened().subscribe(() => {
+      const overlayContainer = document.querySelector('.cdk-overlay-container');
+      const overlayPane = document.querySelector('.cdk-overlay-pane');
+      const backdrop = document.querySelector('.cdk-overlay-backdrop');
+      
+      if (overlayContainer) {
+        (overlayContainer as HTMLElement).style.zIndex = '12000';
+      }
+      if (overlayPane) {
+        (overlayPane as HTMLElement).style.zIndex = '12000';
+      }
+      if (backdrop) {
+        (backdrop as HTMLElement).style.zIndex = '11999';
+      }
+    });
   }
 }
