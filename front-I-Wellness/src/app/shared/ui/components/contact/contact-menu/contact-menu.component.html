@@ -1,4 +1,5 @@
 <button
+  *ngIf="hasAnyContact"
   mat-stroked-button
   color="primary"
   class="contact-button"
@@ -12,6 +13,7 @@
 
 <mat-menu #contactMenu="matMenu" class="contact-menu" [overlapTrigger]="false">
   <button
+    *ngIf="hasPhone"
     mat-menu-item
     (click)="openWhatsApp(provider)"
     class="menu-item whatsapp-item">
@@ -20,6 +22,7 @@
   </button>
 
   <button
+    *ngIf="hasPhone"
     mat-menu-item
     (click)="openTelegram(provider)"
     class="menu-item telegram-item">
@@ -28,6 +31,7 @@
   </button>
 
   <button
+    *ngIf="hasEmail"
     mat-menu-item
     (click)="openEmail(provider)"
     class="menu-item email-item">
