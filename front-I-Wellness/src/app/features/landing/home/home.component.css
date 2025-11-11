@@ -152,6 +152,11 @@
   z-index: 1;
 }
 
+.features-overview .section-header h2 {
+  color: #0f172a;
+  font-weight: 800;
+}
+
 .section-header {
   text-align: center;
   margin-bottom: 4rem;
@@ -163,9 +168,10 @@
 .section-header h2 {
   font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 700;
-  color: var(--primary);
+  color: #1e3a5f;
   margin: 0 0 1.25rem;
   line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .section-header p {
@@ -435,6 +441,11 @@
   z-index: 1;
 }
 
+.roles-section .section-header h2 {
+  color: #0f172a;
+  font-weight: 800;
+}
+
 .roles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
@@ -522,6 +533,11 @@
   background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   position: relative;
   z-index: 1;
+}
+
+.gallery-section .section-header h2 {
+  color: #0f172a;
+  font-weight: 800;
 }
 
 .image-gallery, .galeria {
