@@ -11,10 +11,10 @@
  * Used by ProfilePageComponent to simplify its logic and make it a pure view component.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, finalize, map, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { catchError, finalize, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ServicioService } from '../../features/servicios/services/servicio.service';
 import { UsuarioService } from '../../features/users/services/usuario.service';
@@ -45,7 +45,7 @@ export interface ContactAddedEvent {
 @Injectable({
   providedIn: 'root'
 })
-export class ProfileStateService {
+export class ProfileStateService implements OnDestroy {
   // ========== PRIVATE STATE ==========
   private readonly _state$ = new BehaviorSubject<ProfileState>({
     provider: null,
@@ -57,6 +57,8 @@ export class ProfileStateService {
     isContact: false,
     isAddingContact: false
   });
+
+  private readonly destroy$ = new Subject<void>();
 
   // Event stream for contact additions
   private readonly _contactAdded$ = new BehaviorSubject<ContactAddedEvent | null>(null);
@@ -83,11 +85,19 @@ export class ProfileStateService {
     private readonly authService: AuthService
   ) {
     // Initialize current user ID on service creation
-    this.authService.getCurrentUserId()
-      .pipe(take(1))
-      .subscribe(id => {
-        this.updateState({ currentUserId: id });
-      });
+    this.authService.userId$
+  .pipe(takeUntil(this.destroy$)) // or however you clean up singletons
+  .subscribe(id => {
+    this.updateState({ currentUserId: id, isContact: false, isAddingContact: false });
+    if (id === null) {
+      this.clearSession(); // optional: wipe provider state on logout
+    }
+  });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -241,6 +251,25 @@ export class ProfileStateService {
   }
 
   /**
+   * Clears all cached session data. Should be called on logout so that
+   * subsequent logins start from a clean slate.
+   */
+  clearSession(): void {
+    this._state$.next({
+      provider: null,
+      services: [],
+      isLoading: false,
+      error: null,
+      currentUserId: null,
+      targetProviderId: null,
+      isContact: false,
+      isAddingContact: false
+    });
+
+    this._contactAdded$.next(null);
+  }
+
+  /**
    * Get contacts for the current authenticated user
    * Returns an Observable of raw contact data (usuarios[])
    */
@@ -286,10 +315,12 @@ export class ProfileStateService {
       .subscribe({
         next: id => {
           if (id) {
+            this.updateState({ currentUserId: id });
             this.fetchProviderData(id);
           } else {
             this.updateState({
               error: 'No se pudo obtener el ID del usuario actual',
+              currentUserId: null,
               isLoading: false
             });
           }
@@ -298,6 +329,7 @@ export class ProfileStateService {
           console.error('Error obteniendo ID del usuario:', err);
           this.updateState({
             error: 'Error al obtener el usuario actual',
+            currentUserId: null,
             isLoading: false
           });
         }
