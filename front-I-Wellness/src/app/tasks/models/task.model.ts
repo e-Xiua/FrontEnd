@@ -1,11 +1,17 @@
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
 export interface TaskDto {
   id?: number;
   title: string;
   description?: string;
   responsibleId?: string;
   responsibleName?: string;
+  project?: string;
+  priority?: TaskPriority;
+  progress?: number; // 0-100
   dueDate?: string; // ISO date
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  status: TaskStatus;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -17,8 +23,18 @@ export interface TaskDetailDto extends TaskDto {
 export interface MessageDto {
   id?: number;
   taskId: number;
-  senderId?: string;
-  senderName?: string;
+  senderId: string;
+  receiverId?: string;
   content: string;
-  createdAt?: string;
+  timestamp?: string;
+  readFlag?: boolean;
+}
+
+export interface TaskKpiDto {
+  total: number;
+  todo: number;
+  inProgress: number;
+  done: number;
+  cancelled: number;
+  overdue: number;
 }

@@ -1,27 +1,88 @@
-<body>
-    <div class="container">
-        <aside class="sidebar">
-            <h2>Hola Admin</h2>
-            <ul>
-                <li class="active">&#9998; Edit profile</li>
-            </ul>
+<div class="perfil-admin-container">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-icon">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <h1>Panel de Administrador</h1>
+        <p class="hero-subtitle">Gestiona tu perfil de administrador</p>
+      </div>
+    </section>
+
+    <!-- Form Section -->
+    <section class="form-section">
+      <div class="form-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav">
+          <div class="nav-header">
+            <p class="welcome-text">Hola Admin</p>
+          </div>
+          <ul class="nav-menu">
+            <li class="nav-item active">
+              <i class="fas fa-user-edit"></i>
+              <span>Editar perfil</span>
+            </li>
+          </ul>
         </aside>
-        <main class="content">
-            <div class="profile-header">
-                <h1>Editar perfil</h1>
-                <img *ngIf="admin?.foto" [src]="admin.foto" alt="Profile Picture" class="profile-pic">
+
+        <!-- Form Content -->
+        <div class="form-content">
+          <div class="form-card">
+            <!-- Profile Photo Section -->
+            <div class="profile-photo-section" *ngIf="admin?.foto">
+              <h3 class="section-title">
+                <i class="fas fa-user-circle"></i>
+                Foto de Perfil
+              </h3>
+              <div class="photo-container-readonly">
+                <img [src]="admin.foto" alt="Foto de Perfil Admin" class="profile-photo">
+              </div>
             </div>
+
+            <!-- Profile Form -->
             <form class="profile-form">
-                <div class="input-group full-width">
-                    <label>Nombre</label>
-                    <input type="text" [(ngModel)]="admin.nombre" name="nombre">
+              <!-- Admin Information -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-shield-alt"></i>
+                  Información del Administrador
+                </h3>
+                
+                <div class="input-group">
+                  <label for="nombre">Nombre Completo *</label>
+                  <input 
+                    id="nombre"
+                    type="text" 
+                    [(ngModel)]="admin.nombre" 
+                    name="nombre"
+                    placeholder="Nombre del administrador"
+                    required>
                 </div>
 
-                <div class="buttons">
-                    <button class="cancel" (click)="navigateTo('homeadmin')">Cancel</button>
-                    <button class="save" (click)="guardarCambios()">Save</button>
+                <div class="info-banner">
+                  <i class="fas fa-info-circle"></i>
+                  <p>Como administrador, tu perfil es gestionado por el sistema. Si necesitas hacer cambios adicionales, contacta con el super administrador.</p>
                 </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="navigateTo('homeadmin')">
+                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+                <button type="button" class="btn-save" (click)="guardarCambios()">
+                  <i class="fas fa-save"></i>
+                  Guardar Cambios
+                </button>
+              </div>
             </form>
-        </main>
-    </div>
-</body>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

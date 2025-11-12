@@ -1,93 +1,90 @@
-<div class="min-h-screen bg-background">
+<div class="profile-page-container">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="min-h-screen flex items-center justify-center">
-    <div class="text-center animate-fade-in">
-      <div class="spinner-border text-primary mb-4" role="status">
-        <span class="sr-only">Cargando...</span>
-      </div>
-      <p class="text-muted-foreground">Cargando información del proveedor...</p>
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner-modern"></div>
+      <p>Cargando información del proveedor...</p>
     </div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="min-h-screen flex items-center justify-center">
-    <div class="text-center animate-fade-in">
-      <h1 class="text-2xl font-bold text-foreground mb-2">Error al cargar el perfil</h1>
-      <p class="text-muted-foreground mb-4">{{ error }}</p>
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <h1>Error al cargar el perfil</h1>
+      <p>{{ error }}</p>
     </div>
   </div>
 
   <!-- Provider Not Found -->
-  <div *ngIf="!provider && !isLoading && !error" class="min-h-screen flex items-center justify-center">
-    <div class="text-center animate-fade-in">
-      <h1 class="text-2xl font-bold text-foreground mb-2">Proveedor no encontrado</h1>
-      <p class="text-muted-foreground mb-4">El proveedor que buscas no existe.</p>
+  <div *ngIf="!provider && !isLoading && !error" class="not-found-state">
+    <div class="not-found-content">
+      <i class="fas fa-user-slash"></i>
+      <h1>Proveedor no encontrado</h1>
+      <p>El proveedor que buscas no existe.</p>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div *ngIf="provider && !isLoading && !error">
-    <!-- Header -->
-    <header class="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
-      <div class="container mx-auto px-4 py-4">
-      </div>
-    </header>
-
+  <div *ngIf="provider && !isLoading && !error" class="main-content">
     <!-- Profile Content -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl">
-      <!-- LinkedIn-style Profile Header -->
-      <div class="bg-card rounded-2xl shadow-card overflow-hidden mb-6 animate-fade-in">
-        <!-- Cover/Header Banner -->
-        <div class="h-32 bg-gradient-primary"></div>
+    <main class="profile-content">
+      <!-- Profile Header Card -->
+      <div class="profile-header-card">
+        <!-- Cover Banner with Gradient -->
+        <div class="cover-banner"></div>
 
-        <div class="px-8 pb-6">
+        <div class="profile-header-content">
           <!-- Profile Photo & Basic Info -->
-          <div class="flex flex-col xl:flex-row gap-6 -mt-16 mb-6">
+          <div class="profile-header-grid">
             <img
               title="Avatar de {{ provider.contactName }}"
               [src]="provider.foto"
               [alt]="provider.contactName"
-              class="w-32 h-32 rounded-full ring-4 ring-card bg-card object-cover">
+              class="profile-avatar">
 
-            <div class="flex-1 mt-16 md:mt-20">
-              <h1 class="text-3xl font-bold text-foreground mb-1">{{ provider.contactName }}</h1>
-              <p class="text-xl text-muted-foreground mb-2">{{ provider.cargoContacto }}</p>
-              <p class="text-lg font-semibold text-foreground mb-3">{{ provider.name }}</p>
+            <div class="profile-main-info">
+              <h1 class="provider-name">{{ provider.contactName }}</h1>
+              <p class="provider-role">{{ provider.cargoContacto }}</p>
+              <p class="provider-company">{{ provider.name }}</p>
 
-              <div class="flex items-center gap-4 mb-4">
-                <div class="flex items-center gap-1">
-                  <span class="ml-2 font-semibold">{{ provider.rating }}</span>
-                  <span class="text-muted-foreground">({{ provider.totalReviews }} reseñas)</span>
+              <div class="provider-stats">
+                <div class="rating-display">
+                  <i class="fas fa-star"></i>
+                  <span class="rating-value">{{ provider.rating }}</span>
+                  <span class="rating-count">({{ provider.totalReviews }} reseñas)</span>
                 </div>
-                <div *ngIf="currentUserId && provider && currentUserId !== provider.id" class="my-4">
+                
                 <button
-                  class="btn btn-outline btn-primary gap-2"
+                  *ngIf="currentUserId && provider && currentUserId !== provider.id"
+                  class="btn-follow"
                   (click)="addContact()"
                   [disabled]="(isAddingContact$ | async) || (isContact$ | async)">
-                  <i *ngIf="!(isAddingContact$ | async) && !(isContact$ | async)" class="fas fa-user-plus w-4 h-4"></i>
-                  <span *ngIf="(isAddingContact$ | async)" class="loading loading-spinner"></span>
+                  <i *ngIf="!(isAddingContact$ | async) && !(isContact$ | async)" class="fas fa-user-plus"></i>
+                  <span *ngIf="(isAddingContact$ | async)" class="loading-spinner-small"></span>
                   <span *ngIf="!(isContact$ | async)">Seguir</span>
                   <span *ngIf="(isContact$ | async)">Siguiendo</span>
                 </button>
               </div>
-              </div>
 
-              <!-- Categories as Bubble Badges -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
+              <!-- Category Badge -->
+              <div class="category-badges">
+                <span class="category-badge">
+                  <i class="fas fa-tag"></i>
                   {{ provider.category }}
                 </span>
               </div>
 
-              <div class="flex items-center gap-2 text-muted-foreground">
-                <i class="fas fa-map-marker-alt w-4 h-4"></i>
-                <span class="text-sm">{{ provider.address }}</span>
+              <!-- Location -->
+              <div class="provider-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ provider.address }}</span>
               </div>
             </div>
 
             <app-make-networking-contact
               *ngIf="showNetworkingCard"
-              class="w-full md:max-w-xs xl:self-start xl:mt-20"
+              class="networking-card-container"
               (connect)="startConversation()"
             ></app-make-networking-contact>
           </div>
@@ -95,85 +92,93 @@
       </div>
 
       <!-- About Section -->
-      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-1">
-        <h2 class="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <i class="fas fa-briefcase w-6 h-6 text-primary"></i>
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-briefcase"></i>
           Acerca de
         </h2>
-        <p class="text-muted-foreground leading-relaxed">{{ provider.description }}</p>
+        <p class="about-description">{{ provider.description }}</p>
       </div>
 
       <!-- Contact & Business Information -->
-      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-2">
-        <h2 class="text-2xl font-bold text-foreground mb-6">Información de Contacto</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-            <i class="fas fa-envelope w-5 h-5 text-primary flex-shrink-0"></i>
-            <div class="min-w-0">
-              <p class="text-sm text-muted-foreground">Email</p>
-              <p class="font-medium text-foreground truncate">{{ provider.email }}</p>
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-address-book"></i>
+          Información de Contacto
+        </h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <div class="contact-details">
+              <p class="contact-label">Email</p>
+              <p class="contact-value">{{ provider.email }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-            <i class="fas fa-phone w-5 h-5 text-primary flex-shrink-0"></i>
-            <div>
-              <p class="text-sm text-muted-foreground">Teléfono</p>
-              <p class="font-medium text-foreground">{{ provider.phone }}</p>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <div class="contact-details">
+              <p class="contact-label">Teléfono</p>
+              <p class="contact-value">{{ provider.phone }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-            <i class="fas fa-phone-alt w-5 h-5 text-primary flex-shrink-0"></i>
-            <div>
-              <p class="text-sm text-muted-foreground">Teléfono Empresa</p>
-              <p class="font-medium text-foreground">{{ provider.companyPhone }}</p>
+          <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <div class="contact-details">
+              <p class="contact-label">Teléfono Empresa</p>
+              <p class="contact-value">{{ provider.companyPhone }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-            <i class="fas fa-clock w-5 h-5 text-primary flex-shrink-0"></i>
-            <div>
-              <p class="text-sm text-muted-foreground">Horarios</p>
-              <p class="font-medium text-foreground">{{ provider.hours }}</p>
+          <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <div class="contact-details">
+              <p class="contact-label">Horarios</p>
+              <p class="contact-value">{{ provider.hours }}</p>
             </div>
           </div>
         </div>
 
         <!-- Certifications & Licenses -->
-        <div *ngIf="provider.certificadosCalidad && provider.certificadosCalidad.length > 0" class="mt-6">
-          <h3 class="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <i class="fas fa-award w-5 h-5 text-primary"></i>
+        <div *ngIf="provider.certificadosCalidad && provider.certificadosCalidad.length > 0" class="certifications-section">
+          <h3 class="section-subtitle">
+            <i class="fas fa-award"></i>
             Certificaciones y Estándares de Calidad
           </h3>
-          <div class="flex flex-wrap gap-2">
+          <div class="badges-container">
             <span
               *ngFor="let cert of provider.certificadosCalidad"
-              class="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-sm border border-green-200">
+              class="certification-badge">
+              <i class="fas fa-check-circle"></i>
               {{ cert }}
             </span>
           </div>
         </div>
 
-        <div *ngIf="provider.licenciasPermisos && provider.licenciasPermisos.length > 0" class="mt-6">
-          <h3 class="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <i class="fas fa-file-alt w-5 h-5 text-primary"></i>
+        <div *ngIf="provider.licenciasPermisos && provider.licenciasPermisos.length > 0" class="certifications-section">
+          <h3 class="section-subtitle">
+            <i class="fas fa-file-alt"></i>
             Licencias y Permisos
           </h3>
-          <div class="space-y-2">
-            <p *ngFor="let license of provider.licenciasPermisos" class="text-muted-foreground text-sm flex items-center gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          <div class="licenses-list">
+            <p *ngFor="let license of provider.licenciasPermisos" class="license-item">
+              <i class="fas fa-circle"></i>
               {{ license }}
             </p>
           </div>
         </div>
 
-        <div *ngIf="provider.identificacionFiscal" class="mt-6 p-4 bg-muted/30 rounded-lg">
-          <p class="text-sm text-muted-foreground">
-            ID Fiscal: <span class="font-mono font-medium text-foreground">{{ provider.identificacionFiscal }}</span>
-          </p>
+        <div *ngIf="provider.identificacionFiscal" class="fiscal-info">
+          <i class="fas fa-id-card"></i>
+          <span>ID Fiscal:</span>
+          <strong>{{ provider.identificacionFiscal }}</strong>
         </div>
       </div>
 
-      <section *ngIf="showRouteGeneration && provider" class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
-        <h2 class="text-2xl font-bold text-foreground mb-6">Rutas generadas</h2>
+      <!-- Route Generation Section -->
+      <section *ngIf="showRouteGeneration && provider" class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-route"></i>
+          Rutas Generadas
+        </h2>
         <app-route-generation
           [showHeader]="false"
           [userId]="provider.id"
@@ -183,43 +188,55 @@
       </section>
 
       <!-- Services Section -->
-      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
-        <h2 class="text-2xl font-bold text-foreground mb-6">Servicios Ofrecidos</h2>
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-concierge-bell"></i>
+          Servicios Ofrecidos
+        </h2>
 
         <ng-container *ngIf="showServiceManager; else providerServicesDefault">
           <app-provider-service-list-container></app-provider-service-list-container>
         </ng-container>
 
         <ng-template #providerServicesDefault>
-          <div *ngIf="services.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div *ngFor="let service of services" class="bg-muted/30 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h3 class="text-lg font-semibold text-foreground mb-2">{{ service.nombre || 'Servicio sin nombre' }}</h3>
-              <p class="text-muted-foreground text-sm mb-3">{{ service.descripcion || 'Sin descripción disponible' }}</p>
-              <div class="flex items-center justify-between">
-                <span class="text-primary font-semibold">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
-                <span class="text-xs text-muted-foreground">{{ service.categoria || 'General' }}</span>
+          <div *ngIf="services.length > 0" class="services-grid">
+            <div *ngFor="let service of services" class="service-card">
+              <h3 class="service-name">{{ service.nombre || 'Servicio sin nombre' }}</h3>
+              <p class="service-description">{{ service.descripcion || 'Sin descripción disponible' }}</p>
+              <div class="service-footer">
+                <span class="service-price">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span class="service-category">{{ service.categoria || 'General' }}</span>
               </div>
             </div>
           </div>
 
-          <div *ngIf="services.length === 0" class="text-center py-8">
-            <i class="fas fa-box-open text-4xl text-muted-foreground mb-4"></i>
-            <p class="text-muted-foreground">No hay servicios disponibles para mostrar.</p>
+          <div *ngIf="services.length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <p>No hay servicios disponibles para mostrar.</p>
           </div>
         </ng-template>
       </div>
 
       <!-- Reviews Section -->
-      <div class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-4">
+      <div class="info-card reviews-section">
+        <h2 class="card-title">
+          <i class="fas fa-star"></i>
+          Reseñas y Opiniones
+        </h2>
 
-        <app-review-form
-              [entityType]="'proveedor'"
-              [entityId]="provider.id">
-            </app-review-form>
-        <app-review-display
-                [entityType]="'proveedor'"
-                [entityId]="provider.id">
-        </app-review-display>
+        <div class="review-form-wrapper">
+          <app-review-form
+            [entityType]="'proveedor'"
+            [entityId]="provider.id">
+          </app-review-form>
+        </div>
+
+        <div class="review-display-wrapper">
+          <app-review-display
+            [entityType]="'proveedor'"
+            [entityId]="provider.id">
+          </app-review-display>
+        </div>
       </div>
     </main>
   </div>

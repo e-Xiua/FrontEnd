@@ -1,17 +1,15 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { TaskDto } from '../../tasks/models/task.model';
-import { TaskService } from '../../tasks/services/task.service';
+import { TaskDto } from '../models/task.model';
+import { TaskService } from '../services/task.service';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,8 +33,11 @@ export class TaskFormComponent implements OnInit {
       title: [this.initial?.title || '', Validators.required],
       description: [this.initial?.description || ''],
       responsibleName: [this.initial?.responsibleName || ''],
+      project: [this.initial?.project || ''],
+      priority: [this.initial?.priority || 'MEDIUM'],
+      progress: [this.initial?.progress || 0],
       dueDate: [this.initial?.dueDate || ''],
-      status: [this.initial?.status || 'PENDING'],
+      status: [this.initial?.status || 'TODO'],
     });
 
     // If route contains an id param, load it for editing
@@ -50,6 +51,9 @@ export class TaskFormComponent implements OnInit {
           title: t.title,
           description: t.description,
           responsibleName: t.responsibleName,
+          project: t.project,
+          priority: t.priority || 'MEDIUM',
+          progress: t.progress || 0,
           dueDate: t.dueDate,
           status: t.status,
         });
@@ -58,12 +62,60 @@ export class TaskFormComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Formulario inválido',
+        text: 'Por favor completa todos los campos requeridos.',
+        confirmButtonColor: '#4a9c9f'
+      });
+      return;
+    }
+
     const value = this.form.value as TaskDto;
+    
     if (this.isEditing && this.initial?.id) {
-      this.taskService.update(this.initial.id, value).subscribe(() => this.router.navigate(['/tasks']));
+      this.taskService.update(this.initial.id, value).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Tarea actualizada',
+            text: 'La tarea ha sido actualizada correctamente.',
+            confirmButtonColor: '#4a9c9f'
+          });
+          this.router.navigate(['/tasks']);
+        },
+        error: (err) => {
+          console.error('Error al actualizar tarea:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo actualizar la tarea. Intenta nuevamente.',
+            confirmButtonColor: '#4a9c9f'
+          });
+        }
+      });
     } else {
-      this.taskService.create(value).subscribe(() => this.router.navigate(['/tasks']));
+      this.taskService.create(value).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Tarea creada',
+            text: 'La tarea ha sido creada correctamente.',
+            confirmButtonColor: '#4a9c9f'
+          });
+          this.router.navigate(['/tasks']);
+        },
+        error: (err) => {
+          console.error('Error al crear tarea:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo crear la tarea. Intenta nuevamente.',
+            confirmButtonColor: '#4a9c9f'
+          });
+        }
+      });
     }
   }
 }
