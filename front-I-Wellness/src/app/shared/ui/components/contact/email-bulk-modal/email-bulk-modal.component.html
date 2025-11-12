@@ -1,0 +1,92 @@
+<div class="email-bulk-modal">
+  <div class="modal-header">
+    <h2 mat-dialog-title>
+      <mat-icon>email</mat-icon>
+      Enviar correo a múltiples contactos
+    </h2>
+    <button mat-icon-button class="close-button" (click)="onCancel()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="emailForm" class="email-form">
+      <div class="emails-section">
+        <label class="section-label">Correos electrónicos</label>
+        <div formArrayName="emails" class="emails-container">
+          <div
+            *ngFor="let emailControl of emails.controls; let i = index"
+            class="email-field-row">
+            <mat-form-field appearance="outline" class="email-field">
+              <mat-label>Correo electrónico {{ i + 1 }}</mat-label>
+              <input
+                matInput
+                type="email"
+                [formControlName]="i"
+                placeholder="ejemplo@correo.com"
+                [class.invalid]="emails.at(i).invalid && emails.at(i).touched">
+              <mat-icon matPrefix>email</mat-icon>
+              <mat-error *ngIf="emails.at(i).hasError('required') && emails.at(i).touched">
+                El correo es requerido
+              </mat-error>
+              <mat-error *ngIf="emails.at(i).hasError('email') && emails.at(i).touched">
+                Correo inválido
+              </mat-error>
+            </mat-form-field>
+
+            <button
+              *ngIf="emails.length > 1"
+              mat-icon-button
+              type="button"
+              color="warn"
+              class="remove-button"
+              (click)="removeEmailField(i)"
+              [attr.aria-label]="'Eliminar correo ' + (i + 1)">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <button
+          mat-stroked-button
+          type="button"
+          color="primary"
+          class="add-email-button"
+          (click)="addEmailField()">
+          <mat-icon>add</mat-icon>
+          Agregar otro correo
+        </button>
+      </div>
+
+      <div class="message-section">
+        <mat-form-field appearance="outline" class="message-field">
+          <mat-label>Mensaje</mat-label>
+          <textarea
+            matInput
+            formControlName="message"
+            rows="6"
+            placeholder="Escribe tu mensaje aquí..."></textarea>
+          <mat-error *ngIf="emailForm.get('message')?.hasError('required') && emailForm.get('message')?.touched">
+            El mensaje es requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="modal-actions">
+    <button mat-button type="button" (click)="onCancel()">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="onSend()"
+      [disabled]="!emailForm.valid || getValidEmails().length === 0">
+      <mat-icon>send</mat-icon>
+      Enviar
+    </button>
+  </mat-dialog-actions>
+</div>
+
