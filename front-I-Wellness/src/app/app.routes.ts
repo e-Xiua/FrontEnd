@@ -39,7 +39,6 @@ import { ServiciosProveedorComponent } from './features/users/proveedor/servicio
 import { EditPreferenciasComponent } from './features/users/turista/edit-preferencias/edit-preferencias.component';
 import { FormulariogustosComponent } from './features/users/turista/formulariogustos/formulariogustos.component';
 import { HomeTuristaComponent } from './features/users/turista/home-turista/home-turista.component';
-import { MapaEmpresasComponent } from './features/users/turista/mapa-empresas/mapa-empresas.component';
 import { PerfilTuristaComponent } from './features/users/turista/perfil-turista/perfil-turista.component';
 import { RegistroTuristaComponent } from './features/users/turista/registro-turista/registro-turista.component';
 import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta-detalle.component';
@@ -49,6 +48,7 @@ import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-
 import { CalendarioComponent } from './features/calendario/calendario.component';
 import { DashboardTestComponent } from './features/dashboard-test/dashboard-test.component';
 import { CreadorDeRutasComponent } from './features/users/administrador/creador-de-rutas/creador-de-rutas.component';
+import { GeneradorDeRutasProveedorComponent } from './features/users/proveedor/generador-de-rutas-proveedor/generador-de-rutas-proveedor.component';
 import { InfoServicioComponent } from './features/users/proveedor/info-servicio/info-servicio.component';
 import { ProfilePageComponent } from './features/users/proveedor/profile-page/profile-page.component';
 import { VerRutasComponent } from './features/users/turista/ver-rutas/ver-rutas.component';
@@ -111,7 +111,7 @@ export const routes: Routes = [
       { path: 'editar-servicio/:id', component: EditarServicioComponent },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'perfil/:id', component: PerfilProveedorComponent },
-      { path: 'rutas', component: MapaEmpresasComponent },
+      { path: 'rutas', component: GeneradorDeRutasProveedorComponent},
       { path: 'ruta/:id', component: RutaDetalleComponent },
       { path: 'servicio/:id', component: InfoServicioComponent },
       { path: 'ver-perfil/:id', component: ProfilePageComponent },
@@ -182,7 +182,7 @@ export const routes: Routes = [
   { path: 'crearturista', redirectTo: '/admin/crear-turista', pathMatch: 'full' },
   { path: 'crearproveedor', redirectTo: '/admin/crear-proveedor', pathMatch: 'full' },
   { path: 'dashboard-admin', redirectTo: '/admin/dashboard', pathMatch: 'full' },
-  
+
   // Módulo de tareas - carga perezosa (alias en inglés y español)
     {
       path: 'tasks',
@@ -194,8 +194,8 @@ export const routes: Routes = [
       loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule),
       canActivate: [authGuard]
     },
-  
-  
+
+
   // Ruta comodín - redirige a home
   { path: '**', redirectTo: '' },
 ];
