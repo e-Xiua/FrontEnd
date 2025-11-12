@@ -70,4 +70,16 @@ export class ContactMenuComponent implements AfterViewInit {
     const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl, '_blank');
   }
+
+  get hasPhone(): boolean {
+    return !!this.provider?.telefono && this.provider.telefono.trim().length > 0;
+  }
+
+  get hasEmail(): boolean {
+    return !!this.provider?.email && this.provider.email.trim().length > 0;
+  }
+
+  get hasAnyContact(): boolean {
+    return this.hasPhone || this.hasEmail;
+  }
 }

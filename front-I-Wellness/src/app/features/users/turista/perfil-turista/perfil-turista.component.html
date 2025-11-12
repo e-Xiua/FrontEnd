@@ -1,67 +1,127 @@
-<body>
-    <!-- Mostrar spinner mientras carga -->
-    <div *ngIf="isLoading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Cargando perfil...</p>
+<div class="perfil-turista-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner-modern"></div>
+      <p>Cargando perfil...</p>
     </div>
+  </div>
 
-    <!-- Mostrar mensaje de error si no tiene autorización -->
-    <div *ngIf="unauthorized && !isLoading" class="unauthorized-container">
-        <div class="alert alert-danger">
-            <h2>Acceso denegado</h2>
-            <p>{{ error }}</p>
-            <button class="btn btn-primary" (click)="navigateTo()">Volver al inicio</button>
+  <!-- Unauthorized State -->
+  <div *ngIf="unauthorized && !isLoading" class="unauthorized-state">
+    <div class="unauthorized-content">
+      <i class="fas fa-lock"></i>
+      <h2>Acceso denegado</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="navigateTo()">Volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" *ngIf="!unauthorized && !isLoading">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-icon">
+          <i class="fas fa-user-circle"></i>
         </div>
-    </div>
+        <h1>Mi Perfil</h1>
+        <p class="hero-subtitle">Actualiza tu información personal</p>
+      </div>
+    </section>
 
-    <!-- Mostrar contenido normal solo si tiene autorización y no está cargando -->
-    <div class="container" *ngIf="!unauthorized && !isLoading">
-        <aside class="sidebar">
-            <p>Hola, {{usuario.nombre}}</p>
-            <ul>
-                <li class="active">📝 Edit profile</li>
-                <li><a [routerLink]="['/editpreferencias', usuario.id]">🎯 Preferencias</a></li>
-            </ul>
+    <!-- Form Section -->
+    <section class="form-section">
+      <div class="form-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav">
+          <div class="nav-header">
+            <p class="welcome-text">Hola, {{usuario.nombre}}</p>
+          </div>
+          <ul class="nav-menu">
+            <li class="nav-item active">
+              <i class="fas fa-user-edit"></i>
+              <span>Editar perfil</span>
+            </li>
+            <li class="nav-item">
+              <a [routerLink]="['/editpreferencias', usuario.id]">
+                <i class="fas fa-heart"></i>
+                <span>Preferencias</span>
+              </a>
+            </li>
+          </ul>
         </aside>
-        <main class="content">
-            <div class="profile-header">
-                <h1>Editar perfil</h1>
-                <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+
+        <!-- Form Content -->
+        <div class="form-content">
+          <div class="form-card">
+            <!-- Profile Photo Section -->
+            <div class="profile-photo-section">
+              <h3 class="section-title">
+                <i class="fas fa-camera"></i>
+                Foto de Perfil
+              </h3>
+              <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+              <div class="photo-container" (click)="seleccionarFoto()">
                 <img 
-                    [src]="fotoPreview || usuario.foto" 
-                    alt="Profile Picture" 
-                    class="profile-pic"
-                    (click)="seleccionarFoto()"
-                    title="Haz clic para cambiar tu foto de perfil">
+                  [src]="fotoPreview || usuario.foto" 
+                  alt="Foto de Perfil" 
+                  class="profile-photo"
+                  title="Haz clic para cambiar tu foto de perfil">
+                <div class="photo-overlay">
+                  <i class="fas fa-camera"></i>
+                  <span>Cambiar foto</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Profile Form -->
             <form class="profile-form">
-                <div class="input-group full-width">
-                    <label>Nombre</label>
-                    <input type="text" [(ngModel)]="usuario.nombre" name="nombre">
+              <!-- Personal Information -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-user"></i>
+                  Información Personal
+                </h3>
+                
+                <div class="input-group">
+                  <label for="nombre">Nombre Completo *</label>
+                  <input 
+                    id="nombre"
+                    type="text" 
+                    [(ngModel)]="usuario.nombre" 
+                    name="nombre"
+                    placeholder="Tu nombre completo"
+                    required>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Número de Contacto</label>
-                    <ngx-intl-tel-input
-                        [cssClass]="'form-control'"
-                        [preferredCountries]="preferredCountries"
-                        [enableAutoCountrySelect]="true"
-                        [enablePlaceholder]="true"
-                        [searchCountryFlag]="true"
-                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-                        [selectFirstCountry]="false"
-                        [maxLength]="15"
-                        [phoneValidation]="true"
-                        [separateDialCode]="separateDialCode"
-                        name="telefono"
-                        [(ngModel)]="usuario.turistaInfo.telefono"
-                        (ngModelChange)="onTelefonoChange($event)">
-                    </ngx-intl-tel-input>
+                <div class="input-group">
+                  <label for="telefono">Número de Contacto *</label>
+                  <ngx-intl-tel-input
+                    [cssClass]="'custom-phone-input'"
+                    [preferredCountries]="preferredCountries"
+                    [enableAutoCountrySelect]="true"
+                    [enablePlaceholder]="true"
+                    [searchCountryFlag]="true"
+                    [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                    [selectFirstCountry]="false"
+                    [maxLength]="15"
+                    [phoneValidation]="true"
+                    [separateDialCode]="separateDialCode"
+                    name="telefono"
+                    [(ngModel)]="usuario.turistaInfo.telefono"
+                    (ngModelChange)="onTelefonoChange($event)">
+                  </ngx-intl-tel-input>
                 </div>
 
-                <div class="genero full-width">
-                    <label>Género</label>
-                    <select [(ngModel)]="usuario.turistaInfo.genero" name="genero" class="form-select">
+                <div class="input-row">
+                  <div class="input-group">
+                    <label for="genero">Género</label>
+                    <select 
+                      id="genero"
+                      [(ngModel)]="usuario.turistaInfo.genero" 
+                      name="genero" 
+                      class="custom-select">
                       <option value="" disabled selected>Seleccione su género</option>
                       <option value="Masculino">Masculino</option>
                       <option value="Femenino">Femenino</option>
@@ -69,44 +129,86 @@
                       <option value="Prefiero no decir">Prefiero no decir</option>
                     </select>
                   </div>
-                          
-                <div class="fecha full-width">
-                    <label>Fecha de Nacimiento</label>
-                    <input type="date" 
-                           [ngModel]="usuario.turistaInfo.fechaNacimiento" 
-                           (ngModelChange)="usuario.turistaInfo.fechaNacimientoFormateada = $event"
-                           name="fechaNacimiento" 
-                           class="form-control">
+
+                  <div class="input-group">
+                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                    <input 
+                      id="fechaNacimiento"
+                      type="date" 
+                      [ngModel]="usuario.turistaInfo.fechaNacimiento" 
+                      (ngModelChange)="usuario.turistaInfo.fechaNacimientoFormateada = $event"
+                      name="fechaNacimiento" 
+                      class="custom-date-input">
+                  </div>
                 </div>
-                  
-                <div class="estado full-width">
-                    <label>Estado Civil</label>
-                    <select [(ngModel)]="usuario.turistaInfo.estadoCivil" name="estadoCivil" class="form-control">
-                      <option value="" disabled>Seleccione su estado civil</option>
-                      <option value="Soltero/a">Soltero/a</option>
-                      <option value="Casado/a">Casado/a</option>
-                      <option value="Divorciado/a">Divorciado/a</option>
-                      <option value="Viudo/a">Viudo/a</option>
-                      <option value="Unión Libre">Unión Libre</option>
-                      <option value="Otro">Otro</option>
-                    </select>
+
+                <div class="input-group">
+                  <label for="estadoCivil">Estado Civil</label>
+                  <select 
+                    id="estadoCivil"
+                    [(ngModel)]="usuario.turistaInfo.estadoCivil" 
+                    name="estadoCivil" 
+                    class="custom-select">
+                    <option value="" disabled>Seleccione su estado civil</option>
+                    <option value="Soltero/a">Soltero/a</option>
+                    <option value="Casado/a">Casado/a</option>
+                    <option value="Divorciado/a">Divorciado/a</option>
+                    <option value="Viudo/a">Viudo/a</option>
+                    <option value="Unión Libre">Unión Libre</option>
+                    <option value="Otro">Otro</option>
+                  </select>
                 </div>
-                
-                <select class="input-group dropdown" id="country" name="country" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
-                    <option value="" disabled selected>Seleccione un país de procedencia</option>
+              </div>
+
+              <!-- Location Information -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-map-marker-alt"></i>
+                  Ubicación
+                </h3>
+
+                <div class="input-group">
+                  <label for="country">País de Procedencia *</label>
+                  <select 
+                    id="country"
+                    name="country" 
+                    [(ngModel)]="selectedCountry" 
+                    (change)="onCountryChange()"
+                    class="custom-select">
+                    <option value="" disabled selected>Seleccione un país</option>
                     <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
-                </select>
-                  
-                <select class="input-group dropdown" id="city" name="city" [(ngModel)]="selectedCity" [disabled]="!selectedCountry">
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="city">Ciudad *</label>
+                  <select 
+                    id="city"
+                    name="city" 
+                    [(ngModel)]="selectedCity" 
+                    [disabled]="!selectedCountry"
+                    class="custom-select">
                     <option value="" disabled>Seleccione su ciudad</option>
                     <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-                </select>
-
-                <div class="buttons">
-                    <button class="cancel" (click)="navigateTo()">Cancel</button>
-                    <button class="save" type="button" (click)="guardarCambios()">Save</button>
+                  </select>
                 </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="navigateTo()">
+                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+                <button type="button" class="btn-save" (click)="guardarCambios()">
+                  <i class="fas fa-save"></i>
+                  Guardar Cambios
+                </button>
+              </div>
             </form>
-        </main>
-    </div>
-</body>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

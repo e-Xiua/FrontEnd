@@ -5,17 +5,16 @@ import { MessageDto } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class MessageService {
-  // Keep messages under task resource for consistency
-  private base = '/api/tasks';
+  private readonly baseUrl = 'http://localhost:8091/api/messages';
 
   constructor(private http: HttpClient) {}
 
   getForTask(taskId: number): Observable<MessageDto[]> {
-    return this.http.get<MessageDto[]>(`${this.base}/${taskId}/messages`);
+    return this.http.get<MessageDto[]>(`${this.baseUrl}/task/${taskId}`);
   }
 
   send(payload: Partial<MessageDto>): Observable<MessageDto> {
     if (!payload.taskId) throw new Error('taskId required');
-    return this.http.post<MessageDto>(`${this.base}/${payload.taskId}/messages`, payload as any);
+    return this.http.post<MessageDto>(`${this.baseUrl}/task/${payload.taskId}`, payload);
   }
 }

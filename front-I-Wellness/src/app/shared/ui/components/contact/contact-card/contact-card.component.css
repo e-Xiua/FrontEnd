@@ -263,6 +263,7 @@
   padding: 8px 16px 16px;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .compact .card-actions {
@@ -270,7 +271,8 @@
 }
 
 .chat-button,
-.profile-button {
+.profile-button,
+.bulk-email-button {
   flex: 1;
   border-radius: 8px !important;
   font-weight: 500 !important;
@@ -283,13 +285,15 @@
 }
 
 .compact .chat-button,
-.compact .profile-button {
+.compact .profile-button,
+.compact .bulk-email-button {
   padding: 0 8px !important;
   min-height: 32px !important;
 }
 
 .chat-button mat-icon,
-.profile-button mat-icon {
+.profile-button mat-icon,
+.bulk-email-button mat-icon {
   margin-right: 4px;
   font-size: 18px;
   width: 18px;
@@ -297,7 +301,8 @@
 }
 
 .compact .chat-button mat-icon,
-.compact .profile-button mat-icon {
+.compact .profile-button mat-icon,
+.compact .bulk-email-button mat-icon {
   margin-right: 2px;
   font-size: 16px;
   width: 16px;

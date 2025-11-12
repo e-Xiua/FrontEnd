@@ -4,14 +4,11 @@ import { Observable, interval, Subject, switchMap, startWith, takeUntil } from '
 import { MessageDto } from '../models/task.model';
 import { MessageService } from '../services/message.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-message-panel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './message-panel.component.html',
   styleUrls: ['./message-panel.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,13 +40,24 @@ export class MessagePanelComponent implements OnInit, OnDestroy {
 
   send() {
     if (!this.taskId || this.form.invalid) return;
+    
+    // Obtener el ID del usuario actual del localStorage o contexto
+    const currentUserId = localStorage.getItem('userId') || localStorage.getItem('idUsuario') || 'anonymous';
+    
     const payload: Partial<MessageDto> = {
       taskId: this.taskId,
+      senderId: currentUserId,
       content: this.form.value.content,
     };
-    this.msgService.send(payload).subscribe(() => {
-      this.form.reset();
-      // polling will fetch the new message shortly; nothing else needed
+    
+    this.msgService.send(payload).subscribe({
+      next: () => {
+        this.form.reset();
+        // polling will fetch the new message shortly
+      },
+      error: (err) => {
+        console.error('Error al enviar mensaje:', err);
+      }
     });
   }
 }

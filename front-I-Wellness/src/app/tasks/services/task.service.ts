@@ -1,30 +1,35 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { TaskDto, TaskDetailDto } from '../models/task.model';
+import { TaskDto, TaskDetailDto, TaskKpiDto } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
-  private base = '/api/tasks';
+  private readonly baseUrl = 'http://localhost:8091/api/tasks';
+  
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<TaskDto[]> {
-    return this.http.get<TaskDto[]>(this.base);
+    return this.http.get<TaskDto[]>(`${this.baseUrl}/all`);
   }
 
   getById(id: number): Observable<TaskDetailDto> {
-    return this.http.get<TaskDetailDto>(`${this.base}/${id}`);
+    return this.http.get<TaskDetailDto>(`${this.baseUrl}/${id}/detail`);
+  }
+
+  getKpis(): Observable<TaskKpiDto> {
+    return this.http.get<TaskKpiDto>(`${this.baseUrl}/kpis`);
   }
 
   create(task: TaskDto): Observable<TaskDto> {
-    return this.http.post<TaskDto>(this.base, task);
+    return this.http.post<TaskDto>(this.baseUrl, task);
   }
 
   update(id: number, task: TaskDto): Observable<TaskDto> {
-    return this.http.put<TaskDto>(`${this.base}/${id}`, task);
+    return this.http.put<TaskDto>(`${this.baseUrl}/${id}`, task);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
