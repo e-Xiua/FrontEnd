@@ -18,7 +18,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, forkJoin, interval, of, throwError } from 'rxjs';
-import { catchError, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 
 // Services
 import { UsuarioService } from '../../features/users/services/usuario.service';
@@ -33,7 +33,7 @@ import {
   OptimizationJob,
   OptimizationResult
 } from '../models/optimization-job.models';
-import { EnrichedProviderData } from '../models/provider.models';
+import { EnrichedProviderData, Service } from '../models/provider.models';
 import { RouteRow } from '../models/route-builder.models';
 import { usuarios } from '../models/usuarios';
 
@@ -304,55 +304,137 @@ export class RouteBuilderStateService {
    */
   updateRowService(rowId: string, serviceId: number): void {
     const currentRows = this._selectedPois$.value;
+    const targetRow = currentRows.find(row => row.id === rowId);
 
-    const updatedRows = currentRows.map(row => {
-      if (row.id === rowId && row.providerData) {
-        const service = row.providerData.services.find((s: any) => s.idServicio === serviceId);
+    if (!targetRow) {
+      console.warn(`updateRowService: row with id ${rowId} not found`);
+      return;
+    }
 
-        // 🎯 LOGGING: Specific service selected by user
-        if (service) {
-          console.log('=== 🎯 SERVICE SELECTED IN ROUTE BUILDER ===');
-          console.log('Row ID:', rowId);
-          console.log('Service ID:', serviceId);
-          console.log('Provider:', row.providerData.provider.nombre_empresa);
+    console.log('=== 🎯 SERVICE SELECTION REQUEST ===');
+    console.log('Row ID:', rowId);
+    console.log('Requested Service ID:', serviceId);
 
-          // Log full service object as JSON
-          console.log('Full Service Object (JSON):');
-          console.log(JSON.stringify(service, null, 2));
-
-          // Log structured service details
-          console.log('Selected Service Details:', {
-            id: service.idServicio,
-            nombre: service.nombre,
-            descripcion: service.descripcion,
-            precio: service.precio,
-            tiempoAproximado: service.tiempoAproximado
-          });
-
-          // Show comparison with provider averages
-          console.log('Comparison with Provider Averages:', {
-            serviceCost: service.precio,
-            providerAvgCost: row.providerData.averageCost,
-            costDifference: service.precio - row.providerData.averageCost,
-            serviceDuration: service.tiempoAproximado,
-            providerAvgDuration: row.providerData.averageVisitDuration,
-            durationDifference: service.tiempoAproximado - row.providerData.averageVisitDuration
-          });
-
-          console.log('============================================');
-        } else {
-          console.warn(`Service with ID ${serviceId} not found in provider's services`);
+    this.servicioService.buscarPorId(serviceId)
+      .pipe(
+        take(1),
+        catchError(error => {
+          console.error(`Error fetching service ${serviceId}:`, error);
+          this._error$.next('Failed to load selected service details.');
+          return of(null);
+        }),
+        finalize(() => {
+          console.log('Service lookup completed for row:', rowId);
+        })
+      )
+      .subscribe(serviceResponse => {
+        if (!serviceResponse) {
+          console.warn('Service response was empty; keeping previous state');
+          return;
         }
 
-        return {
-          ...row,
-          selectedService: service || null
-        };
-      }
-      return row;
-    });
+        const normalizedService = this.normalizeServicePayload(serviceResponse);
 
-    this._selectedPois$.next(updatedRows);
+        const providerIdFromService = this.normalizeProviderId(serviceResponse);
+        let providerData = targetRow.providerData;
+        let providerId = targetRow.providerId;
+
+        if (providerIdFromService && (!providerData || providerData.provider.id !== providerIdFromService)) {
+          const providersCache = this._providers$.value;
+          providerData = providersCache.find(p => p.provider.id === providerIdFromService) ?? providerData;
+          providerId = providerData?.provider.id ?? providerIdFromService;
+
+          if (!providerData) {
+            console.warn('Provider data not found in cache for provider:', providerIdFromService);
+          }
+        }
+
+        if (providerData) {
+          console.log('=== 🎯 SERVICE SELECTED IN ROUTE BUILDER ===');
+          console.log('Provider:', providerData.provider.nombre_empresa);
+          console.log('Selected Service Details:', normalizedService);
+          console.log('Comparison with Provider Averages:', {
+            serviceCost: normalizedService.precio,
+            providerAvgCost: providerData.averageCost,
+            costDifference: normalizedService.precio - providerData.averageCost,
+            serviceDuration: normalizedService.tiempoAproximado,
+            providerAvgDuration: providerData.averageVisitDuration,
+            durationDifference: normalizedService.tiempoAproximado - providerData.averageVisitDuration
+          });
+          console.log('============================================');
+        }
+
+        let providerDataWithService = providerData;
+        if (providerData) {
+          const existingServices = Array.isArray(providerData.services) ? providerData.services : [];
+          const serviceIndex = existingServices.findIndex(s => s.idServicio === normalizedService.idServicio);
+          const nextServices = serviceIndex >= 0
+            ? existingServices.map(service => service.idServicio === normalizedService.idServicio ? normalizedService : service)
+            : [...existingServices, normalizedService];
+
+          providerDataWithService = {
+            ...providerData,
+            services: nextServices
+          };
+
+          const providersSnapshot = this._providers$.value;
+          const providerKey = providerId ?? providerIdFromService ?? providerData.provider.id;
+          const providerIndex = providersSnapshot.findIndex(entry => entry.provider.id === providerKey);
+          if (providerIndex >= 0) {
+            const updatedProviderEntry: EnrichedProviderData = {
+              ...providersSnapshot[providerIndex],
+              services: nextServices
+            };
+            const nextProviders = [...providersSnapshot];
+            nextProviders[providerIndex] = updatedProviderEntry;
+            this._providers$.next(nextProviders);
+          }
+        }
+
+        console.log('Updating row with selected service:', {
+          rowId,
+          providerId,
+          providerDataWithService,
+          normalizedService
+        });
+
+        const updatedRows = currentRows.map(row => {
+          if (row.id === rowId) {
+            return {
+              ...row,
+              providerId: providerId ?? row.providerId,
+              providerData: providerDataWithService ?? row.providerData,
+              selectedService: normalizedService
+            };
+          }
+          return row;
+        });
+
+        this._selectedPois$.next(updatedRows);
+      });
+  }
+
+  private normalizeServicePayload(raw: any): Service {
+    const id = raw?.idServicio ?? raw?._idServicio ?? raw?.id ?? 0;
+    const precio = Number(raw?.precio ?? raw?.costo ?? 0) || 0;
+    const tiempo = Number(raw?.tiempoAproximado ?? raw?.tiempo ?? raw?.duracion ?? 0) || 0;
+
+    return {
+      idServicio: typeof id === 'number' ? id : Number(id) || 0,
+      nombre: raw?.nombre ?? raw?.titulo ?? 'Servicio sin nombre',
+      descripcion: raw?.descripcion ?? raw?.detalle ?? '',
+      precio,
+      tiempoAproximado: tiempo
+    };
+  }
+
+  private normalizeProviderId(raw: any): number | null {
+    const providerId = raw?._idProveedor ?? raw?.idProveedor ?? raw?.providerId ?? null;
+    if (providerId == null) {
+      return null;
+    }
+    const parsed = typeof providerId === 'number' ? providerId : Number(providerId);
+    return Number.isNaN(parsed) ? null : parsed;
   }
 
   /**
@@ -549,15 +631,15 @@ export class RouteBuilderStateService {
    */
   private enrichOptimizationResult(result: any): OptimizationResult {
     const providers = this._providers$.value;
-    
+
     console.log('📊 Enriching optimization result with cached provider data...');
     console.log('Available providers in cache:', providers.length);
-    
+
     // Enrich each POI in the sequence
     const enrichedSequence = result.optimizedSequence.map((poi: any) => {
       // Find the matching provider by poiId
       const providerData = providers.find(p => p.provider.id === poi.poiId);
-      
+
       if (!providerData) {
         console.warn(`⚠️ Provider ${poi.poiId} not found in cache, using basic data`);
         return {
@@ -573,7 +655,7 @@ export class RouteBuilderStateService {
           cost: undefined as number | undefined
         };
       }
-      
+
       // Enrich with full provider data
       const enrichedPOI = {
         poiId: poi.poiId,
@@ -590,7 +672,7 @@ export class RouteBuilderStateService {
         // Store full provider data for map display
         providerData: providerData
       };
-      
+
       console.log(`✅ Enriched POI ${poi.poiId}:`, {
         originalName: poi.name,
         enrichedName: enrichedPOI.name,
@@ -598,10 +680,10 @@ export class RouteBuilderStateService {
         cost: enrichedPOI.cost,
         servicesCount: providerData.services.length
       });
-      
+
       return enrichedPOI;
     });
-    
+
     // Return enriched result
     return {
       optimizedRouteId: result.optimizedRouteId,
