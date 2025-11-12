@@ -103,5 +103,17 @@
       [compactMode]="compactMode"
       class="contact-menu-wrapper">
     </app-contact-menu>
+
+    
+    <!-- Bulk email button -->
+    <button
+      mat-stroked-button
+      color="primary"
+      class="bulk-email-button"
+      (click)="onBulkEmailClick($event)"
+      [attr.aria-label]="'Enviar correo a múltiples contactos'">
+      <mat-icon>add</mat-icon>
+      <span *ngIf="!compactMode">Correo múltiple</span>
+    </button>
   </div>
 </mat-card>
