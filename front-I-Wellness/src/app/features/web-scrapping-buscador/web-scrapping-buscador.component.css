@@ -15,31 +15,12 @@
 }
 
 .observatorio-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: var(--text-dark);
-  padding-top: 100px; /* Espacio para el navbar fijo */
-}
-
-/* Header */
-.header {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: white;
-}
-
-.header-content h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-.header-content p {
-  font-size: 1.1rem;
-  opacity: 0.9;
 }
 
 /* Search Section */
@@ -49,15 +30,35 @@
 
 .search-card {
   background: white;
-  border-radius: 12px;
-  padding: 2rem;
+  border-radius: 16px;
+  padding: 2.5rem;
   box-shadow: var(--shadow-lg);
 }
 
-.search-card h2 {
+.header-title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header-title h1 {
   color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.header-title h1 i {
+  color: var(--secondary-color);
+}
+
+.subtitle {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .search-form {
@@ -68,34 +69,36 @@
 
 .search-form input {
   flex: 1;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .search-form input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+  box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.1);
 }
 
 .search-form button {
-  padding: 1rem 1.5rem;
+  padding: 1rem 2rem;
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 150px;
 }
 
 .search-form button:hover:not(:disabled) {
   background: #1e40af;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(44, 90, 160, 0.3);
 }
 
 .search-form button:disabled {

@@ -1,6 +1,18 @@
 <div class="provider-search-container">
-  <div class="search-input-wrapper">
-    <input
+  <!-- Botón de toggle para mostrar/ocultar buscador -->
+  <button 
+    class="search-toggle-btn"
+    (click)="toggleSearch()"
+    type="button"
+    [attr.aria-label]="isSearchVisible ? 'Ocultar búsqueda' : 'Mostrar búsqueda'"
+    [class.active]="isSearchVisible"
+  >
+    <span class="search-icon">🔍</span>
+  </button>
+
+  <!-- Input de búsqueda (solo visible cuando isSearchVisible = true) -->
+  <div class="search-input-wrapper" *ngIf="isSearchVisible" [@slideIn]>
+    <input #searchInput
       type="text"
       class="search-input"
       [(ngModel)]="searchQuery"
@@ -26,7 +38,8 @@
     </div>
   </div>
 
-  <div *ngIf="showResults" class="search-results">
+  <!-- Resultados de búsqueda -->
+  <div *ngIf="showResults && isSearchVisible" class="search-results">
     <div *ngIf="filteredProviders.length === 0 && !isLoading" class="no-results">
       <p>No se encontraron proveedores que coincidan con "{{ searchQuery }}"</p>
     </div>
@@ -59,9 +72,21 @@
               {{ category }}
             </span>
           </div>
+          
+          <!-- Mostrar mensaje si no hay categorías -->
+          <div *ngIf="!provider.proveedorInfo?.categories?.length" class="provider-categories">
+            <span class="category-badge category-badge-default">
+              Sin categorías
+            </span>
+          </div>
 
           <p *ngIf="provider.correo" class="provider-email">
-            {{ provider.correo }}
+            📧 {{ provider.correo }}
+          </p>
+          
+          <!-- Mostrar ID del proveedor como información adicional -->
+          <p class="provider-id">
+            <small>ID: {{ provider.id }}</small>
           </p>
         </div>
 

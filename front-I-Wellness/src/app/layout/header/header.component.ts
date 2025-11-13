@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { HeaderConfig } from '../../shared/models/header';
 import { usuarios } from '../../shared/models/usuarios';
 import { HeaderService } from '../../shared/services/header.service';
@@ -41,7 +42,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
-    private readonly headerService: HeaderService
+    private readonly headerService: HeaderService,
+    public readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {

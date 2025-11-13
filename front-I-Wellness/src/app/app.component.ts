@@ -36,7 +36,10 @@ export class AppComponent implements OnInit {
     'registroturista',
     'recuperar',
     'restablecer',
-    'registroproveedor'
+    'registroproveedor',
+    'buscador-web',
+    'observatorio',
+    'metricas'
   ];
 
   constructor(private router: Router) {

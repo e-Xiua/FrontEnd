@@ -231,10 +231,27 @@ export class UniversalHeaderComponent implements OnInit, OnDestroy {
   }
 
   onProviderSelected(provider: usuarios): void {
-    console.log('Proveedor seleccionado desde el header:', provider);
+    console.log('✅ Proveedor seleccionado desde el header:', provider);
+    console.log('  - ID:', provider.id);
+    console.log('  - Nombre:', provider.nombre);
+    console.log('  - Categorías:', provider.proveedorInfo?.categories);
+    
     // Navegar al perfil del proveedor seleccionado
     if (provider.id) {
-      this.router.navigate(['/proveedor/ver-perfil', provider.id]);
+      const targetRoute = '/proveedor/ver-perfil/' + provider.id;
+      console.log('🔗 Navegando a:', targetRoute);
+      
+      this.router.navigate(['/proveedor/ver-perfil', provider.id]).then(success => {
+        if (success) {
+          console.log('✅ Navegación exitosa');
+        } else {
+          console.error('❌ Error en la navegación');
+        }
+      }).catch(error => {
+        console.error('❌ Error al navegar:', error);
+      });
+    } else {
+      console.warn('⚠️ El proveedor no tiene ID');
     }
   }
 }

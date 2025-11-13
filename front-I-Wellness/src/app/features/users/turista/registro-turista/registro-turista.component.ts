@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -11,7 +11,7 @@ import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryFiel
 @Component({
   selector: 'app-registro-turista',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxIntlTelInputModule],
+  imports: [CommonModule, FormsModule, NgxIntlTelInputModule, RouterModule],
   templateUrl: './registro-turista.component.html',
   styleUrl: './registro-turista.component.css',
   

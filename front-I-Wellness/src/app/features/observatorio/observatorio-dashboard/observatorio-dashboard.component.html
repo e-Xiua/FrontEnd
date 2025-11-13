@@ -10,6 +10,10 @@
         </div>
       </div>
       <div class="update-info">
+        <button class="back-btn" (click)="volverAlInicio()">
+          <span class="material-icons">home</span>
+          {{ authService.isAuthenticated() ? 'Volver al Sistema' : 'Volver al Inicio' }}
+        </button>
         <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
           <span class="material-icons" [class.spinning]="loading">refresh</span>
           Actualizar

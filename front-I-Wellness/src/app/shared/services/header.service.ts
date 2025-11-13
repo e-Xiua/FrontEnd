@@ -115,19 +115,25 @@ export class HeaderService {
     return {
       role: 'proveedor',
       config: {
-        title: 'Panel de Proveedor',
+        title: 'e-Xiua',
         logoUrl: '/assets/logo.png',
         theme: 'light',
         showProviderSearch: true,
         navigationItems: [
+          { label: 'Inicio', route: '/proveedor/home', icon: 'home' },
           { label: 'Dashboard', route: '/proveedor/dashboard', icon: 'dashboard' },
-          { label: 'Perfil Principal', route: '/proveedor/home', icon: 'room_service' },
+          { label: 'Servicios', route: '/proveedor/servicios', icon: 'room_service' },
           { label: 'Rutas', route: '/proveedor/rutas', icon: 'map' },
+          { label: 'Tareas', route: '/tasks', icon: 'task_alt' },
+          { label: 'Calendario', route: '/calendario', icon: 'event' },
+          { label: 'Temas', route: '/temas', icon: 'explore' },
+          { label: 'Buscador', route: '/buscador-web', icon: 'search' },
+          { label: 'Observatorio', route: '/observatorio', icon: 'cloud_queue' },
         ],
         actions: [
           {
             id: 'profile',
-            label: 'Perfil',
+            label: 'Mi Perfil',
             icon: 'account_circle',
             action: () => this.navigateToProfile('proveedor')
           },
@@ -183,6 +189,8 @@ export class HeaderService {
         navigationItems: [
           { label: 'Inicio', route: '/', icon: 'home' },
           { label: 'Temas', route: '/temas', icon: 'explore' },
+          { label: 'Buscador Integrado', route: '/buscador-web', icon: 'search' },
+          { label: 'Observatorio Ambiental', route: '/observatorio', icon: 'cloud_queue' },
         ],
         actions: [
           {

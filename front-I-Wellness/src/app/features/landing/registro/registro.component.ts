@@ -1,9 +1,11 @@
 import { Component, EventEmitter, Output, Renderer2 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-Registro',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css'
 })

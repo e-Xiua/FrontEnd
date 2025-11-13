@@ -92,6 +92,32 @@
   gap: var(--spacing-md);
 }
 
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255,255,255,0.95);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.back-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.back-btn .material-icons {
+  font-size: 20px;
+}
+
 .refresh-btn {
   display: flex;
   align-items: center;

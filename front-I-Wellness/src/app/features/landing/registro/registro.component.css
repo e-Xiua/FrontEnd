@@ -1,112 +1,341 @@
-/* Estilos generales */
+/* Variables del sistema */
+:host {
+  --primary-color: #4a9c9f;
+  --secondary-color: #2973B2;
+  --accent-color: #34d399;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --bg-light: #f9fafb;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  --border-radius: 16px;
+  --transition: all 0.3s ease;
+}
+
+/* Reset */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: transparent;
+.registro-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-
-/* Contenedor principal */
-.container {
-    display: flex;
-    width: 80%;
-    max-width: 1000px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.registro-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  max-width: 1200px;
+  width: 100%;
+  padding: 3rem;
+  animation: fadeIn 0.5s ease-in;
 }
 
-.logo h1 strong{
-    color: #000000;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Panel izquierdo */
-.left-panel {
-    width: 60%;
-    height: 400px;
-    background-color: #5fa9a9;
-    border-radius: 12px 0 0 12px;
-    background-image: url("https://media.istockphoto.com/id/1135365219/es/foto/arenal-volcano-costa-rica.jpg?s=612x612&w=0&k=20&c=YP055BJEpRX_07BtlZG6xK6orVcfhDAWanyB5QUTZHo=");
+/* Header Section */
+.header-section {
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
-/* Panel derecho */
-.right-panel {
-    width: 40%;
-    padding: 40px;
-    text-align: center;
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.logo h1 {
-    font-size: 24px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+.logo-img {
+  height: 60px;
+  width: auto;
+  animation: float 3s ease-in-out infinite;
 }
 
-.icon {
-    font-size: 20px;
-    color: #5fa9a9;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-p {
-    font-size: 18px;
-    margin: 20px 0;
-    color: #333;
+.brand-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--secondary-color);
+  margin: 0;
 }
 
-/* Botones */
-.buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 0.5rem 0;
 }
 
-.btn {
-    padding: 12px 20px;
-    font-size: 16px;
-    border: none;
-    background-color: #5fa9a9;
-    color: white;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.welcome-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin: 0;
 }
 
-.btn:hover {
-    background-color: #4b8d8d;
+/* Options Container */
+.options-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
-/* Responsivo */
+.option-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 3px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.option-card:hover::before {
+  transform: scaleX(1);
+}
+
+.option-card.visitante {
+  border-color: transparent;
+}
+
+.option-card.visitante:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 12px 24px rgba(74, 156, 159, 0.2);
+  transform: translateY(-8px);
+}
+
+.option-card.empresa {
+  border-color: transparent;
+}
+
+.option-card.empresa:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 12px 24px rgba(41, 115, 178, 0.2);
+  transform: translateY(-8px);
+}
+
+.option-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2.5rem;
+  transition: var(--transition);
+}
+
+.visitante .option-icon {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+}
+
+.empresa .option-icon {
+  background: linear-gradient(135deg, var(--secondary-color), #4a9cd9);
+  color: white;
+}
+
+.option-card:hover .option-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.option-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.option-description {
+  font-size: 1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.option-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.feature-item i {
+  color: var(--accent-color);
+  font-size: 1.1rem;
+}
+
+.btn-select {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: white;
+}
+
+.visitante .btn-select {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+}
+
+.visitante .btn-select:hover {
+  background: linear-gradient(135deg, #3d8386, #2bb87e);
+  box-shadow: 0 6px 16px rgba(74, 156, 159, 0.4);
+  transform: translateY(-2px);
+}
+
+.empresa .btn-select {
+  background: linear-gradient(135deg, var(--secondary-color), #4a9cd9);
+}
+
+.empresa .btn-select:hover {
+  background: linear-gradient(135deg, #1f5a8f, #3780b8);
+  box-shadow: 0 6px 16px rgba(41, 115, 178, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-select i {
+  transition: transform 0.3s ease;
+}
+
+.btn-select:hover i {
+  transform: translateX(5px);
+}
+
+/* Footer Section */
+.footer-section {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer-section p {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.link-login {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.link-login:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .options-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        width: 90%;
-    }
+  .registro-card {
+    padding: 2rem;
+  }
 
-    .left-panel {
-        width: 100%;
-        height: 200px;
-        border-radius: 12px 12px 0 0;
-    }
+  .brand-name {
+    font-size: 2rem;
+  }
 
-    .right-panel {
-        width: 100%;
-        padding: 20px;
-    }
+  .welcome-title {
+    font-size: 1.75rem;
+  }
+
+  .option-card {
+    padding: 2rem;
+  }
+
+  .option-title {
+    font-size: 1.5rem;
+  }
 }
 
-.active{
-    background-color: #5fa9a9;
+@media (max-width: 480px) {
+  .registro-container {
+    padding: 1rem;
+  }
+
+  .registro-card {
+    padding: 1.5rem;
+  }
+
+  .logo-img {
+    height: 50px;
+  }
+
+  .brand-name {
+    font-size: 1.75rem;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .option-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
 }

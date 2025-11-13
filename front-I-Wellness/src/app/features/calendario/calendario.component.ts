@@ -15,6 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UniversalHeaderComponent } from '../../shared/components/universal-header/universal-header.component';
 import { Evento, EventoForm } from '../../shared/models/evento';
 import { EventoApiService } from './services/evento-api.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 interface CalendarDay {
   date: Date;
@@ -53,6 +54,8 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   currentMonth = this.currentDate.getMonth();
   currentYear = this.currentDate.getFullYear();
   
+  userRole: 'admin' | 'proveedor' | 'turista' | 'public' = 'public';
+  
   monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -85,7 +88,8 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
-    private readonly eventoApi: EventoApiService
+    private readonly eventoApi: EventoApiService,
+    private readonly authService: AuthService
   ) {
     this.eventoForm = this.fb.group({
       titulo: ['', Validators.required],
@@ -101,6 +105,18 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Detectar rol del usuario
+    if (this.authService.isAuthenticated()) {
+      const rol = this.authService.getCurrentUserRole();
+      if (rol === 'ADMIN') {
+        this.userRole = 'admin';
+      } else if (rol === 'PROVEEDOR') {
+        this.userRole = 'proveedor';
+      } else if (rol === 'TURISTA') {
+        this.userRole = 'turista';
+      }
+    }
+    
     this.generateCalendar();
     this.loadEventos();
   }

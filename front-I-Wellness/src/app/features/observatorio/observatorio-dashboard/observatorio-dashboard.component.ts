@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { ObservatorioService } from '../../../shared/services/observatorio.service';
 import { 
   ClimaCurrent, 
@@ -29,7 +30,11 @@ export class ObservatorioDashboardComponent implements OnInit {
   volcanoData: VolcanoStatus | null = null;
   eventsData: EventsRecent | null = null;
 
-  constructor(private observatorioService: ObservatorioService) {}
+  constructor(
+    private observatorioService: ObservatorioService,
+    private router: Router,
+    public authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadObservatorioData();
@@ -116,5 +121,28 @@ export class ObservatorioDashboardComponent implements OnInit {
 
   refreshData(): void {
     this.loadObservatorioData();
+  }
+
+  volverAlInicio(): void {
+    // Si está autenticado, redirigir según el rol
+    if (this.authService.isAuthenticated()) {
+      const userRole = localStorage.getItem('rol');
+      switch (userRole) {
+        case 'TURISTA':
+          this.router.navigate(['/turista/home']);
+          break;
+        case 'PROVEEDOR':
+          this.router.navigate(['/proveedor/home']);
+          break;
+        case 'ADMIN':
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        default:
+          this.router.navigate(['/']);
+      }
+    } else {
+      // Si no está autenticado, ir a la landing
+      this.router.navigate(['/']);
+    }
   }
 }

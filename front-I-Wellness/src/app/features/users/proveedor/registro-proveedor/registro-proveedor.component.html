@@ -1,202 +1,260 @@
-<body>
-  <div class="container">
-    <!-- Sección Izquierda (Imagen y Logo) -->
-    <div class="left-section">
-      <div class="logo">
-        <img src="../../../../assets/logo.png" alt="I-Wellness Logo" />
-        <h2>I-Wellness</h2>
+<div class="registro-proveedor-container">
+  <div class="registro-card">
+    <!-- Header -->
+    <div class="header-section">
+      <div class="logo-brand">
+        <img src="../../../../assets/logo.png" alt="e-Xiua Logo" class="logo-img">
+        <h1 class="brand-title">e-Xiua</h1>
       </div>
+      <h2 class="page-title">
+        <span class="highlight-empresa">EMPRESA</span>
+        <span class="subtitle-text">Registro</span>
+      </h2>
+      <p class="welcome-text">Registra tu empresa de turismo de bienestar</p>
     </div>
 
-    <!-- Sección Derecha (Formulario de Registro) -->
-    <div class="right-section">
-      <h2 class="title"><span>EMPRESA</span> Registro</h2>
-
-      <div class="form-container">
-        <!-- Datos de Contacto -->
+    <!-- Form Container -->
+    <div class="form-content">
+      <div class="form-columns">
+        
+        <!-- Columna 1: Datos de Contacto -->
         <div class="form-column">
-          <h3 class="section-title">Datos de contacto</h3>
+          <h3 class="section-title">
+            <i class="fas fa-user-tie"></i>
+            Datos de Contacto
+          </h3>
 
-          <input
-            type="text"
-            placeholder="Nombre"
-            [(ngModel)]="name"
-            (input)="validateName()"
-            maxlength="55"
-            required
-          />
-          <small *ngIf="nameError" class="error-message">{{ nameError }}</small>
-
-          <input
-            type="text"
-            placeholder="Cargo de contacto"
-            [(ngModel)]="contactPosition"
-            (input)="validatecontactPosition()"
-            maxlength="25"
-            required
-          />
-          <small *ngIf="contactPositionError" class="error-message">{{
-            contactPositionError
-          }}</small>
-
-          <ngx-intl-tel-input
-            [cssClass]="'custom'"
-            [preferredCountries]="preferredCountries"
-            [enableAutoCountrySelect]="true"
-            [enablePlaceholder]="true"
-            [searchCountryFlag]="true"
-            [searchCountryField]="[
-              SearchCountryField.Iso2,
-              SearchCountryField.Name
-            ]"
-            [selectFirstCountry]="false"
-            [selectedCountryISO]="CountryISO.CostaRica"
-            [maxLength]="15"
-            [phoneValidation]="true"
-            [separateDialCode]="separateDialCode"
-            [numberFormat]="PhoneNumberFormat.National"
-            [(ngModel)]="phone"
-            name="phone"
-            placeholder="Teléfono"
-            required
-            (input)="validatePhone()"
-          >
-          </ngx-intl-tel-input>
-          <small *ngIf="phoneError" class="error-message">{{
-            phoneError
-          }}</small>
-
-          <div class="password-container">
+          <div class="form-group">
+            <label class="form-label">Nombre del contacto</label>
             <input
-              [type]="showPassword ? 'text' : 'password'"
-              placeholder="Contraseña"
-              [(ngModel)]="password"
-              (input)="validatePassword()"
+              type="text"
+              class="form-input"
+              placeholder="Nombre completo"
+              [(ngModel)]="name"
+              (input)="validateName()"
+              maxlength="55"
               required
             />
-            <button
-              type="button"
-              (click)="togglePasswordVisibility()"
-              class="toggle-password"
-            >
-              {{ showPassword ? "Ocultar" : "Mostrar" }}
-            </button>
+            <small *ngIf="nameError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ nameError }}
+            </small>
           </div>
-          <small *ngIf="passwordError" class="error-message">{{
-            passwordError
-          }}</small>
-                    <div class="password-container">
+
+          <div class="form-group">
+            <label class="form-label">Cargo del contacto</label>
             <input
-              [type]="showConfirmPassword ? 'text' : 'password'"
-              placeholder="Repite tu contraseña"
-              [(ngModel)]="confirmPassword"
-              (input)="validateConfirmPassword()"
+              type="text"
+              class="form-input"
+              placeholder="Ej: Gerente, Director"
+              [(ngModel)]="contactPosition"
+              (input)="validatecontactPosition()"
+              maxlength="25"
               required
             />
-            <button
-              type="button"
-              (click)="toggleConfirmPasswordVisibility()"
-              class="toggle-password"
-            >
-              {{ showConfirmPassword ? "Ocultar" : "Mostrar" }}
-            </button>
+            <small *ngIf="contactPositionError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ contactPositionError }}
+            </small>
           </div>
-          <small *ngIf="confirmPasswordError" class="error-message">{{
-            confirmPasswordError
-          }}</small>
+
+          <div class="form-group">
+            <label class="form-label">Teléfono personal</label>
+            <ngx-intl-tel-input
+              [cssClass]="'custom'"
+              [preferredCountries]="preferredCountries"
+              [enableAutoCountrySelect]="true"
+              [enablePlaceholder]="true"
+              [searchCountryFlag]="true"
+              [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+              [selectFirstCountry]="false"
+              [selectedCountryISO]="CountryISO.CostaRica"
+              [maxLength]="15"
+              [phoneValidation]="true"
+              [separateDialCode]="separateDialCode"
+              [numberFormat]="PhoneNumberFormat.National"
+              [(ngModel)]="phone"
+              name="phone"
+              placeholder="Teléfono"
+              required
+              (input)="validatePhone()"
+            ></ngx-intl-tel-input>
+            <small *ngIf="phoneError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ phoneError }}
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="password-container">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="form-input"
+                placeholder="Contraseña segura"
+                [(ngModel)]="password"
+                (input)="validatePassword()"
+                required
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="toggle-password"
+              >
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <small *ngIf="passwordError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ passwordError }}
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="password-container">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                class="form-input"
+                placeholder="Repite tu contraseña"
+                [(ngModel)]="confirmPassword"
+                (input)="validateConfirmPassword()"
+                required
+              />
+              <button
+                type="button"
+                (click)="toggleConfirmPasswordVisibility()"
+                class="toggle-password"
+              >
+                <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <small *ngIf="confirmPasswordError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ confirmPasswordError }}
+            </small>
+          </div>
         </div>
 
-        <!-- Datos de la Empresa -->
+        <!-- Columna 2: Datos de la Empresa -->
         <div class="form-column">
-          <h3 class="section-title">Datos de la empresa</h3>
-          <input
-            type="text"
-            placeholder="Empresa"
-            [(ngModel)]="companyName"
-            (input)="validatecompanyName()"
-            required
-          />
-          <small *ngIf="companyNameError" class="error-message">{{
-            companyNameError
-          }}</small>
+          <h3 class="section-title">
+            <i class="fas fa-building"></i>
+            Datos de la Empresa
+          </h3>
 
-          <input
-            type="email"
-            placeholder="Email"
-            [(ngModel)]="email"
-            (input)="validateEmail()"
-            required
-          />
-          <small *ngIf="emailError" class="error-message">{{
-            emailError
-          }}</small>
+          <div class="form-group">
+            <label class="form-label">Nombre de la empresa</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Nombre comercial"
+              [(ngModel)]="companyName"
+              (input)="validatecompanyName()"
+              required
+            />
+            <small *ngIf="companyNameError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ companyNameError }}
+            </small>
+          </div>
 
-          <ngx-intl-tel-input
-            [cssClass]="'custom'"
-            [preferredCountries]="preferredCountries"
-            [enableAutoCountrySelect]="true"
-            [enablePlaceholder]="true"
-            [searchCountryFlag]="true"
-            [searchCountryField]="[
-              SearchCountryField.Iso2,
-              SearchCountryField.Name
-            ]"
-            [selectFirstCountry]="false"
-            [selectedCountryISO]="CountryISO.CostaRica"
-            [maxLength]="15"
-            [phoneValidation]="true"
-            [separateDialCode]="separateDialCode"
-            [numberFormat]="PhoneNumberFormat.National"
-            [(ngModel)]="companyNamePhone"
-            name="companyNamePhone"
-            placeholder="Teléfono de la empresa"
-            required
-            (input)="validatecompanyNamePhone()"
-            class="tel"
-          >
-          </ngx-intl-tel-input>
-          <small *ngIf="companyNamePhoneError" class="error-message">{{
-            companyNamePhoneError
-          }}</small>
+          <div class="form-group">
+            <label class="form-label">Email de la empresa</label>
+            <input
+              type="email"
+              class="form-input"
+              placeholder="contacto@empresa.com"
+              [(ngModel)]="email"
+              (input)="validateEmail()"
+              required
+            />
+            <small *ngIf="emailError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ emailError }}
+            </small>
+          </div>
 
-          <label for="foto">Foto de la persona</label>
-          <input class="foto" type="file" id="foto" accept="image/*" (change)="onFileSelected($event)" />
-          <div *ngIf="fotoError" class="error-message">{{ fotoError }}</div>
+          <div class="form-group">
+            <label class="form-label">Teléfono de la empresa</label>
+            <ngx-intl-tel-input
+              [cssClass]="'custom'"
+              [preferredCountries]="preferredCountries"
+              [enableAutoCountrySelect]="true"
+              [enablePlaceholder]="true"
+              [searchCountryFlag]="true"
+              [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+              [selectFirstCountry]="false"
+              [selectedCountryISO]="CountryISO.CostaRica"
+              [maxLength]="15"
+              [phoneValidation]="true"
+              [separateDialCode]="separateDialCode"
+              [numberFormat]="PhoneNumberFormat.National"
+              [(ngModel)]="companyNamePhone"
+              name="companyNamePhone"
+              placeholder="Teléfono de la empresa"
+              required
+              (input)="validatecompanyNamePhone()"
+            ></ngx-intl-tel-input>
+            <small *ngIf="companyNamePhoneError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ companyNamePhoneError }}
+            </small>
+          </div>
 
-
+          <div class="form-group">
+            <label class="form-label">Foto del representante</label>
+            <label class="file-upload-label">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+              <div class="upload-placeholder">
+                <i class="fas fa-upload"></i>
+                <span>Seleccionar imagen</span>
+              </div>
+            </label>
+            <small *ngIf="fotoError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ fotoError }}
+            </small>
+          </div>
         </div>
       </div>
-      <input
-        type="text"
-        id="search-box"
-        placeholder="Buscar dirección..."
-        (keydown.enter)="searchLocation()"
-        [(ngModel)]="searchQuery"
-        class="form-control mb-2"
-      />
 
-      <select
-        *ngIf="searchResults.length > 0"
-        class="form-control mb-2"
-        (change)="handleResultSelection($event)"
-      >
-        <option disabled selected>Selecciona una dirección</option>
-        <option
-          *ngFor="let result of searchResults"
-          [value]="result.display_name"
+      <!-- Sección de Ubicación -->
+      <div class="location-section">
+        <h3 class="section-title">
+          <i class="fas fa-map-marker-alt"></i>
+          Ubicación de la Empresa
+        </h3>
+        
+        <div class="search-location">
+          <input
+            type="text"
+            class="form-input"
+            placeholder="Buscar dirección..."
+            (keydown.enter)="searchLocation()"
+            [(ngModel)]="searchQuery"
+          />
+          <button type="button" class="btn-search" (click)="searchLocation()">
+            <i class="fas fa-search"></i>
+            Buscar
+          </button>
+        </div>
+
+        <select
+          *ngIf="searchResults.length > 0"
+          class="form-select"
+          (change)="handleResultSelection($event)"
         >
-          {{ result.display_name }}
-        </option>
-      </select>
-      <div id="reg-map" class="map-container"></div>
+          <option disabled selected>Selecciona una dirección</option>
+          <option *ngFor="let result of searchResults" [value]="result.display_name">
+            {{ result.display_name }}
+          </option>
+        </select>
 
-      <button
-        class="register-btn"
-        (click)="register()"
-        [disabled]="hasErrors()"
-      >
-        Crear cuenta
-      </button>
+        <div id="reg-map" class="map-container"></div>
+      </div>
+
+      <!-- Botón de Submit -->
+      <div class="form-actions">
+        <button class="btn-submit" (click)="register()" [disabled]="hasErrors()">
+          <i class="fas fa-building"></i>
+          Crear cuenta empresarial
+        </button>
+        <p class="login-link">
+          ¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión aquí</a>
+        </p>
+      </div>
     </div>
   </div>
-</body>
+</div>
