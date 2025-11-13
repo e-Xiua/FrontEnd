@@ -21,14 +21,14 @@ export class ChatMessageComponent {
     if (this.isOwn) {
       return 'https://api.dicebear.com/7.x/avataaars/svg?seed=User';
     }
-    return this.provider?.photo || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Default';
+    return this.provider?.foto || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Default';
   }
 
   get displayName(): string {
     if (this.isOwn) {
       return 'Tú';
     }
-    return this.provider?.contactName || 'Provider';
+    return this.provider?.nombre || 'Provider';
   }
 
   get statusIcon(): string {

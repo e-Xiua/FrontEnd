@@ -85,9 +85,6 @@ ngOnInit(): void {
         console.log(this.servicio);
         this.horariosDisponibles = this.servicio.horario;
 
-        // Cargar reseñas mock (TODO: reemplazar con datos reales del backend)
-        this.loadMockReviews();
-
         // Si es turista, cargar usuario primero y LUEGO verificar reservas
         if (this.currentUserRole === 'Turista') {
           this.authService.usuarioHome().subscribe({
@@ -343,49 +340,5 @@ handleReviewSubmit(reviewData: ReviewSubmission): void {
   // this.loadReviews(this.servicioId);
 }
 
-/**
- * Carga reseñas mock (temporal hasta tener backend)
- */
-loadMockReviews(): void {
-  this.reviews = [
-    {
-      id: 1,
-      author: 'Laura García',
-      avatar: 'https://i.pravatar.cc/150?img=5',
-      date: '2024-10-15',
-      rating: 5,
-      comment: 'Excelente servicio, muy profesional y atento. La experiencia superó mis expectativas.',
-      helpful: 12,
-      notHelpful: 1,
-      authorId: 101
-    },
-    {
-      id: 2,
-      author: 'Carlos Martínez',
-      avatar: 'https://i.pravatar.cc/150?img=12',
-      date: '2024-10-10',
-      rating: 4,
-      comment: 'Todo fue muy puntual y agradable. Recomendado.',
-      helpful: 8,
-      notHelpful: 0,
-      authorId: 102
-    },
-    {
-      id: 3,
-      author: 'Ana Pérez',
-      avatar: 'https://i.pravatar.cc/150?img=20',
-      date: '2024-10-05',
-      rating: 5,
-      comment: 'Me encantó, repetiría sin dudar. Muy buena relación calidad-precio.',
-      helpful: 15,
-      notHelpful: 2,
-      authorId: 103
-    }
-  ];
-
-  // Calcular el rating promedio
-  const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-  this.averageRating = this.reviews.length > 0 ? totalRating / this.reviews.length : 0;
-}
 
 }

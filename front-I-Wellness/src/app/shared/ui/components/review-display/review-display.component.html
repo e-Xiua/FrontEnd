@@ -41,14 +41,14 @@
       <div class="review-header">
         <img
           title="Review"
-          [src]="review.avatar"
-          [alt]="'Avatar de ' + review.author"
-          [title]="review.author"
+          [src]="review.foto"
+          [alt]="'Avatar de ' + review.nombre"
+          [title]="review.nombre"
           class="review-avatar">
 
         <div class="review-author-info">
           <div class="author-rating-row">
-            <h4 class="author-name">{{ review.author }}</h4>
+            <h4 class="author-name">{{ review.nombre }}</h4>
             <div class="review-stars">
               <i
                 *ngFor="let filled of getStarArray(review.rating)"

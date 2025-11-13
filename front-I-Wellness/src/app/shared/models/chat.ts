@@ -4,7 +4,7 @@ export interface UsuarioDTO {
     nombre: string;
     apellido: string;
     correo: string;
-    urlFotoPerfil: string;
+    foto: string;
 }
 
 export interface Message {
@@ -76,7 +76,7 @@ export interface ChatProvider {
 
   // Propiedades específicas del chat
   contactName: string;
-  photo: string;
+  foto: string;
   rating: number;
   totalReviews: number;
   services: ChatService[];

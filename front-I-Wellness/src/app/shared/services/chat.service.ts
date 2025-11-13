@@ -4,13 +4,13 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { UsuarioService } from '../../features/users/services/usuario.service';
 import {
-  ChatProvider,
-  ChatState,
-  Conversation,
-  ConversationSummary,
-  Message,
-  SendMessageResponse,
-  UsuarioDTO
+    ChatProvider,
+    ChatState,
+    Conversation,
+    ConversationSummary,
+    Message,
+    SendMessageResponse,
+    UsuarioDTO
 } from '../models/chat';
 import { ChatRealtimeService } from './chat-realtime.service';
 import { ConversationApiService } from './conversation-api.service';
@@ -242,7 +242,7 @@ export class ChatService {
       nombre: userData.nombre || userData.name || '',
       apellido: userData.apellido || userData.lastName || '',
       correo: userData.correo || userData.email || '',
-      urlFotoPerfil: userData.urlFotoPerfil || userData.photo || userData.profilePicture || ''
+      foto: userData.foto || userData.photo || userData.profilePicture || ''
     };
   }
 
@@ -639,7 +639,7 @@ export class ChatService {
               telefono: '',
               cedula: '',
               contactName: `${participant.nombre} ${participant.apellido || ''}`.trim(),
-              photo: participant.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + state.selectedProviderId,
+              foto: participant.foto || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + state.selectedProviderId,
               rating: 0,
               totalReviews: 0,
               services: [],
