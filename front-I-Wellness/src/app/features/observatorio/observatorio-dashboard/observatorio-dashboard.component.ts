@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { ObservatorioService } from '../../../shared/services/observatorio.service';
+import { UniversalHeaderComponent } from '../../../shared/components/universal-header/universal-header.component';
 import { 
   ClimaCurrent, 
   UVCurrent, 
@@ -14,7 +15,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-observatorio-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, UniversalHeaderComponent],
   templateUrl: './observatorio-dashboard.component.html',
   styleUrls: ['./observatorio-dashboard.component.css']
 })
@@ -23,6 +24,7 @@ export class ObservatorioDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   lastUpdate: Date = new Date();
+  userRole: 'admin' | 'proveedor' | 'turista' | 'public' = 'public';
 
   // Datos del observatorio
   climaData: ClimaCurrent | null = null;
@@ -37,6 +39,26 @@ export class ObservatorioDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Determinar el rol del usuario para el header
+    if (this.authService.isAuthenticated()) {
+      const rol = localStorage.getItem('rol');
+      switch (rol) {
+        case 'Admin':
+          this.userRole = 'admin';
+          break;
+        case 'Proveedor':
+          this.userRole = 'proveedor';
+          break;
+        case 'Turista':
+          this.userRole = 'turista';
+          break;
+        default:
+          this.userRole = 'public';
+      }
+    } else {
+      this.userRole = 'public';
+    }
+
     this.loadObservatorioData();
     
     // Actualizar datos cada 10 minutos

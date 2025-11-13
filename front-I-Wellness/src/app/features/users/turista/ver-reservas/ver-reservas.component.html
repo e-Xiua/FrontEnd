@@ -1,25 +1,176 @@
-<div *ngFor="let proveedor of proveedoresFiltrados" class="proveedor-card">
-  <h2 (click)="alternarProveedor(proveedor.id)" class="proveedor-header">
-    {{ proveedor.proveedorInfo?.nombre_empresa }}
-  </h2>
-
-  <!-- Mostrar si el proveedor está en el set de abiertos -->
-  <div *ngIf="proveedoresAbiertos.has(proveedor.id)">
-    <div *ngFor="let servicio of servicios">
-      <div *ngIf="servicio._idProveedor === proveedor.id" class="servicio-card">
-        <h3>{{ servicio.nombre }}</h3>
-
-        <ng-container *ngFor="let reserva of reservas">
-          <div *ngIf="reserva._idServicio === servicio._idServicio" class="reserva-block">
-            <p><strong>Fecha:</strong> {{ reserva.fechaServicio | date: 'dd/MM/yyyy HH:mm' }}</p>
-            <p [ngClass]="getEstadoClass(reserva.estado)"><strong>Estado:</strong> {{ reserva.estado }}</p>
-
-             <button *ngIf="reserva.estado !== 'cancelada' && reserva.estado !== 'completada'" (click)="cancelarReserva(reserva)" class="btn-cancelar">
-              Cancelar reserva
-            </button>
-          </div>
-        </ng-container>
+<div class="reservas-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-calendar-check"></i>
       </div>
+      <h1>Mis Reservas</h1>
+      <p class="hero-subtitle">Gestiona todas tus reservas de servicios de bienestar</p>
     </div>
+  </section>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando tus reservas...</p>
   </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!cargando && (!reservas || reservas.length === 0)" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-calendar-times"></i>
+    </div>
+    <h3>No tienes reservas</h3>
+    <p>Explora nuestros servicios y haz tu primera reserva</p>
+    <button class="btn-explore" routerLink="/hometurista">
+      <i class="fas fa-search"></i>
+      Explorar Servicios
+    </button>
+  </div>
+
+  <!-- Reservas Content -->
+  <main class="reservas-content" *ngIf="!cargando && reservas && reservas.length > 0">
+    
+    <!-- Resumen de Reservas -->
+    <section class="summary-section">
+      <div class="summary-card">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <span class="summary-number">{{ (reservas | filter:'confirmada').length }}</span>
+          <span class="summary-label">Confirmadas</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <i class="fas fa-clock"></i>
+        <div>
+          <span class="summary-number">{{ (reservas | filter:'pendiente').length }}</span>
+          <span class="summary-label">Pendientes</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <i class="fas fa-check-double"></i>
+        <div>
+          <span class="summary-number">{{ (reservas | filter:'completada').length }}</span>
+          <span class="summary-label">Completadas</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <i class="fas fa-times-circle"></i>
+        <div>
+          <span class="summary-number">{{ (reservas | filter:'cancelada').length }}</span>
+          <span class="summary-label">Canceladas</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de Proveedores -->
+    <section class="proveedores-section">
+      <div *ngFor="let proveedor of proveedoresFiltrados" class="proveedor-card">
+        
+        <!-- Header del Proveedor -->
+        <div class="proveedor-header" (click)="alternarProveedor(proveedor.id)">
+          <div class="proveedor-info">
+            <div class="proveedor-avatar">
+              <img *ngIf="proveedor.foto" [src]="proveedor.foto" [alt]="proveedor.proveedorInfo?.nombre_empresa">
+              <i *ngIf="!proveedor.foto" class="fas fa-building"></i>
+            </div>
+            <div class="proveedor-details">
+              <h2>{{ proveedor.proveedorInfo?.nombre_empresa }}</h2>
+              <p class="proveedor-contact">
+                <i class="fas fa-user"></i>
+                {{ proveedor.nombre }}
+              </p>
+            </div>
+          </div>
+          <div class="proveedor-toggle">
+            <i class="fas" [ngClass]="proveedoresAbiertos.has(proveedor.id) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </div>
+        </div>
+
+        <!-- Servicios del Proveedor (Expandible) -->
+        <div class="proveedor-content" [class.expanded]="proveedoresAbiertos.has(proveedor.id)">
+          <div *ngFor="let servicio of servicios">
+            <div *ngIf="servicio._idProveedor === proveedor.id" class="servicio-section">
+              
+              <!-- Header del Servicio -->
+              <div class="servicio-header">
+                <div class="servicio-image">
+                  <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                </div>
+                <div class="servicio-info">
+                  <h3>{{ servicio.nombre }}</h3>
+                  <p class="servicio-description">{{ servicio.descripcion }}</p>
+                  <div class="servicio-price">
+                    <i class="fas fa-tag"></i>
+                    {{ servicio.precio === 0 ? 'Gratis' : '$' + servicio.precio }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reservas del Servicio -->
+              <div class="reservas-list">
+                <ng-container *ngFor="let reserva of reservas">
+                  <div *ngIf="reserva._idServicio === servicio._idServicio" class="reserva-card" [attr.data-estado]="reserva.estado">
+                    
+                    <div class="reserva-header">
+                      <div class="reserva-icon">
+                        <i class="fas" [ngClass]="{
+                          'fa-check-circle': reserva.estado === 'confirmada',
+                          'fa-clock': reserva.estado === 'pendiente',
+                          'fa-check-double': reserva.estado === 'completada',
+                          'fa-times-circle': reserva.estado === 'cancelada'
+                        }"></i>
+                      </div>
+                      <div class="reserva-status" [ngClass]="getEstadoClass(reserva.estado)">
+                        <span class="estado-badge">{{ reserva.estado | uppercase }}</span>
+                      </div>
+                    </div>
+
+                    <div class="reserva-details">
+                      <div class="reserva-info-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div>
+                          <span class="info-label">Fecha del Servicio</span>
+                          <span class="info-value">{{ reserva.fechaServicio | date: 'dd/MM/yyyy' }}</span>
+                        </div>
+                      </div>
+                      
+                      <div class="reserva-info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                          <span class="info-label">Hora</span>
+                          <span class="info-value">{{ reserva.fechaServicio | date: 'HH:mm' }}</span>
+                        </div>
+                      </div>
+
+                      <div class="reserva-info-item">
+                        <i class="fas fa-calendar-plus"></i>
+                        <div>
+                          <span class="info-label">Fecha de Reserva</span>
+                          <span class="info-value">{{ reserva.fechaReserva | date: 'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Acciones de Reserva -->
+                    <div class="reserva-actions" *ngIf="reserva.estado !== 'cancelada' && reserva.estado !== 'completada'">
+                      <button class="btn-cancelar" (click)="cancelarReserva(reserva)">
+                        <i class="fas fa-times"></i>
+                        Cancelar Reserva
+                      </button>
+                    </div>
+
+                  </div>
+                </ng-container>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
 </div>

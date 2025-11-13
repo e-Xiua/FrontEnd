@@ -40,8 +40,14 @@
 
   <!-- Resultados de búsqueda -->
   <div *ngIf="showResults && isSearchVisible" class="search-results">
-    <div *ngIf="filteredProviders.length === 0 && !isLoading" class="no-results">
+    <!-- Sin resultados de búsqueda -->
+    <div *ngIf="filteredProviders.length === 0 && !isLoading && searchQuery" class="no-results">
       <p>No se encontraron proveedores que coincidan con "{{ searchQuery }}"</p>
+    </div>
+    
+    <!-- No hay proveedores cargados -->
+    <div *ngIf="allProviders.length === 0 && !isLoading && searchQuery" class="no-results">
+      <p style="color: orange;">⚠️ No hay proveedores disponibles. Verifica la conexión con el servidor.</p>
     </div>
 
     <div *ngIf="filteredProviders.length > 0" class="results-list">
@@ -54,10 +60,10 @@
       >
         <div class="provider-photo">
           <img
-            [src]="provider.foto || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(provider.nombre || 'P')"
+            [src]="provider.foto ? provider.foto : getAvatarUrl(provider)"
             [alt]="'Foto de ' + (provider.nombre || 'Proveedor')"
             [title]="provider.nombre || 'Proveedor'"
-            (error)="$any($event.target).src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(provider.nombre || 'P')"
+            (error)="$any($event.target).src = '/assets/default-avatar.svg'"
           />
         </div>
 

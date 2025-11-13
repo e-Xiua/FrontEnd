@@ -1,12 +1,908 @@
-.tourist-routes-container {
-      padding: 1.5rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-    }
+/* Reset y Variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    ::ng-deep .route-generation {
-      background: white;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
+:host {
+  --primary-color: #4a9c9f;
+  --primary-hover: #3d8285;
+  --secondary-color: #2c5f63;
+  --accent-color: #FF9843;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+  --border-color: #e1e8ed;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+  --transition: all 0.3s ease;
+}
+
+/* Container Principal */
+.rutas-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-light);
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  padding: 4rem 2rem 3rem;
+  margin-bottom: 0;
+  color: white;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+.hero-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.95;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 2rem 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+
+.hero-stat:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+}
+
+.hero-stat i {
+  font-size: 1.5rem;
+}
+
+/* Sections */
+.map-section,
+.routes-section {
+  padding: 3rem 2rem;
+}
+
+.routes-section {
+  background: var(--bg-white);
+}
+
+/* Section Header */
+.section-header {
+  max-width: 1400px;
+  margin: 0 auto 2rem;
+  padding: 2rem;
+  background: var(--bg-white);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  border-left: 5px solid var(--primary-color);
+}
+
+.header-content h2 {
+  color: var(--text-dark) !important;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-content h2 i {
+  color: var(--primary-color);
+  font-size: 2rem;
+}
+
+.section-description {
+  color: #2c3e50 !important;
+  font-size: 1.1rem;
+  margin: 0;
+  padding-left: 3rem;
+  font-weight: 500;
+  opacity: 1 !important;
+  line-height: 1.6;
+}
+
+.section-header .section-description {
+  color: #2c3e50 !important;
+}
+
+.header-content .section-description {
+  color: #2c3e50 !important;
+}
+
+.header-actions {
+  margin-top: 1.5rem;
+  padding-left: 3rem;
+}
+
+.info-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(74, 156, 159, 0.1), rgba(44, 95, 99, 0.05));
+  border-radius: 12px;
+  border: 2px solid rgba(74, 156, 159, 0.2);
+  max-width: 800px;
+}
+
+.info-card i {
+  color: var(--primary-color);
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.info-content h4 {
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.info-content p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Map Wrapper */
+.map-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--bg-white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--border-color);
+}
+
+.map-wrapper app-map-for-all-providers {
+  display: block;
+  min-height: 500px;
+  width: 100%;
+}
+
+/* Routes Wrapper */
+.routes-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Estilos mejorados para el componente interno route-generation */
+::ng-deep .route-generation {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+::ng-deep .route-generation__title {
+  color: #2c3e50 !important;
+  font-weight: 700 !important;
+  font-size: 2rem !important;
+}
+
+::ng-deep .route-generation__description {
+  color: #2c3e50 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  font-size: 1.1rem !important;
+}
+
+::ng-deep .route-generation__header {
+  margin-bottom: 2.5rem !important;
+  padding: 2.5rem !important;
+}
+
+/* Mejorar visualización de rutas */
+::ng-deep .routes-container {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+::ng-deep .routes-header {
+  background: var(--bg-white) !important;
+  padding: 2rem !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 2px solid var(--border-color) !important;
+  margin-bottom: 2rem !important;
+}
+
+::ng-deep .route-item {
+  margin-bottom: 1.5rem !important;
+  background: var(--bg-white) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 2px solid var(--border-color) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .route-item:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .route-header {
+  background: linear-gradient(135deg, rgba(74, 156, 159, 0.08), rgba(44, 95, 99, 0.08)) !important;
+  padding: 2rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .route-header:hover {
+  background: linear-gradient(135deg, rgba(74, 156, 159, 0.15), rgba(44, 95, 99, 0.15)) !important;
+}
+
+::ng-deep .route-title {
+  color: var(--text-dark) !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+::ng-deep .route-description {
+  color: var(--text-light) !important;
+  font-size: 1.05rem !important;
+  line-height: 1.6 !important;
+}
+
+::ng-deep .route-meta-grid {
+  display: flex !important;
+  gap: 1.25rem !important;
+  flex-wrap: wrap !important;
+  margin-top: 1.25rem !important;
+}
+
+::ng-deep .meta-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.625rem !important;
+  padding: 0.75rem 1.25rem !important;
+  background: var(--bg-white) !important;
+  border-radius: 25px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  border: 2px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+::ng-deep .meta-icon {
+  color: var(--primary-color) !important;
+  font-size: 1.25rem !important;
+}
+
+::ng-deep .difficulty-badge {
+  padding: 0.5rem 1rem !important;
+  border-radius: 20px !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+::ng-deep .providers-count {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .expand-icon {
+  font-size: 1.5rem !important;
+  color: var(--primary-color) !important;
+  font-weight: bold !important;
+}
+
+/* Contenido expandido de rutas */
+::ng-deep .route-content {
+  padding: 0 2rem 2rem 2rem !important;
+  background: var(--bg-light) !important;
+}
+
+::ng-deep .route-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.75rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+::ng-deep .tag {
+  padding: 0.5rem 1rem !important;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  color: white !important;
+  border-radius: 20px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+::ng-deep .providers-info h4 {
+  color: var(--text-dark) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+::ng-deep .providers-info h4::before {
+  font-size: 1.5rem !important;
+}
+
+::ng-deep .providers-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 1.5rem !important;
+}
+
+::ng-deep .provider-card {
+  background: var(--bg-white) !important;
+  border-radius: 16px !important;
+  padding: 1.5rem !important;
+  border: 2px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .provider-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .provider-info h5 {
+  color: var(--text-dark) !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+::ng-deep .provider-info p {
+  color: var(--text-light) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1rem !important;
+}
+
+::ng-deep .provider-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+::ng-deep .provider-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+::ng-deep .route-action-btn {
+  padding: 1rem 2rem !important;
+  border-radius: 12px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+::ng-deep .route-action-btn.primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  color: white !important;
+  border: none !important;
+}
+
+::ng-deep .route-action-btn.primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Filtros y estadísticas */
+::ng-deep .filter-controls {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1.25rem !important;
+  padding: 1.5rem !important;
+  background: var(--bg-light) !important;
+  border-radius: 16px !important;
+  margin-bottom: 2rem !important;
+}
+
+::ng-deep .filter-group label {
+  color: var(--text-dark) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+::ng-deep .filter-search,
+::ng-deep .filter-select {
+  padding: 0.875rem 1.25rem !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .filter-search:focus,
+::ng-deep .filter-select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(74, 156, 159, 0.1) !important;
+  outline: none !important;
+}
+
+::ng-deep .clear-filters-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  color: white !important;
+  padding: 0.875rem 1.75rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+::ng-deep .clear-filters-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+::ng-deep .stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+  gap: 1.25rem !important;
+  margin-bottom: 2rem !important;
+}
+
+::ng-deep .stat-item {
+  padding: 1.5rem !important;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  border-radius: 16px !important;
+  text-align: center !important;
+  box-shadow: var(--shadow-md) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .stat-item:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+::ng-deep .stat-value {
+  color: white !important;
+  font-size: 2.25rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+::ng-deep .stat-label {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+}
+
+/* Estados vacío y error mejorados */
+::ng-deep .route-generation__empty {
+  padding: 4rem 2rem !important;
+  text-align: center !important;
+  background: var(--bg-white) !important;
+  border-radius: 20px !important;
+  border: 3px dashed var(--border-color) !important;
+}
+
+::ng-deep .route-generation__empty::before {
+  font-size: 5rem !important;
+  opacity: 0.4 !important;
+}
+
+::ng-deep .route-generation__empty p {
+  color: var(--text-light) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  margin-top: 1rem !important;
+}
+
+::ng-deep .route-generation__error {
+  padding: 2.5rem !important;
+  background: #fff5f5 !important;
+  border: 3px solid #fc8181 !important;
+  border-radius: 20px !important;
+}
+
+::ng-deep .route-generation__error::before {
+  font-size: 4rem !important;
+}
+
+::ng-deep .route-generation__error p {
+  color: #c53030 !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+}
+
+::ng-deep .route-generation__retry {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  padding: 1rem 2rem !important;
+  border-radius: 12px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+::ng-deep .route-generation__retry:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+::ng-deep .route-generation__status {
+  padding: 4rem 2rem !important;
+}
+
+::ng-deep .route-generation__status::before {
+  width: 60px !important;
+  height: 60px !important;
+  border-width: 5px !important;
+  margin-bottom: 2rem !important;
+}
+
+::ng-deep .route-generation__status p {
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: var(--text-dark) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .rutas-container {
+    padding: 0;
+  }
+
+  ::ng-deep .providers-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  }
+
+  .hero-stats {
+    gap: 2rem;
+  }
+
+  .info-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 1.5rem 2rem;
+  }
+
+  .hero-section h1 {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hero-icon {
+    font-size: 3rem;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .hero-stat {
+    justify-content: center;
+  }
+
+  .map-section,
+  .routes-section {
+    padding: 2rem 1rem;
+  }
+
+  .section-header {
+    padding: 1.5rem;
+  }
+
+  .header-content h2 {
+    font-size: 1.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .header-content h2 i {
+    font-size: 1.75rem;
+  }
+
+  .section-description {
+    padding-left: 0;
+    font-size: 1rem;
+  }
+
+  .header-actions {
+    padding-left: 0;
+    margin-top: 1.25rem;
+  }
+
+  .info-card {
+    flex-direction: column;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .info-card i {
+    margin: 0 auto;
+  }
+
+  .map-wrapper app-map-for-all-providers {
+    min-height: 400px;
+  }
+
+  ::ng-deep .route-header {
+    padding: 1.5rem !important;
+  }
+
+  ::ng-deep .route-title {
+    font-size: 1.5rem !important;
+  }
+
+  ::ng-deep .route-meta-grid {
+    gap: 0.75rem !important;
+  }
+
+  ::ng-deep .meta-item {
+    font-size: 0.875rem !important;
+    padding: 0.625rem 1rem !important;
+  }
+
+  ::ng-deep .providers-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  ::ng-deep .route-content {
+    padding: 0 1.5rem 1.5rem 1.5rem !important;
+  }
+
+  ::ng-deep .filter-controls {
+    flex-direction: column;
+    gap: 1rem !important;
+  }
+
+  ::ng-deep .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  }
+
+  ::ng-deep .stat-value {
+    font-size: 1.875rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 2rem 1rem 1.5rem;
+  }
+
+  .hero-section h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-stat {
+    font-size: 0.95rem;
+    padding: 0.625rem 1.25rem;
+  }
+
+  .hero-stat i {
+    font-size: 1.25rem;
+  }
+
+  .section-header {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .header-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .header-content h2 i {
+    font-size: 1.5rem;
+  }
+
+  .section-description {
+    font-size: 0.95rem;
+  }
+
+  .info-content h4 {
+    font-size: 1rem;
+  }
+
+  .info-content p {
+    font-size: 0.875rem;
+  }
+
+  .map-wrapper {
+    border-radius: 16px;
+  }
+
+  .map-wrapper app-map-for-all-providers {
+    min-height: 350px;
+  }
+
+  ::ng-deep .route-header {
+    padding: 1.25rem !important;
+  }
+
+  ::ng-deep .route-title {
+    font-size: 1.35rem !important;
+  }
+
+  ::ng-deep .route-description {
+    font-size: 0.95rem !important;
+  }
+
+  ::ng-deep .meta-item {
+    font-size: 0.8125rem !important;
+    padding: 0.5rem 0.875rem !important;
+  }
+
+  ::ng-deep .route-content {
+    padding: 0 1.25rem 1.25rem 1.25rem !important;
+  }
+
+  ::ng-deep .provider-card {
+    padding: 1.25rem !important;
+  }
+
+  ::ng-deep .route-action-btn,
+  ::ng-deep .provider-btn {
+    width: 100% !important;
+    padding: 0.875rem !important;
+  }
+
+  ::ng-deep .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  ::ng-deep .stat-item {
+    padding: 1.25rem !important;
+  }
+
+  ::ng-deep .route-generation__empty,
+  ::ng-deep .route-generation__status {
+    padding: 3rem 1.5rem !important;
+  }
+
+  ::ng-deep .route-generation__error {
+    padding: 2rem 1.5rem !important;
+  }
+}
+
+
+/* Mejoras visuales adicionales para el mapa */
+::ng-deep app-map-for-all-providers {
+  display: block;
+}
+
+::ng-deep app-map-for-all-providers .section-title {
+  color: #2c3e50 !important;
+}
+
+::ng-deep app-map-for-all-providers .section-description {
+  color: #2c3e50 !important;
+  opacity: 1 !important;
+}
+
+::ng-deep app-map-for-all-providers .map-container {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+::ng-deep app-map-for-all-providers .leaflet-container {
+  font-family: inherit;
+}
+
+::ng-deep app-map-for-all-providers .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+::ng-deep app-map-for-all-providers .leaflet-popup-content {
+  margin: 1rem;
+}
+
+::ng-deep app-map-for-all-providers .marker-popup h3 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep app-map-for-all-providers .marker-popup p {
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}

@@ -70,7 +70,7 @@ export class PerfilProveedorComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit(): void {
-    throw new Error('Method not implemented.');
+    // Intentionally left blank. Map initialization is handled in ngAfterViewChecked
   }
 
   ngOnInit() {

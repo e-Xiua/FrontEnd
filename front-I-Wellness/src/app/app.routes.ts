@@ -40,6 +40,7 @@ import { EditPreferenciasComponent } from './features/users/turista/edit-prefere
 import { FormulariogustosComponent } from './features/users/turista/formulariogustos/formulariogustos.component';
 import { HomeTuristaComponent } from './features/users/turista/home-turista/home-turista.component';
 import { PerfilTuristaComponent } from './features/users/turista/perfil-turista/perfil-turista.component';
+import { ProviderProfileComponent } from './features/users/turista/provider-profile/provider-profile.component';
 import { RegistroTuristaComponent } from './features/users/turista/registro-turista/registro-turista.component';
 import { RutaDetalleComponent } from './features/users/turista/ruta-detalle/ruta-detalle.component';
 import { VerReservasComponent } from './features/users/turista/ver-reservas/ver-reservas.component';
@@ -94,6 +95,7 @@ export const routes: Routes = [
       { path: 'perfil/:id', component: PerfilTuristaComponent },
       { path: 'edit-preferencias/:id', component: EditPreferenciasComponent },
       { path: 'proveedor/:id', component: ServiciosProveedorComponent },
+      { path: 'perfil-proveedor/:id', component: ProviderProfileComponent },
       { path: 'reservas', component: VerReservasComponent },
     ]
   },
@@ -114,7 +116,11 @@ export const routes: Routes = [
       { path: 'rutas', component: GeneradorDeRutasProveedorComponent},
       { path: 'ruta/:id', component: RutaDetalleComponent },
       { path: 'servicio/:id', component: InfoServicioComponent },
-      { path: 'ver-perfil/:id', component: ProfilePageComponent },
+      { 
+        path: 'ver-perfil/:id', 
+        component: ProfilePageComponent,
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+      },
     ]
   },
 

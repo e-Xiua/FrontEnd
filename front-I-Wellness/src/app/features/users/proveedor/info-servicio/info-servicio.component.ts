@@ -9,6 +9,7 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { UniversalHeaderComponent } from '../../../../shared/components/universal-header/universal-header.component';
 import { Review, ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
 import { ReviewFormComponent, ReviewSubmission } from '../../../../shared/ui/components/review-form/review-form.component';
 import { ReservaService } from '../../../servicios/reservas/reserva.service';
@@ -28,7 +29,8 @@ import { TipoCambioService } from '../services/tipo-cambio.service';
     MatNativeDateModule,
     MatTimepickerModule,
     ReviewDisplayComponent,
-    ReviewFormComponent
+    ReviewFormComponent,
+    UniversalHeaderComponent
   ],
   templateUrl: './info-servicio.component.html',
   styleUrl: './info-servicio.component.css'

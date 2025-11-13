@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Pipe, PipeTransform } from '@angular/core';
 import { ReservaService } from '../../../servicios/reservas/reserva.service';
 import { ServicioService } from '../../../servicios/services/servicio.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
@@ -6,10 +6,25 @@ import { forkJoin } from 'rxjs';
 import { UsuarioService } from '../../services/usuario.service';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { RouterModule } from '@angular/router';
+
+// Pipe para filtrar reservas por estado
+@Pipe({
+  name: 'filter',
+  standalone: true
+})
+export class FilterPipe implements PipeTransform {
+  transform(items: any[], estado: string): any[] {
+    if (!items || !estado) {
+      return items;
+    }
+    return items.filter(item => item.estado === estado);
+  }
+}
 
 @Component({
   selector: 'app-ver-reservas',
-  imports: [CommonModule],
+  imports: [CommonModule, FilterPipe, RouterModule],
   templateUrl: './ver-reservas.component.html',
   styleUrl: './ver-reservas.component.css'
 })

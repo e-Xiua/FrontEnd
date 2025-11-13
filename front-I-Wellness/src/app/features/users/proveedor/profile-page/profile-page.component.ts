@@ -6,6 +6,7 @@ import { ExtendedPlaceData } from '../../../../shared/models/place-data.model';
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { ProfileStateService } from '../../../../shared/services/profile-state.service';
+import { ReviewsCallService, ProviderRatingDTO } from '../../../../shared/services/reviews-call.service';
 import { MakeNetworkingContactComponent } from '../../../../shared/ui/components/make-networking-contact/make-networking-contact.component';
 import { ProviderServiceListContainerComponent } from '../../../../shared/ui/components/provider-service-list/provider-service-list.container';
 import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
@@ -43,13 +44,18 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
   currentUserId: number | null = null;
   isContact = false;
   isAddingContact = false;
+  
+  // Rating data
+  providerRating: ProviderRatingDTO | null = null;
+  address: string = '';
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly profileState: ProfileStateService
+    private readonly profileState: ProfileStateService,
+    private readonly reviewsService: ReviewsCallService
   ) {}
 
   // Reactive state from ProfileStateService (getter pattern for safe access)
@@ -66,6 +72,10 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     this.profileState.state$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
+        // Preservar rating y totalReviews si ya los tenemos cargados
+        const currentRating = this.provider?.rating;
+        const currentTotalReviews = this.provider?.totalReviews;
+        
         this.provider = state.provider;
         this.services = state.services;
         this.isLoading = state.isLoading;
@@ -74,28 +84,103 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
         this.isContact = state.isContact;
         this.isAddingContact = state.isAddingContact;
 
-        // Log state changes for debugging
-        console.log('ProfilePage: State updated', {
+        // Restaurar rating si ya lo teníamos cargado y el nuevo provider no tiene uno válido
+        if (this.provider && this.providerRating) {
+          if (!this.provider.rating || this.provider.rating === 0) {
+            this.provider.rating = currentRating || this.parseRatingValue(this.providerRating.averageRating);
+            this.provider.totalReviews = currentTotalReviews || this.providerRating.totalReviews;
+          }
+        }
+
+        // Log state changes for debugging with detailed provider info
+        console.log('📊 ProfilePage: State updated', {
           providerId: state.targetProviderId,
           isContact: state.isContact,
-          isAddingContact: state.isAddingContact
+          isAddingContact: state.isAddingContact,
+          hasProvider: !!state.provider,
+          servicesCount: state.services?.length ?? 0
         });
+
+        if (state.provider) {
+          console.log('👤 Provider data received:', {
+            id: state.provider.id,
+            name: state.provider.name,
+            contactName: state.provider.contactName,
+            email: state.provider.correo,
+            phone: state.provider.phone,
+            companyPhone: state.provider.companyPhone,
+            address: state.provider.address,
+            hours: state.provider.hours,
+            description: state.provider.description,
+            cargoContacto: state.provider.cargoContacto,
+            certificadosCalidad: state.provider.certificadosCalidad,
+            identificacionFiscal: state.provider.identificacionFiscal,
+            licenciasPermisos: state.provider.licenciasPermisos,
+            category: state.provider.category,
+            categories: state.provider.categories,
+            rating: state.provider.rating,
+            totalReviews: state.provider.totalReviews,
+          });
+          
+          // Cargar dirección cuando el provider esté disponible
+          if (state.provider.provider?.proveedorInfo) {
+            this.loadAddressFromCoordinates();
+          }
+          
+          // Cargar rating cuando tengamos el ID del proveedor (solo si no lo tenemos ya)
+          if (!this.providerRating) {
+            this.loadProviderRating(state.provider.id);
+          }
+        }
       });
 
-    // Initial load
-    this.loadProvider();
+    // Subscribe to route parameter changes to reload profile when navigating to different provider
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const idParam = params.get('id');
+        if (idParam) {
+          const newProviderId = Number(idParam);
+          console.log('🔄 ProfilePage: Route param changed, loading provider ID:', newProviderId);
+          
+          // Update providerId if it comes from route
+          if (!this.providerId || this.providerId !== newProviderId) {
+            this.providerId = newProviderId;
+            this.loadProvider();
+          }
+        } else if (this.providerId) {
+          // If no route param but we have a providerId input, use that
+          console.log('🔄 ProfilePage: Using @Input providerId:', this.providerId);
+          this.loadProvider();
+        }
+      });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ('providerId' in changes && !changes['providerId'].firstChange) {
-      this.loadProvider();
+    // Cargar el proveedor cuando el providerId cambia (incluyendo el primer cambio si viene como @Input)
+    if ('providerId' in changes) {
+      const currentId = changes['providerId'].currentValue;
+      const previousId = changes['providerId'].previousValue;
+      
+      console.log('🔄 ProfilePage ngOnChanges:', {
+        currentId,
+        previousId,
+        isFirstChange: changes['providerId'].firstChange
+      });
+      
+      // Si es el primer cambio y tenemos un ID válido, o si el ID cambió
+      if ((changes['providerId'].firstChange && currentId) || 
+          (!changes['providerId'].firstChange && currentId !== previousId)) {
+        this.loadProvider();
+      }
     }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.profileState.reset();
+    // Don't reset state here - it will be cleared when loading a new provider
+    // or when the user navigates away from provider profiles entirely
   }
 
   addContact(): void {
@@ -120,5 +205,104 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
 
     // Load services after provider is set
     this.profileState.loadServices(this.showServiceManager);
+    
+    // Load rating if provider ID is available
+    if (this.providerId) {
+      this.loadProviderRating(this.providerId);
+    }
+  }
+  
+  /**
+   * Carga el rating promedio del proveedor desde la API de reviews
+   */
+  private loadProviderRating(providerId: number): void {
+    console.log('🌟 Cargando rating para proveedor ID:', providerId);
+    
+    this.reviewsService.getProviderRating(providerId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rating) => {
+          this.providerRating = rating;
+          console.log('✅ Rating cargado:', rating);
+          console.log('📊 Rating details:', {
+            averageRating: rating.averageRating,
+            parsedValue: this.parseRatingValue(rating.averageRating),
+            totalReviews: rating.totalReviews
+          });
+          
+          // Actualizar el provider con el rating obtenido
+          if (this.provider) {
+            const parsedRating = this.parseRatingValue(rating.averageRating);
+            this.provider.rating = parsedRating;
+            this.provider.totalReviews = rating.totalReviews;
+            
+            console.log('✅ Provider rating actualizado:', {
+              rating: this.provider.rating,
+              totalReviews: this.provider.totalReviews
+            });
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar rating:', error);
+          // Mantener valores por defecto si falla
+          this.providerRating = null;
+          if (this.provider) {
+            this.provider.rating = 0;
+            this.provider.totalReviews = 0;
+          }
+        }
+      });
+  }
+  
+  /**
+   * Parsea el valor de rating que puede venir como objeto {source, parsedValue} o número
+   */
+  private parseRatingValue(rating: any): number {
+    if (typeof rating === 'number') {
+      return rating;
+    }
+    if (rating && typeof rating === 'object' && 'parsedValue' in rating) {
+      return rating.parsedValue;
+    }
+    return 0;
+  }
+  
+  /**
+   * Genera dirección a partir de coordenadas usando reverse geocoding
+   */
+  private loadAddressFromCoordinates(): void {
+    if (!this.provider?.provider?.proveedorInfo) {
+      return;
+    }
+    
+    const lat = this.provider.provider.proveedorInfo.coordenadaX;
+    const lon = this.provider.provider.proveedorInfo.coordenadaY;
+    
+    if (!lat || !lon) {
+      this.address = 'Ubicación no disponible';
+      return;
+    }
+    
+    console.log('📍 Obteniendo dirección para coordenadas:', { lat, lon });
+    
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.display_name) {
+          this.address = data.display_name;
+          console.log('✅ Dirección obtenida:', this.address);
+          
+          // Actualizar el provider con la dirección
+          if (this.provider) {
+            this.provider.address = this.address;
+          }
+        } else {
+          this.address = 'Dirección no disponible';
+        }
+      })
+      .catch(error => {
+        console.error('❌ Error al obtener dirección:', error);
+        this.address = 'Error al obtener dirección';
+      });
   }
 }

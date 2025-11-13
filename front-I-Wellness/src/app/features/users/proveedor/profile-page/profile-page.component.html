@@ -44,15 +44,15 @@
               class="profile-avatar">
 
             <div class="profile-main-info">
-              <h1 class="provider-name">{{ provider.contactName }}</h1>
-              <p class="provider-role">{{ provider.cargoContacto }}</p>
-              <p class="provider-company">{{ provider.name }}</p>
+              <h1 class="provider-name">{{ provider.contactName || provider.name || 'Proveedor' }}</h1>
+              <p class="provider-role" *ngIf="provider.cargoContacto">{{ provider.cargoContacto }}</p>
+              <p class="provider-company">{{ provider.name || 'Empresa no especificada' }}</p>
 
               <div class="provider-stats">
                 <div class="rating-display">
                   <i class="fas fa-star"></i>
-                  <span class="rating-value">{{ provider.rating }}</span>
-                  <span class="rating-count">({{ provider.totalReviews }} reseñas)</span>
+                  <span class="rating-value">{{ provider.rating?.toFixed(1) || '0.0' }}</span>
+                  <span class="rating-count">({{ provider.totalReviews || 0 }} reseñas)</span>
                 </div>
                 
                 <button
@@ -67,18 +67,10 @@
                 </button>
               </div>
 
-              <!-- Category Badge -->
-              <div class="category-badges">
-                <span class="category-badge">
-                  <i class="fas fa-tag"></i>
-                  {{ provider.category }}
-                </span>
-              </div>
-
               <!-- Location -->
               <div class="provider-location">
                 <i class="fas fa-map-marker-alt"></i>
-                <span>{{ provider.address }}</span>
+                <span>{{ address || provider.address || 'Ubicación no disponible' }}</span>
               </div>
             </div>
 
@@ -111,28 +103,21 @@
             <i class="fas fa-envelope"></i>
             <div class="contact-details">
               <p class="contact-label">Email</p>
-              <p class="contact-value">{{ provider.email }}</p>
+              <p class="contact-value">{{ provider.correo || 'No disponible' }}</p>
             </div>
           </div>
           <div class="contact-item">
             <i class="fas fa-phone"></i>
             <div class="contact-details">
               <p class="contact-label">Teléfono</p>
-              <p class="contact-value">{{ provider.phone }}</p>
+              <p class="contact-value">{{ provider.phone || 'No disponible' }}</p>
             </div>
           </div>
           <div class="contact-item">
             <i class="fas fa-phone-alt"></i>
             <div class="contact-details">
               <p class="contact-label">Teléfono Empresa</p>
-              <p class="contact-value">{{ provider.companyPhone }}</p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <i class="fas fa-clock"></i>
-            <div class="contact-details">
-              <p class="contact-label">Horarios</p>
-              <p class="contact-value">{{ provider.hours }}</p>
+              <p class="contact-value">{{ provider.companyPhone || 'No disponible' }}</p>
             </div>
           </div>
         </div>
@@ -201,11 +186,37 @@
         <ng-template #providerServicesDefault>
           <div *ngIf="services.length > 0" class="services-grid">
             <div *ngFor="let service of services" class="service-card">
-              <h3 class="service-name">{{ service.nombre || 'Servicio sin nombre' }}</h3>
-              <p class="service-description">{{ service.descripcion || 'Sin descripción disponible' }}</p>
-              <div class="service-footer">
-                <span class="service-price">{{ service.precio | currency:'USD':'symbol':'1.2-2' }}</span>
-                <span class="service-category">{{ service.categoria || 'General' }}</span>
+              <div *ngIf="service.imagen" class="service-image">
+                <img [src]="service.imagen" [alt]="service.nombre" />
+              </div>
+              <div class="service-content">
+                <h3 class="service-name">{{ service.nombre || 'Servicio sin nombre' }}</h3>
+                <p class="service-description">{{ service.descripcion || 'Sin descripción disponible' }}</p>
+                
+                <!-- Horario del servicio específico -->
+                <div *ngIf="service.horario" class="service-schedule">
+                  <i class="fas fa-clock"></i>
+                  <span>{{ service.horario }}</span>
+                </div>
+                
+                <!-- Tiempo aproximado -->
+                <div *ngIf="service.tiempoAproximado" class="service-duration">
+                  <i class="fas fa-hourglass-half"></i>
+                  <span>{{ service.tiempoAproximado }} min</span>
+                </div>
+                
+                <div class="service-footer">
+                  <span class="service-price">
+                    {{ service.precio?.parsedValue !== undefined ? (service.precio.parsedValue | currency:'USD':'symbol':'1.2-2') : (service.precio | currency:'USD':'symbol':'1.2-2') }}
+                  </span>
+                  <span class="service-category">{{ service.categoria || 'General' }}</span>
+                  <span *ngIf="service.estado !== undefined" 
+                        class="service-status" 
+                        [class.active]="service.estado"
+                        [class.inactive]="!service.estado">
+                    {{ service.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

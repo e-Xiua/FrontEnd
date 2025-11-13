@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth/auth.service';
+import { ObservatorioService } from '../../shared/services/observatorio.service';
+import { UniversalHeaderComponent } from '../../shared/components/universal-header/universal-header.component';
 
 interface SearchResult {
   search_term: string;
@@ -51,43 +54,67 @@ interface SourceBreakdown {
 @Component({
   selector: 'app-web-scrapping-buscador',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UniversalHeaderComponent],
   templateUrl: './web-scrapping-buscador.component.html',
   styleUrls: ['./web-scrapping-buscador.component.css']
 })
-export class WebScrappingBuscadorComponent {
+export class WebScrappingBuscadorComponent implements OnInit {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private observatorioService = inject(ObservatorioService);
   
   searchResults: SearchResult | null = null;
   buscando = false;
   error = '';
   currentTab = 'matches';
   searchTerm = '';
+  userRole: 'admin' | 'proveedor' | 'turista' | 'public' = 'public';
 
   // Términos sugeridos
   suggestedTerms = ['precio', 'clima', 'spa', 'hotel', 'actividades'];
 
-  buscar(query: string) {
-    if (!query.trim()) return;
-    
+  ngOnInit(): void {
+    // Determinar el rol del usuario para el header
+    if (this.authService.isAuthenticated()) {
+      const rol = localStorage.getItem('rol');
+      switch (rol) {
+        case 'Admin':
+          this.userRole = 'admin';
+          break;
+        case 'Proveedor':
+          this.userRole = 'proveedor';
+          break;
+        case 'Turista':
+          this.userRole = 'turista';
+          break;
+        default:
+          this.userRole = 'public';
+      }
+    } else {
+      this.userRole = 'public';
+    }
+  }
+
+  buscar(query: string): void {
+    if (!query.trim()) {
+      this.error = 'Por favor ingrese un término de búsqueda';
+      return;
+    }
+
     this.buscando = true;
-    this.searchResults = null;
     this.error = '';
-    this.searchTerm = query;
-    
-    // Llamada al backend web scrapping - Puerto 8080 como está configurado en server.py
-    this.http.get<SearchResult>(`http://localhost:8085/api/search?term=${encodeURIComponent(query)}`)
-      .subscribe({
-        next: (data) => {
-          this.searchResults = data;
-          this.buscando = false;
-        },
-        error: (err) => {
-          this.error = 'No se pudo obtener resultados. Asegúrate de que el servidor esté ejecutándose en puerto 8080.';
-          this.buscando = false;
-          console.error('Error de búsqueda:', err);
-        }
-      });
+    this.searchResults = null;
+
+    this.observatorioService.searchTourismParameter(query).subscribe({
+      next: (data: SearchResult) => {
+        this.searchResults = data;
+        this.buscando = false;
+      },
+      error: (err: Error) => {
+        this.error = 'Error al realizar la búsqueda: ' + (err.message || 'Error desconocido');
+        this.buscando = false;
+      }
+    });
   }
 
   searchSuggestion(term: string) {

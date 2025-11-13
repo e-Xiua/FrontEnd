@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { jwtDecode } from 'jwt-decode';
@@ -27,7 +28,7 @@ interface Usuario {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: [NgxChartsModule],
+  imports: [NgxChartsModule, CommonModule],
   styleUrls: ['./dashboard.component.css'],
   encapsulation: ViewEncapsulation.None
 })
@@ -72,10 +73,16 @@ reservasPorEstadoCivilChart: any[] = [];
     selectable: true,
     group: ScaleType.Ordinal,
     domain: [
-      '#FF9843', // Naranja vibrante
-      '#FFDD95', // Amarillo suave
-      '#86A7FC', // Azul claro
-      '#3468C0'  // Azul intenso
+      '#2973B2', // Azul principal - alta legibilidad
+      '#FF9843', // Naranja vibrante - contraste fuerte
+      '#4a9c9f', // Turquesa - complementario
+      '#28a745', // Verde success - clara distinción
+      '#dc3545', // Rojo danger - alta visibilidad
+      '#ffc107', // Amarillo warning - contraste
+      '#17a2b8', // Cyan info - diferenciación
+      '#6f42c1', // Púrpura - variedad
+      '#fd7e14', // Naranja oscuro - alternativo
+      '#20c997'  // Verde agua - complemento
     ]
   };
 xAxisTickFormatting: any;
@@ -89,13 +96,22 @@ xAxisTickFormatting: any;
     
     this.authService.usuarioHome().subscribe({
       next: (data) => {
-        this.user = data;
-        this. user = JSON.parse(data);
-        this.cargarDatosProveedor(this.user.proveedor.id);
-
+        try {
+          this.user = JSON.parse(data);
+          console.log('✅ Usuario cargado:', this.user);
+          
+          // Validar que user y proveedor existan antes de acceder al ID
+          if (this.user?.proveedor?.id) {
+            this.cargarDatosProveedor(this.user.proveedor.id);
+          } else {
+            console.error('❌ No se encontró el ID del proveedor en los datos del usuario');
+          }
+        } catch (error) {
+          console.error('❌ Error al parsear datos del usuario:', error);
+        }
       },
       error: (err) => {
-        console.error('Error al obtener el usuario:', err);
+        console.error('❌ Error al obtener el usuario:', err);
       }
     });
 

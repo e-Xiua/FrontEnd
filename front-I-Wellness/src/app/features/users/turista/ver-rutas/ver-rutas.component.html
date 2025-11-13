@@ -1,16 +1,75 @@
-<app-map-for-all-providers
-      ></app-map-for-all-providers>
+<div class="rutas-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-route"></i>
+      </div>
+      <h1>Rutas Optimizadas de Bienestar</h1>
+      <p class="hero-subtitle">Descubre y planifica tus experiencias de bienestar en La Fortuna con rutas inteligentes</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <i class="fas fa-map-marked-alt"></i>
+          <span>Rutas Personalizadas</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fas fa-compass"></i>
+          <span>Optimización Inteligente</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fas fa-heart"></i>
+          <span>Experiencias de Bienestar</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div class="tourist-routes-container">
+  <!-- Map Section -->
+  <section class="map-section">
+    <div class="section-header">
+      <div class="header-content">
+        <h2>
+          <i class="fas fa-map-marked-alt"></i>
+          Mapa Interactivo de Proveedores
+        </h2>
+        <p class="section-description">Explora todos los proveedores de bienestar disponibles en La Fortuna. Haz clic en los marcadores para ver más información.</p>
+      </div>
+    </div>
+    <div class="map-wrapper">
+      <app-map-for-all-providers></app-map-for-all-providers>
+    </div>
+  </section>
+
+  <!-- Routes Section -->
+  <section class="routes-section">
+    <div class="section-header">
+      <div class="header-content">
+        <h2>
+          <i class="fas fa-directions"></i>
+          Mis Rutas Guardadas
+        </h2>
+        <p class="section-description">Visualiza y gestiona todas las rutas personalizadas que has creado. Cada ruta está optimizada para ofrecerte la mejor experiencia.</p>
+      </div>
+      <div class="header-actions">
+        <div class="info-card">
+          <i class="fas fa-info-circle"></i>
+          <div class="info-content">
+            <h4>¿Cómo funcionan las rutas?</h4>
+            <p>Las rutas se optimizan automáticamente según distancia, tiempo y preferencias para que disfrutes al máximo tu experiencia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="routes-wrapper">
       <app-route-generation
-        title="Mis Rutas Optimizadas"
-        description="Explora las rutas personalizadas que has creado"
-        [showHeader]="true"
+        title="Rutas Optimizadas"
+        description="Aquí puedes ver todas las rutas que has creado y guardado"
+        [showHeader]="false"
         [userId]="currentUserId"
         [maxRoutesToShow]="10"
         (routeSelected)="onRouteSelected($event)"
         (providerSelected)="onProviderSelected($event)">
       </app-route-generation>
     </div>
-
-
+  </section>
+</div>

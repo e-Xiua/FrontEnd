@@ -122,7 +122,6 @@ export class HeaderService {
         navigationItems: [
           { label: 'Inicio', route: '/proveedor/home', icon: 'home' },
           { label: 'Dashboard', route: '/proveedor/dashboard', icon: 'dashboard' },
-          { label: 'Servicios', route: '/proveedor/servicios', icon: 'room_service' },
           { label: 'Rutas', route: '/proveedor/rutas', icon: 'map' },
           { label: 'Tareas', route: '/tasks', icon: 'task_alt' },
           { label: 'Calendario', route: '/calendario', icon: 'event' },
@@ -157,9 +156,11 @@ export class HeaderService {
         theme: 'light',
         navigationItems: [
           { label: 'Inicio', route: '/turista/home', icon: 'home' },
-          { label: 'Reservar Rutas', route: '/turista/reservar-rutas', icon: 'map' },
+          { label: 'Consultar Rutas', route: '/turista/reservar-rutas', icon: 'map' },
           { label: 'Reservas', route: '/turista/reservas', icon: 'event' },
-          { label: 'Preferencias', route: '/turista/formulariogustos', icon: 'tune' },
+          { label: 'Temas', route: '/temas', icon: 'explore' },
+          { label: 'Buscador', route: '/buscador-web', icon: 'search' },
+          { label: 'Observatorio', route: '/observatorio', icon: 'cloud_queue' },
         ],
         actions: [
           {

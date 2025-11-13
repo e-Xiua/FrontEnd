@@ -67,49 +67,123 @@ export function mapUsuarioToExtendedPlaceData(user: usuarios): ExtendedPlaceData
 		throw new Error('mapUsuarioToExtendedPlaceData: user is required');
 	}
 
+	console.log('🔍 mapUsuarioToExtendedPlaceData - Input user:', user);
+	console.log('🔍 proveedorInfo:', user.proveedorInfo);
+
 	const proveedorInfo = user.proveedorInfo ?? {};
 	const normalizedId = typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
+	
+	// Provider name - try multiple field variations
 	const providerName = proveedorInfo.nombre_empresa
 		?? proveedorInfo.nombreEmpresa
+		?? proveedorInfo.razonSocial
 		?? user.nombre
 		?? placeDataDefaults.contactName;
 
+	// Categories - try multiple field variations
 	const categories = Array.isArray(proveedorInfo.categorias)
 		? proveedorInfo.categorias.filter(Boolean)
+		: Array.isArray(proveedorInfo.categories)
+		? proveedorInfo.categories.filter(Boolean)
 		: proveedorInfo.categoria
 			? [proveedorInfo.categoria]
 			: [];
 
+	// Total reviews - try multiple field variations
 	const totalReviews = typeof proveedorInfo.total_resenas === 'number'
 		? proveedorInfo.total_resenas
+		: typeof proveedorInfo.totalResenas === 'number'
+		? proveedorInfo.totalResenas
 		: Array.isArray(proveedorInfo.resenas)
 			? proveedorInfo.resenas.length
 			: 0;
 
-	const contactName = user.nombre ?? proveedorInfo.cargo_contacto ?? placeDataDefaults.contactName;
+	// Contact name - try multiple field variations
+	const contactName = user.nombre 
+		?? proveedorInfo.nombreContacto
+		?? proveedorInfo.nombre_contacto
+		?? proveedorInfo.cargo_contacto 
+		?? proveedorInfo.cargoContacto
+		?? placeDataDefaults.contactName;
+	
 	const photoSeed = contactName || providerName;
 	const foto = user.foto
 		?? proveedorInfo.foto
 		?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(photoSeed)}`;
 
-	return {
+	// Phone - try multiple field variations including top-level
+	const phone = proveedorInfo.telefono 
+		?? placeDataDefaults.phone;
+	
+	// Company phone - try multiple field variations
+	const companyPhone = proveedorInfo.telefono_empresa 
+		?? proveedorInfo.telefonoEmpresa
+		?? proveedorInfo.telefono 
+		?? placeDataDefaults.companyPhone;
+
+	// Email - try multiple field variations
+	const email = user.correo 
+		?? proveedorInfo.correo
+		?? proveedorInfo.email
+		?? placeDataDefaults.correo;
+
+	// Cargo - try multiple field variations
+	const cargoContacto = proveedorInfo.cargo_contacto 
+		?? proveedorInfo.cargoContacto
+		?? placeDataDefaults.cargoContacto;
+
+	// Address - try multiple field variations
+	const address = proveedorInfo.direccion 
+		?? proveedorInfo.address
+		?? placeDataDefaults.address;
+
+	// Hours - try multiple field variations
+	const hours = proveedorInfo.horario 
+		?? proveedorInfo.horarios
+		?? proveedorInfo.hours
+		?? placeDataDefaults.hours;
+
+	// Description - try multiple field variations
+	const description = proveedorInfo.descripcion 
+		?? proveedorInfo.description
+		?? placeDataDefaults.description;
+
+	// Certifications - try multiple field variations
+	const certificadosCalidad = proveedorInfo.certificados_calidad 
+		?? proveedorInfo.certificadosCalidad
+		?? proveedorInfo.certificaciones
+		?? null;
+
+	// Fiscal ID - try multiple field variations
+	const identificacionFiscal = proveedorInfo.identificacion_fiscal 
+		?? proveedorInfo.identificacionFiscal
+		?? proveedorInfo.cedulaJuridica
+		?? null;
+
+	// Licenses - try multiple field variations
+	const licenciasPermisos = proveedorInfo.licencias_permisos 
+		?? proveedorInfo.licenciasPermisos
+		?? proveedorInfo.licencias
+		?? null;
+
+	const result: ExtendedPlaceData = {
 		id: Number.isNaN(normalizedId) ? 0 : normalizedId,
 		name: providerName,
 		contactName,
-		correo: user.correo ?? placeDataDefaults.correo,
+		correo: email,
 		foto,
 		category: categories[0] ?? placeDataDefaults.category,
-		rating: coerceNumber(proveedorInfo.promedioCalificacion ?? proveedorInfo.rating) ?? 0,
+		rating: coerceNumber(proveedorInfo.promedioCalificacion ?? proveedorInfo.rating ?? proveedorInfo.calificacion) ?? 0,
 		totalReviews,
-		address: proveedorInfo.direccion ?? placeDataDefaults.address,
-		hours: proveedorInfo.horario ?? placeDataDefaults.hours,
-		description: proveedorInfo.descripcion ?? placeDataDefaults.description,
-		phone: proveedorInfo.telefono ?? placeDataDefaults.phone,
-		companyPhone: proveedorInfo.telefono_empresa ?? proveedorInfo.telefono ?? placeDataDefaults.companyPhone,
-		cargoContacto: proveedorInfo.cargo_contacto ?? placeDataDefaults.cargoContacto,
-		certificadosCalidad: proveedorInfo.certificados_calidad ?? null,
-		identificacionFiscal: proveedorInfo.identificacion_fiscal ?? null,
-		licenciasPermisos: proveedorInfo.licencias_permisos ?? null,
+		address,
+		hours,
+		description,
+		phone,
+		companyPhone,
+		cargoContacto,
+		certificadosCalidad: Array.isArray(certificadosCalidad) ? certificadosCalidad : null,
+		identificacionFiscal,
+		licenciasPermisos: Array.isArray(licenciasPermisos) ? licenciasPermisos : null,
 		services: Array.isArray(proveedorInfo.servicios) ? proveedorInfo.servicios : [],
 		reviews: Array.isArray(proveedorInfo.resenas) ? proveedorInfo.resenas : [],
 		categories,
@@ -132,6 +206,24 @@ export function mapUsuarioToExtendedPlaceData(user: usuarios): ExtendedPlaceData
 			proveedorInfo
 		}
 	};
+
+	console.log('✅ mapUsuarioToExtendedPlaceData - Output:', result);
+	console.log('📋 Mapped fields check:', {
+		name: result.name,
+		contactName: result.contactName,
+		email: result.correo,
+		phone: result.phone,
+		companyPhone: result.companyPhone,
+		address: result.address,
+		hours: result.hours,
+		description: result.description,
+		cargoContacto: result.cargoContacto,
+		certificadosCalidad: result.certificadosCalidad,
+		identificacionFiscal: result.identificacionFiscal,
+		licenciasPermisos: result.licenciasPermisos
+	});
+	
+	return result;
 }
 
 	function coerceNumber(value: unknown): number | undefined {

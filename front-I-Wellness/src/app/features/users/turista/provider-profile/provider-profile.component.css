@@ -1,0 +1,17 @@
+/* El componente profile-page maneja su propio estilo */
+:host {
+  display: block;
+  width: 100%;
+  /* Eliminar padding del layout padre */
+  margin: -1rem;
+}
+
+/* Asegurar que el profile-page se renderice correctamente */
+::ng-deep app-profile-page {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep app-profile-page .profile-page-container {
+  padding-top: 1rem;
+}

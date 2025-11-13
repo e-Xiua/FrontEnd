@@ -337,12 +337,22 @@ export class ProfileStateService implements OnDestroy {
   }
 
   private fetchProviderData(providerId: number): void {
-    this.updateState({ targetProviderId: providerId });
+    // Clear previous provider data before loading new one
+    this.updateState({ 
+      targetProviderId: providerId,
+      provider: null,
+      services: [],
+      isContact: false,
+      isLoading: true,
+      error: null
+    });
+
+    console.log('🔄 ProfileStateService: Fetching provider data for ID:', providerId);
 
     this.usuarioService.obtenerPorIdPublico(providerId)
       .pipe(
         catchError(err => {
-          console.error('Error al obtener datos del proveedor:', err);
+          console.error('❌ Error al obtener datos del proveedor:', err);
           this.updateState({
             error: 'No se pudo cargar la información del proveedor.',
             isLoading: false
@@ -352,9 +362,9 @@ export class ProfileStateService implements OnDestroy {
       )
       .subscribe({
         next: (userData: usuarios) => {
-          console.log('Datos del usuario obtenidos:', userData);
+          console.log('✅ Datos del usuario obtenidos:', userData);
           const provider = mapUsuarioToExtendedPlaceData(userData);
-          this.updateState({ provider });
+          this.updateState({ provider, isLoading: false });
 
           // After loading provider, check contact state
           this.loadContactState();

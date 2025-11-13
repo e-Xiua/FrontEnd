@@ -152,6 +152,24 @@
   color: var(--primary-color);
 }
 
+.loading p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.loading-info {
+  color: var(--text-light);
+  font-size: 0.9rem !important;
+  margin-top: 1rem !important;
+}
+
+.loading-tip {
+  color: #FF9843;
+  font-size: 0.95rem !important;
+  margin-top: 1rem !important;
+  font-weight: 500;
+}
+
 .spinner {
   width: 40px;
   height: 40px;

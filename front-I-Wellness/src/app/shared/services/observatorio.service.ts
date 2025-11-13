@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, timeout } from 'rxjs';
 import type { 
   ClimaCurrent, 
   ClimaForecast, 
@@ -301,6 +301,32 @@ export class ObservatorioService {
   }
 
   // ============================================================
+  // WEB SCRAPPING - BUSCADOR DE PARÁMETROS
+  // ============================================================
+
+  /**
+   * Busca parámetros turísticos en múltiples fuentes web
+   * @param searchTerm Término de búsqueda
+   * NOTA: Timeout de 120 segundos debido a que el proceso de scraping puede tomar tiempo
+   */
+  searchTourismParameter(searchTerm: string): Observable<any> {
+    const params = new HttpParams().set('term', searchTerm);
+    return this.http.get(`${this.baseUrl}/search`, { 
+      params,
+      // Timeout de 120 segundos (2 minutos) para búsquedas largas
+      observe: 'body',
+      responseType: 'json'
+    })
+      .pipe(
+        timeout(120000), // 120 segundos
+        catchError(error => {
+          console.error('Error en búsqueda de parámetros:', error);
+          return of(this.getDefaultSearchResults(searchTerm));
+        })
+      );
+  }
+
+  // ============================================================
   // MÉTODOS AUXILIARES - DATOS POR DEFECTO
   // ============================================================
 
@@ -453,6 +479,24 @@ export class ObservatorioService {
         trending_topics: [],
         upcoming_events: []
       }
+    };
+  }
+
+  private getDefaultSearchResults(searchTerm: string): any {
+    return {
+      search_term: searchTerm,
+      search_timestamp: new Date().toISOString(),
+      total_matches: 0,
+      sources_searched: 61,
+      sources_with_results: 0,
+      variations_found: 0,
+      matches: [],
+      summary: {
+        message: 'Servicio de búsqueda no disponible',
+        total_results: 0,
+        unique_sources: 0
+      },
+      sources_breakdown: []
     };
   }
 }
