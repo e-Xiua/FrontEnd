@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { MapForAllProvidersComponent } from "../../../../shared/components/map-for-all-providers/map-for-all-providers.component";
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteGenerationComponent } from '../../../../shared/ui/components/route-generation';
 
 @Component({
   selector: 'app-ver-rutas',
-  imports: [RouteGenerationComponent],
+  imports: [RouteGenerationComponent, MapForAllProvidersComponent],
   templateUrl: './ver-rutas.component.html',
   styleUrls: ['./ver-rutas.component.css']
 })

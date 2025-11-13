@@ -1,1 +1,12 @@
-<p>generador-de-rutas-proveedor works!</p>
+<route-generator-full></route-generator-full>
+
+
+<section *ngIf="showRouteGeneration && provider" class="bg-card rounded-2xl shadow-card p-8 mb-6 animate-fade-in-3">
+<h2 class="text-2xl font-bold text-foreground mb-6">Rutas generadas</h2>
+<app-route-generation
+    [showHeader]="false"
+    [userId]="currentUserId || null || undefined"
+    (routeSelected)="routeSelected.emit($event)"
+    (providerSelected)="providerSelected.emit($event)"
+    ></app-route-generation>
+      </section>

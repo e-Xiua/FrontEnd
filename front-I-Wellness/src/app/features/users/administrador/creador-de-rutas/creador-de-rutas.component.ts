@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { MapForAllProvidersComponent } from "../../../../shared/components/map-for-all-providers/map-for-all-providers.component";
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route'; // 1. Import the Route model
 import { usuarios } from '../../../../shared/models/usuarios';
 import { RouteGenerationComponent } from '../../../../shared/ui/components/route-generation';
 
-
 @Component({
   selector: 'app-creador-de-rutas',
   standalone: true, // Make it standalone
-  imports: [CommonModule, RouteGenerationComponent], // Add CommonModule for *ngIf
+  imports: [CommonModule, RouteGenerationComponent, MapForAllProvidersComponent], // Add CommonModule for *ngIf
   templateUrl: './creador-de-rutas.component.html',
   styleUrls: ['./creador-de-rutas.component.css']
 })
