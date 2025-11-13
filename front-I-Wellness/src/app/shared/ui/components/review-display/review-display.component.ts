@@ -6,13 +6,11 @@ import { ReviewsCallService } from '../../../services/reviews-call.service';
 
 export interface Review {
   id: number;
-  author: string;
-  avatar: string;
+  nombre: string;
+  foto: string;
   date: string;
   rating: number;
   comment: string;
-  helpful?: number;
-  notHelpful?: number;
   authorId?: number;
 }
 

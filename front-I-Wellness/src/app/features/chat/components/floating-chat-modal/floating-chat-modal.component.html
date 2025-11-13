@@ -117,7 +117,7 @@
             <div class="chat-header">
               <img
                 title="Participante"
-                [src]="activeConversation.participant?.urlFotoPerfil || activeConversation.participant2?.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'"
+                [src]="activeConversation.participant?.foto || activeConversation.participant2?.foto || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'"
                 [alt]="activeConversation.participant?.nombre || activeConversation.participant2?.nombre || 'Usuario'"
                 class="provider-avatar">
               <div class="provider-info">
@@ -155,7 +155,7 @@
                 aria-label="Seleccionar conversación">
 
                 <img
-                  [src]="conversation.participant?.urlFotoPerfil || conversation.participant2?.urlFotoPerfil || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + conversation.providerId"
+                  [src]="conversation.participant?.foto || conversation.participant2?.foto || 'https://api.dicebear.com/7.x/avataaars/svg?seed=provider' + conversation.providerId"
                   [alt]="conversation.participant?.nombre || conversation.participant2?.nombre || 'Proveedor'"
                   class="conversation-avatar">
 

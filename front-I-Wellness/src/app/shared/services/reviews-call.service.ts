@@ -22,8 +22,8 @@ export interface ReviewResponseDTO {
   id: number;
   serviceId: number;
   userId: number;
-  username: string;
-  userImageUrl: string;
+  nombre: string;
+  foto: string;
   rating: number;
   comment: string;
   createdAt: string;
@@ -93,6 +93,8 @@ export class ReviewsCallService {
     }
 
     return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
       'X-User-Id': String(userId)
     });
@@ -174,7 +176,7 @@ export class ReviewsCallService {
    * Obtiene una reseña por ID
    */
   getReviewById(reviewId: number): Observable<Review> {
-    return this.http.get<ReviewResponseDTO>(`${this.API_URL}/${reviewId}`)
+    return this.http.get<ReviewResponseDTO>(`${this.API_URL}/${reviewId}`, { headers: this.createHeaders() })
       .pipe(
         map(dto => this.mapToReview(dto)),
         catchError(error => {
@@ -200,7 +202,7 @@ export class ReviewsCallService {
 
     return this.http.get<PagedReviewResponse>(
       `${this.API_URL}/service/${serviceId}`,
-      { params }
+      { params , headers: this.createHeaders() }
     ).pipe(
       catchError(error => {
         console.error('Error al obtener reseñas del servicio:', error);
@@ -246,7 +248,7 @@ export class ReviewsCallService {
 
     return this.http.get<PagedReviewResponse>(
       `${this.API_URL}/provider/${providerId}`,
-      { params }
+      { params , headers: this.createHeaders() }
     ).pipe(
       catchError(error => {
         console.error('Error al obtener reseñas del proveedor:', error);
@@ -259,7 +261,7 @@ export class ReviewsCallService {
    * Obtiene el rating promedio de un proveedor
    */
   getProviderRating(providerId: number): Observable<ProviderRatingDTO> {
-    return this.http.get<ProviderRatingDTO>(`${this.API_URL}/provider/${providerId}/rating`)
+    return this.http.get<ProviderRatingDTO>(`${this.API_URL}/provider/${providerId}/rating`, { headers: this.createHeaders() })
       .pipe(
         catchError(error => {
           console.error('Error al obtener rating del proveedor:', error);
@@ -336,7 +338,7 @@ export class ReviewsCallService {
 
     return this.http.get<ReviewResponseDTO[]>(
       `${this.API_URL}/provider/${providerId}/recent`,
-      { params }
+      { params, headers: this.createHeaders() }
     ).pipe(
       map(dtos => dtos.map(dto => this.mapToReview(dto))),
       catchError(error => {
@@ -356,7 +358,7 @@ export class ReviewsCallService {
 
     return this.http.get<PagedReviewResponse>(
       `${this.API_URL}/user/${userId}`,
-      { params }
+      { params, headers: this.createHeaders()}
     ).pipe(
       catchError(error => {
         console.error('Error al obtener reseñas del usuario:', error);
@@ -369,7 +371,7 @@ export class ReviewsCallService {
    * Obtiene las estadísticas de calificación de un servicio
    */
   getServiceRating(serviceId: number): Observable<ServiceRatingDTO> {
-    return this.http.get<ServiceRatingDTO>(`${this.API_URL}/service/${serviceId}/rating`)
+    return this.http.get<ServiceRatingDTO>(`${this.API_URL}/service/${serviceId}/rating`,  { headers: this.createHeaders() })
       .pipe(
         catchError(error => {
           console.error('Error al obtener calificación del servicio:', error);
@@ -386,7 +388,7 @@ export class ReviewsCallService {
 
     return this.http.get<ReviewResponseDTO[]>(
       `${this.API_URL}/service/${serviceId}/recent`,
-      { params }
+      { params, headers: this.createHeaders() }
     ).pipe(
       map(dtos => dtos.map(dto => this.mapToReview(dto))),
       catchError(error => {
@@ -402,13 +404,11 @@ export class ReviewsCallService {
   private mapToReview(dto: ReviewResponseDTO): Review {
     return {
       id: dto.id,
-      author: dto.username || 'Usuario',
-      avatar: dto.userImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${dto.userId}`,
+      nombre: dto.nombre || 'Usuario',
+      foto: dto.foto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${dto.userId}`,
       date: dto.createdAt,
       rating: dto.rating,
       comment: dto.comment || '',
-      helpful: 0, // El backend no maneja esto aún
-      notHelpful: 0, // El backend no maneja esto aún
       authorId: dto.userId
     };
   }
