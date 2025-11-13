@@ -152,7 +152,7 @@
               <i class="fas fa-heart"></i>
               Categorías de Bienestar
             </h3>
-            <p class="helper-text">Selecciona entre 2 y 5 categorías relacionadas</p>
+            <p class="helper-text">Selecciona entre 1 y 5 categorías relacionadas</p>
             
             <div class="preferencias-grid">
               <label class="preferencia-chip" *ngFor="let pref of preferencias">
@@ -171,7 +171,7 @@
               </label>
             </div>
             <div class="preferences-counter">
-              <span [class.valid]="selectedPreferences.length >= 2 && selectedPreferences.length <= 5">
+              <span [class.valid]="selectedPreferences.length >= 1 && selectedPreferences.length <= 5">
                 {{ selectedPreferences.length }} / 5 seleccionadas
               </span>
             </div>

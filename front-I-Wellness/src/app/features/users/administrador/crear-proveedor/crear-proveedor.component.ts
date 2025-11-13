@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
 import { AdminService } from '../../../admin/services/admin.service';
-import { Router } from '@angular/router';
 import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryField} from 'ngx-intl-tel-input';
 import L from 'leaflet';
 
 @Component({
   selector: 'app-crear-proveedor',
-  imports: [CommonModule, FormsModule, NgxIntlTelInputModule],
+  imports: [CommonModule, FormsModule, NgxIntlTelInputModule, RouterModule],
   templateUrl: './crear-proveedor.component.html',
   styleUrl: './crear-proveedor.component.css'
 })

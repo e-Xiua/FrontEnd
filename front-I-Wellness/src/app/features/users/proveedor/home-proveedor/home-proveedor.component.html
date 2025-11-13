@@ -7,7 +7,7 @@
       </div>
       <h1>Mis Servicios</h1>
       <p class="hero-subtitle">Gestiona tu oferta de servicios de bienestar</p>
-      <button class="add-service-btn" (click)="agregar('agregarservicio')">
+      <button class="add-service-btn" (click)="agregar('agregar-servicio')">
         <i class="fas fa-plus-circle"></i>
         Añadir Nuevo Servicio
       </button>
@@ -28,7 +28,7 @@
       </div>
       <h3>No tienes servicios registrados</h3>
       <p>Comienza agregando tu primer servicio de bienestar</p>
-      <button class="add-service-btn-secondary" (click)="agregar('agregarservicio')">
+      <button class="add-service-btn-secondary" (click)="agregar('agregar-servicio')">
         <i class="fas fa-plus"></i>
         Crear Primer Servicio
       </button>
@@ -64,7 +64,7 @@
               </button>
               <button 
                 class="action-btn edit-btn" 
-                (click)="navigateTo('editarservicio', servicio._idServicio)"
+                (click)="navigateTo('editar-servicio', servicio._idServicio)"
                 title="Editar">
                 <i class="fas fa-edit"></i>
               </button>

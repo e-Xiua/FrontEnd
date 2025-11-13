@@ -1,107 +1,264 @@
-<body>
-    <div class="container">
-        <div class="left-panel">
-            <div class="logo">
-                <img src="../../../../assets/logo.png" alt="I-Wellness Logo">
-                <h1>I-Wellness</h1>
+<div class="crear-turista-container">
+    <div class="crear-turista-card">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="back-button" (click)="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver</span>
+            </div>
+            <div class="logo-brand">
+                <img src="../../../../assets/logo.png" alt="I-Wellness Logo" class="logo-img">
+                <h1 class="brand-title">I-Wellness</h1>
+            </div>
+            <h2 class="page-title">
+                <span class="highlight-crear">CREAR</span>
+                <span class="subtitle-text">Nuevo Turista</span>
+            </h2>
+            <p class="welcome-text">Completa la información del nuevo visitante para registrarlo en el sistema</p>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-content">
+            <!-- Foto de Perfil -->
+            <div class="profile-photo-section">
+                <label class="file-upload-label">
+                    <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+                    <div class="upload-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <span>Subir foto de perfil (opcional)</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Sección: Datos de Contacto -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Datos de Contacto
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Nombre completo *</label>
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            placeholder="Ingresa el nombre del turista" 
+                            [(ngModel)]="name" 
+                            (input)="validateName()" 
+                            maxlength="35" 
+                            required
+                        >
+                        <small *ngIf="nameError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ nameError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Correo electrónico *</label>
+                        <input 
+                            type="email" 
+                            class="form-input" 
+                            placeholder="correo@ejemplo.com" 
+                            [(ngModel)]="email" 
+                            (input)="validateEmail()" 
+                            required
+                        >
+                        <small *ngIf="emailError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ emailError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Teléfono *</label>
+                        <ngx-intl-tel-input
+                            [cssClass]="'custom'"
+                            [preferredCountries]="preferredCountries"
+                            [enableAutoCountrySelect]="true"
+                            [enablePlaceholder]="true"
+                            [searchCountryFlag]="true"
+                            [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                            [selectFirstCountry]="false"
+                            [selectedCountryISO]="CountryISO.CostaRica"
+                            [maxLength]="15"
+                            [phoneValidation]="true"
+                            [separateDialCode]="separateDialCode"
+                            [numberFormat]="PhoneNumberFormat.National"
+                            [(ngModel)]="phone" 
+                            name="phone"  
+                            placeholder="Teléfono"
+                            required
+                            (input)="validatePhone()">
+                        </ngx-intl-tel-input>
+                        <small *ngIf="phoneError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ phoneError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña *</label>
+                        <div class="password-container">
+                            <input 
+                                [type]="showPassword ? 'text' : 'password'" 
+                                class="form-input" 
+                                placeholder="Contraseña segura" 
+                                [(ngModel)]="password" 
+                                (input)="validatePassword()" 
+                                required
+                            >
+                            <button
+                                type="button"
+                                (click)="togglePasswordVisibility()"
+                                class="toggle-password"
+                            >
+                                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
+                        <small *ngIf="passwordError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ passwordError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirmar contraseña *</label>
+                        <div class="password-container">
+                            <input 
+                                [type]="showConfirmPassword ? 'text' : 'password'" 
+                                class="form-input" 
+                                placeholder="Repite la contraseña" 
+                                [(ngModel)]="confirmPassword" 
+                                (input)="validateConfirmPassword()" 
+                                required
+                            >
+                            <button
+                                type="button"
+                                (click)="toggleConfirmPasswordVisibility()"
+                                class="toggle-password"
+                            >
+                                <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
+                        <small *ngIf="confirmPasswordError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ confirmPasswordError }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Información Personal -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-id-card"></i>
+                    Información Personal
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">País de procedencia *</label>
+                        <select class="form-select" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
+                            <option value="" disabled selected>Seleccione un país</option>
+                            <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ciudad</label>
+                        <select class="form-select" [disabled]="!selectedCountry" [(ngModel)]="selectedCity">
+                            <option value="" disabled selected>Seleccione una ciudad</option>
+                            <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Género *</label>
+                        <select class="form-select" [(ngModel)]="genero" (change)="validateGenero()">
+                            <option value="" disabled selected>Seleccione un género</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="No Binario">No Binario</option>
+                            <option value="Prefiero no decir">Prefiero no decir</option>
+                        </select>
+                        <small *ngIf="generoError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ generoError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha de nacimiento *</label>
+                        <input 
+                            type="date" 
+                            class="form-input" 
+                            [(ngModel)]="fechaNacimiento" 
+                            (change)="validateFechaNacimiento()"
+                        >
+                        <small *ngIf="fechaNacimientoError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ fechaNacimientoError }}
+                        </small>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Estado civil *</label>
+                        <select class="form-select" [(ngModel)]="estadoCivil" (change)="validateEstadoCivil()">
+                            <option value="" disabled selected>Seleccione un estado civil</option>
+                            <option value="Soltero/a">Soltero/a</option>
+                            <option value="Casado/a">Casado/a</option>
+                            <option value="Divorciado/a">Divorciado/a</option>
+                            <option value="Viudo/a">Viudo/a</option>
+                            <option value="Unión Libre">Unión Libre</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <small *ngIf="estadoCivilError" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ estadoCivilError }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Preferencias -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-heart"></i>
+                    Preferencias de Bienestar
+                </h3>
+                <p class="section-description">Selecciona entre 3 y 5 actividades de interés</p>
+                
+                <div class="preferencias-grid">
+                    <label class="preference-item" *ngFor="let pref of preferencias">
+                        <input
+                            type="checkbox"
+                            [value]="pref._idPreferencias"
+                            (change)="onPreferenceChange($event, pref._idPreferencias)"
+                            [checked]="selectedPreferences.includes(pref._idPreferencias)"
+                        >
+                        <span class="preference-label">
+                            <i class="fas fa-check-circle"></i>
+                            {{ pref.nombre }}
+                        </span>
+                    </label>
+                </div>
+                
+                <div class="preferences-counter" [class.error]="selectedPreferences.length < 3 || selectedPreferences.length > 5">
+                    <i class="fas fa-info-circle"></i>
+                    <span>{{ selectedPreferences.length }} de 5 preferencias seleccionadas</span>
+                </div>
+                
+                <small *ngIf="selectedPreferences.length < 3 || selectedPreferences.length > 5" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Debes seleccionar entre 3 y 5 preferencias
+                </small>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button class="btn-cancel" (click)="goBack()" type="button">
+                    <i class="fas fa-times"></i>
+                    <span>Cancelar</span>
+                </button>
+                <button class="btn-submit" (click)="createTurista()" [disabled]="isLoading">
+                    <i class="fas fa-user-plus"></i>
+                    <span>{{ isLoading ? 'Creando turista...' : 'Crear turista' }}</span>
+                </button>
             </div>
         </div>
-        <div class="right-panel">
-            <h2 class="title"><span class="turista">Crear</span> <span class="registro"> Turista</span></h2>
-
-            <button class="btn-section">Datos de contacto</button>
-
-            <label class="file-upload-label">
-              <input type="file" accept="image/*" (change)="onFileSelected($event)">
-              <span>Subir foto de perfil (opcional)</span>
-            </label>
-            
-            <input type="text" placeholder="Nombre" [(ngModel)]="name" (input)="validateName()" maxlength="35" required>
-            <small *ngIf="nameError" class="error-message">{{ nameError }}</small>
-
-            <input type="email" placeholder="Correo" [(ngModel)]="email" (input)="validateEmail()" required>
-            <small *ngIf="emailError" class="error-message">{{ emailError }}</small>
-
-            <ngx-intl-tel-input
-              [cssClass]="'custom'"
-              [preferredCountries]="preferredCountries"
-              [enableAutoCountrySelect]="true"
-              [enablePlaceholder]="true"
-              [searchCountryFlag]="true"
-              [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-              [selectFirstCountry]="false"
-              [selectedCountryISO]="CountryISO.CostaRica"
-              [maxLength]="15"
-              [phoneValidation]="true"
-              [separateDialCode]="separateDialCode"
-              [numberFormat]="PhoneNumberFormat.National"
-              [(ngModel)]="phone" 
-              name="phone"  
-              placeholder="Teléfono"
-              required
-              (input)="validatePhone()">
-            </ngx-intl-tel-input>
-            <small *ngIf="phoneError" class="error-message">{{ phoneError }}</small>
-
-            <input type="password" placeholder="Contraseña" [(ngModel)]="password" (input)="validatePassword()" required>
-            <small *ngIf="passwordError" class="error-message">{{ passwordError }}</small>
-
-            <input type="password" placeholder="Repite tu contraseña" [(ngModel)]="confirmPassword" (input)="validateConfirmPassword()" required>
-            <small *ngIf="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</small>
-
-            <select id="country" [(ngModel)]="selectedCountry" (change)="onCountryChange()">
-                <option value="" disabled selected>Seleccione un país de procedencia</option>
-                <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
-            </select>
-
-            <select id="city" [disabled]="!selectedCountry">
-                <option value="" disabled selected>Seleccione su ciudad</option>
-                <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-            </select>
-
-            <select id="genero" [(ngModel)]="genero" (change)="validateGenero()">
-              <option value="" disabled selected>Seleccione su género</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Femenino">Femenino</option>
-              <option value="No Binario">No Binario</option>
-              <option value="Prefiero no decir">Prefiero no decir</option>
-          </select>
-          <small *ngIf="generoError" class="error-message">{{ generoError }}</small>
-
-          <div class="fecha-nacimiento-container">
-              <label class="fecha-nacimiento-label" for="fechaNacimiento">Fecha de Nacimiento: </label>
-              <input type="date" id="fechaNacimiento" [(ngModel)]="fechaNacimiento" (change)="validateFechaNacimiento()">
-              <small *ngIf="fechaNacimientoError" class="error-message">{{ fechaNacimientoError }}</small>
-          </div>
-
-          <select id="estadoCivil" [(ngModel)]="estadoCivil" (change)="validateEstadoCivil()">
-              <option value="" disabled selected>Seleccione su estado civil</option>
-              <option value="Soltero/a">Soltero/a</option>
-              <option value="Casado/a">Casado/a</option>
-              <option value="Divorciado/a">Divorciado/a</option>
-              <option value="Viudo/a">Viudo/a</option>
-              <option value="Unión Libre">Unión Libre</option>
-              <option value="Otro">Otro</option>
-          </select>
-          <small *ngIf="estadoCivilError" class="error-message">{{ estadoCivilError }}</small>
-
-            <div class="preferencias-section">
-                <h3>Selecciona tus preferencias (entre 3 y 5):</h3>
-                <div class="preferencias-list">
-                  <label *ngFor="let pref of preferencias">
-                    <input
-                      type="checkbox"
-                      [value]="pref._idPreferencias"
-                      (change)="onPreferenceChange($event, pref._idPreferencias)">
-                    {{ pref.nombre }}
-                  </label>
-                </div>
-                <div class="error-message" *ngIf="selectedPreferences.length < 3 || selectedPreferences.length > 5">
-                  Debes seleccionar entre 3 y 5 preferencias.
-                </div>
-              </div>
-
-            <button class="btn-submit" (click)="createTurista()">Crear turista</button>
-        </div>
     </div>
-</body>
+</div>

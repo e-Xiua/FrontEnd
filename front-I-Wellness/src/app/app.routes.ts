@@ -141,6 +141,11 @@ export const routes: Routes = [
       { path: 'crear-proveedor', component: CrearProveedorComponent },
       { path: 'rutas', component: CreadorDeRutasComponent },
       { path: 'ruta/:id', component: RutaDetalleComponent },
+      { 
+        path: 'ver-perfil/:id', 
+        component: ProfilePageComponent,
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+      },
     ]
   },
 

@@ -19,6 +19,11 @@ import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryFiel
   styleUrl: './crear-turista.component.css'
 })
 export class CrearTuristaComponent implements OnInit {
+  // Password visibility toggles
+  showPassword = false;
+  showConfirmPassword = false;
+  isLoading = false;
+  
   separateDialCode = false;
 	SearchCountryField = SearchCountryField;
 	CountryISO = CountryISO;
@@ -53,9 +58,6 @@ export class CrearTuristaComponent implements OnInit {
   generoError: string = '';
   fechaNacimientoError: string = '';
   estadoCivilError: string = '';
-
-  // Estado de carga
-  isLoading: boolean = false;
 
   preferencias: any[] = [];
   selectedPreferences: number[] = [];
@@ -325,13 +327,27 @@ export class CrearTuristaComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.imagenPerfil = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+    const file: File = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagenPerfil = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
   }
-}
+
+  // Toggle password visibility
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  // Navigate back
+  goBack(): void {
+    this.router.navigate(['/admin-home/visitantes']);
+  }
 }

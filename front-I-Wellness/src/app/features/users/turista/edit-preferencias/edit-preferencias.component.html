@@ -24,6 +24,13 @@
           Elige las actividades y eventos que más disfrutes. Esto nos ayudará a ofrecerte 
           las mejores recomendaciones adaptadas a tus gustos.
         </p>
+        
+        <!-- Indicador de preferencias actuales -->
+        <div class="status-badge" *ngIf="preferenciasOriginales.length > 0 && !isLoading">
+          <i class="fas fa-star"></i>
+          <span>Actualmente tienes {{ preferenciasOriginales.length }} preferencias guardadas</span>
+        </div>
+
         <div class="selection-counter">
           <span class="counter-label">Seleccionados:</span>
           <span class="counter-value" [class.valid]="seleccionados.length >= 3 && seleccionados.length <= 5">
@@ -34,25 +41,69 @@
           <i class="fas fa-check-circle"></i>
           Selecciona entre <strong>3 y 5</strong> opciones
         </p>
+        
+        <!-- Leyenda -->
+        <div class="legend" *ngIf="preferenciasOriginales.length > 0 && !isLoading">
+          <div class="legend-item">
+            <span class="legend-badge original-active"></span>
+            <span>Preferencias actuales (activas)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge original-removed"></span>
+            <span>Antes seleccionada (removida)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge new"></span>
+            <span>Nueva selección</span>
+          </div>
+        </div>
       </div>
 
       <!-- Preferences Grid -->
       <div class="preferences-section">
-        <div class="preferences-grid">
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Cargando tus preferencias...</p>
+        </div>
+
+        <!-- Grid de preferencias -->
+        <div class="preferences-grid" *ngIf="!isLoading">
           <div class="preference-card" 
                *ngFor="let item of preferencias; let i = index" 
                (click)="seleccionarGusto(item)"
-               [class.selected]="seleccionados.includes(item)"
+               [class.selected]="estaSeleccionado(item)"
+               [class.was-original]="esPreferenciaOriginal(item) && !estaSeleccionado(item)"
+               [class.original-selected]="esPreferenciaOriginal(item) && estaSeleccionado(item)"
+               [class.new-selection]="esNuevaSeleccion(item)"
                [style.animation-delay.ms]="i * 50">
             <div class="card-image-wrapper">
               <img [src]="item.imagen" [alt]="item.nombre" class="card-image" />
               <div class="card-overlay"></div>
-              <div class="selection-badge" *ngIf="seleccionados.includes(item)">
+              
+              <!-- Badge para preferencias originales seleccionadas -->
+              <div class="original-badge" *ngIf="esPreferenciaOriginal(item) && estaSeleccionado(item)">
+                <i class="fas fa-star"></i>
+              </div>
+              
+              <!-- Badge para selección actual -->
+              <div class="selection-badge" *ngIf="estaSeleccionado(item)">
                 <i class="fas fa-check-circle"></i>
+              </div>
+              
+              <!-- Indicador sutil para preferencias que estaban antes pero ya no -->
+              <div class="was-selected-indicator" *ngIf="esPreferenciaOriginal(item) && !estaSeleccionado(item)">
+                <i class="fas fa-history"></i>
               </div>
             </div>
             <div class="card-content">
               <h3 class="card-title">{{ item.nombre }}</h3>
+              <p class="card-status" *ngIf="esPreferenciaOriginal(item) && estaSeleccionado(item)">
+                <i class="fas fa-star"></i> Actual
+              </p>
+              <p class="card-status-removed" *ngIf="esPreferenciaOriginal(item) && !estaSeleccionado(item)">
+                <i class="fas fa-history"></i> Antes seleccionada
+              </p>
             </div>
           </div>
         </div>

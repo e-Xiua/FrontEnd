@@ -154,10 +154,10 @@ export class EditarServicioComponent {
   navigateTo() {
     this.servicio.horario = this.getFormattedSchedule();
 
-    if (this.selectedPreferences.length < 2) {
+    if (this.selectedPreferences.length < 1) {
       Swal.fire({
         title: '¡Error!',
-        text: 'Debe seleccionar al menos 2 preferencias.',
+        text: 'Debe seleccionar al menos 1 preferencia.',
         icon: 'error',
         confirmButtonColor: '#4a9c9f',
         confirmButtonText: 'Aceptar'

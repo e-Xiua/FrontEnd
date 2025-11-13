@@ -86,12 +86,17 @@ export class HeaderService {
         logoUrl: '/assets/logo.png',
         theme: 'dark',
         navigationItems: [
+          { label: 'Inicio', route: '/admin/home', icon: 'home' },
           { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
           { label: 'Usuarios', route: '/admin/visitantes', icon: 'people' },
           { label: 'Proveedores', route: '/admin/proveedores', icon: 'business' },
-          { label: 'Servicios', route: '/admin/servicios', icon: 'room_service' },
           { label: 'Rutas', route: '/admin/rutas', icon: 'map' },
-          { label: 'Reportes', route: '/admin/reportes', icon: 'bar_chart' },
+          { label: 'Reportes del Sistema', route: '/metricas', icon: 'bar_chart' },
+          { label: 'Tareas', route: '/tasks', icon: 'task_alt' },
+          { label: 'Calendario', route: '/calendario', icon: 'event' },
+          { label: 'Temas', route: '/temas', icon: 'explore' },
+          { label: 'Buscador', route: '/buscador-web', icon: 'search' },
+          { label: 'Observatorio', route: '/observatorio', icon: 'cloud_queue' },
         ],
         actions: [
           {

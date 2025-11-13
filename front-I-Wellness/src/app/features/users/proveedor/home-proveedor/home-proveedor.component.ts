@@ -89,14 +89,22 @@ export class HomeProveedorComponent implements OnInit, OnDestroy {
   agregar(ruta: string): void {
     // Guardar el ID del proveedor en sessionStorage para usar en otras páginas
     sessionStorage.setItem('idProveedor', this.providerId.toString());
-    this.router.navigate([`/proveedor/${ruta}`]);
+    // Asegurarse de usar el formato con guiones que coincida con las rutas definidas
+    const formattedRoute = ruta === 'agregarservicio' ? 'agregar-servicio' : ruta;
+    this.router.navigate([`/proveedor/${formattedRoute}`]);
   }
 
   /**
    * Navegar a una ruta con ID
    */
   navigateTo(ruta: string, id: number): void {
-    this.router.navigate([`/${ruta}`, id]);
+    // Para rutas de edición que pertenecen al área de proveedor
+    if (ruta === 'editar-servicio' || ruta === 'editarservicio') {
+      this.router.navigate(['/proveedor/editar-servicio', id]);
+    } else {
+      // Para otras rutas como 'infoservicio' que están en el nivel superior
+      this.router.navigate([`/${ruta}`, id]);
+    }
   }
 
   /**

@@ -199,6 +199,109 @@
   font-weight: 700;
 }
 
+/* Status Badge - Indicador de preferencias actuales */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+  animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-badge i {
+  font-size: 1.1rem;
+}
+
+/* Legend - Leyenda de colores */
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.legend-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+}
+
+.legend-badge.original-active {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.legend-badge.original-removed {
+  background: rgba(243, 156, 18, 0.3);
+  border: 2px dashed rgba(243, 156, 18, 0.6);
+}
+
+.legend-badge.new {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-light);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loading-state i {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
 /* Preferences Section */
 .preferences-section {
   margin-bottom: 2.5rem;
@@ -247,6 +350,39 @@
   transform: translateY(-8px) scale(1.02);
 }
 
+/* Preferencias originales que están seleccionadas tienen borde dorado */
+.preference-card.original-selected {
+  border-color: #f39c12;
+  background: linear-gradient(to bottom, rgba(243, 156, 18, 0.08), white);
+  box-shadow: 0 8px 16px rgba(243, 156, 18, 0.35);
+}
+
+/* Preferencias que estaban antes pero ya NO están seleccionadas - estilo sutil */
+.preference-card.was-original {
+  border-color: rgba(243, 156, 18, 0.3);
+  background: linear-gradient(to bottom, rgba(243, 156, 18, 0.02), white);
+  position: relative;
+}
+
+.preference-card.was-original::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed rgba(243, 156, 18, 0.4);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+/* Nuevas selecciones tienen el estilo estándar */
+.preference-card.new-selection {
+  border-color: var(--primary-color);
+  background: linear-gradient(to bottom, rgba(74, 156, 159, 0.05), white);
+  box-shadow: 0 8px 16px rgba(74, 156, 159, 0.3);
+}
+
 /* Card Image Wrapper */
 .card-image-wrapper {
   position: relative;
@@ -283,6 +419,61 @@
 .preference-card.selected .card-overlay {
   background: linear-gradient(to bottom, rgba(74, 156, 159, 0.6) 0%, rgba(74, 156, 159, 0.8) 100%);
   opacity: 1;
+}
+
+.preference-card.original-selected .card-overlay {
+  background: linear-gradient(to bottom, rgba(243, 156, 18, 0.6) 0%, rgba(243, 156, 18, 0.8) 100%);
+  opacity: 1;
+}
+
+.preference-card.was-original .card-overlay {
+  background: linear-gradient(to bottom, transparent 0%, rgba(243, 156, 18, 0.15) 100%);
+  opacity: 0.6;
+}
+
+/* Was Selected Indicator - Badge para preferencias que estaban antes pero ya no */
+.was-selected-indicator {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 36px;
+  height: 36px;
+  background: rgba(243, 156, 18, 0.85);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.5s ease-out;
+  z-index: 2;
+  border: 2px solid white;
+}
+
+.was-selected-indicator i {
+  font-size: 1.1rem;
+  color: white;
+}
+
+/* Original Badge - Badge especial para preferencias originales */
+.original-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  animation: bounceIn 0.5s ease-out;
+  z-index: 2;
+}
+
+.original-badge i {
+  font-size: 1.3rem;
+  color: white;
 }
 
 /* Selection Badge */
@@ -338,6 +529,53 @@
 .preference-card.selected .card-title {
   color: var(--primary-color);
   font-weight: 700;
+}
+
+.preference-card.original-selected .card-title {
+  color: #e67e22;
+  font-weight: 700;
+}
+
+.preference-card.was-original .card-title {
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* Card Status - Indicador de estado actual */
+.card-status {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #e67e22;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.card-status i {
+  font-size: 0.9rem;
+}
+
+/* Card Status Removed - Para preferencias que estaban pero ya no */
+.card-status-removed {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(243, 156, 18, 0.7);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-style: italic;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.card-status-removed i {
+  font-size: 0.85rem;
 }
 
 /* Form Actions */
@@ -436,6 +674,17 @@
   .btn-save {
     width: 100%;
     padding: 1rem 2rem;
+  }
+
+  .legend {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .status-badge {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
   }
 }
 

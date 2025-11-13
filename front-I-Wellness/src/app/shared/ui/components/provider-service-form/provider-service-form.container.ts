@@ -44,7 +44,7 @@ import {
   `
 })
 export class ProviderServiceFormContainerComponent implements OnInit {
-  readonly MIN_PREFERENCES = 2;
+  readonly MIN_PREFERENCES = 1;
   readonly MAX_PREFERENCES = 5;
 
   serviceDraft: ProviderServiceFormModel = {

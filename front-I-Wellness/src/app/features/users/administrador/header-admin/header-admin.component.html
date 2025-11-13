@@ -1,16 +1,56 @@
 <header class="navbar">
-    <div class="nav-left">
-      <a href="/homeadmin" class="logo">Home</a>
-      <a href="/visitantes" class="logo">Visitantes</a>
-      <a href="/proveedores" class="logo">Proveedores</a>
-      <a href="/dashboard-admin" class="logo">Dashboard</a>
-    </div>
-  
-  
-    <div class="nav-right">
-      <div class="profile-container">
-        <img [src]="usuario.foto" alt="Profile Picture" class="profile-pic" (click)="navigateTo('perfiladmin', usuario.id)">
-        <button class="logout-btn" (click)="navigateTo('')">Salir</button>
+    <div class="navbar-container">
+      <!-- Logo -->
+      <div class="navbar-brand">
+        <img src="/assets/logo.png" alt="I-Wellness" class="brand-logo">
+        <span class="brand-text">I-Wellness</span>
+      </div>
+
+      <!-- Navigation Scroll Container -->
+      <nav class="navbar-scroll-wrapper">
+        <div class="navbar-scroll-content" 
+             #scrollContainer
+             (scroll)="checkScrollIndicators()">
+          <!-- Navigation Items -->
+          <a *ngFor="let item of navigationItems" 
+             [routerLink]="item.route" 
+             class="nav-link"
+             routerLinkActive="active">
+            <i class="material-icons">{{ item.icon }}</i>
+            <span>{{ item.label }}</span>
+          </a>
+
+          <!-- Action Buttons -->
+          <div class="nav-actions">
+            <button class="nav-action-btn profile-btn" 
+                    (click)="navigateToProfile()"
+                    title="Mi Perfil">
+              <img [src]="usuario?.foto || defaultAvatar" 
+                   alt="Perfil" 
+                   class="profile-pic">
+              <span>Perfil</span>
+            </button>
+            
+            <button class="nav-action-btn logout-btn" 
+                    (click)="logout()"
+                    title="Cerrar Sesión">
+              <i class="material-icons">logout</i>
+              <span>Salir</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scroll Indicators -->
+      <div class="scroll-indicator scroll-left" 
+           *ngIf="canScrollLeft"
+           (click)="scrollLeft()">
+        <i class="material-icons">chevron_left</i>
+      </div>
+      <div class="scroll-indicator scroll-right" 
+           *ngIf="canScrollRight"
+           (click)="scrollRight()">
+        <i class="material-icons">chevron_right</i>
       </div>
     </div>
   </header>

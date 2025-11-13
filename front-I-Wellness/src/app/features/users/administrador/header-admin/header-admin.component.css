@@ -1,108 +1,347 @@
-/* Estilos base */
+/* Design System Variables */
+:host {
+  --primary-color: #4a9c9f;
+  --secondary-color: #2c5f63;
+  --accent-color: #FF9843;
+  --text-dark: #2c3e50;
+  --text-light: #6c757d;
+  --bg-light: #f8f9fa;
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar Container */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: linear-gradient(to right, #9ACBD0, #48A6A7);
-    color: white;
-    height: 60px;
+  background: linear-gradient(to right, #48A6A7, #9ACBD0);
+  color: white;
+  height: 60px;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  gap: 20px;
+  position: relative;
+}
+
+/* Brand/Logo */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-right: 20px;
+  border-right: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+}
+
+/* Scrollable Navigation Wrapper */
+.navbar-scroll-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  margin: 0 10px;
+}
+
+.navbar-scroll-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.navbar-scroll-content::-webkit-scrollbar {
+  height: 4px;
+}
+
+.navbar-scroll-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.navbar-scroll-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.navbar-scroll-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Navigation Links */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: white;
+  color: var(--primary-color);
+  border-color: white;
+}
+
+.nav-link i {
+  font-size: 20px;
+}
+
+/* Action Buttons Container */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.nav-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-action-btn i {
+  font-size: 20px;
+}
+
+/* Profile Button */
+.profile-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.profile-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.profile-btn .profile-pic {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+/* Logout Button */
+.logout-btn {
+  background: linear-gradient(135deg, #E82A3C 0%, #c41e2f 100%);
+  color: white;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #c41e2f 0%, #a01626 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(232, 42, 60, 0.4);
+}
+
+/* Scroll Indicators */
+.scroll-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.scroll-indicator:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-indicator i {
+  color: var(--primary-color);
+  font-size: 20px;
+}
+
+.scroll-left {
+  left: 180px;
+}
+
+.scroll-right {
+  right: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .navbar-brand {
+    padding-right: 15px;
   }
   
-  /* Izquierda */
-  .nav-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  .brand-text {
+    font-size: 18px;
   }
-  
-  .nav-left .logo,
-  .nav-left .nav-link {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    padding-bottom: 5px;
-    position: relative;
-  }
-  
-  .nav-left .logo::after,
-  .nav-left .nav-link::after {
-    content: "";
-    display: block;
-    width: 100%;
-    height: 2px;
-    background: white;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    transform: scaleX(0);
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .nav-left .logo:hover::after,
-  .nav-left .nav-link:hover::after {
-    transform: scaleX(1);
-  }
-  
-  /* Centro */
-  .nav-center {
-    display: flex;
-    align-items: center;
-  }
-  
-  .search-input {
+
+  .nav-link,
+  .nav-action-btn {
     padding: 8px 12px;
-    border-radius: 20px;
-    border: none;
-    outline: none;
-    width: 200px;
+    font-size: 13px;
   }
-  
-  .search-btn {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    margin-left: -30px;
-    font-size: 16px;
-  }
-  
-  /* Derecha */
-  .nav-right {
-    display: flex;
-    align-items: center;
+}
+
+@media (max-width: 1200px) {
+  .navbar-container {
+    padding: 0 15px;
     gap: 15px;
   }
-  
-  .icon-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
+
+  .scroll-left {
+    left: 160px;
   }
-  
-  .profile-container {
-    display: flex;
-    align-items: center;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+    min-height: 60px;
+  }
+
+  .navbar-container {
+    padding: 10px;
     gap: 10px;
   }
-  
-  .profile-pic {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid white;
+
+  .navbar-brand {
+    padding-right: 10px;
   }
-  
-  .logout-btn {
-    background: red;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 10px;
-    cursor: pointer;
+
+  .brand-logo {
+    height: 35px;
   }
+
+  .brand-text {
+    display: none;
+  }
+
+  .navbar-scroll-content {
+    gap: 6px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .nav-link span {
+    display: none;
+  }
+
+  .nav-link i {
+    font-size: 22px;
+  }
+
+  .nav-actions {
+    margin-left: 8px;
+    padding-left: 8px;
+  }
+
+  .nav-action-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .nav-action-btn span {
+    display: none;
+  }
+
+  .scroll-left {
+    left: 60px;
+  }
+
+  .scroll-indicator {
+    width: 26px;
+    height: 26px;
+  }
+
+  .scroll-indicator i {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 8px;
+  }
+
+  .brand-logo {
+    height: 30px;
+  }
+
+  .navbar-scroll-content {
+    gap: 4px;
+  }
+
+  .nav-link,
+  .nav-action-btn {
+    padding: 6px 8px;
+  }
+
+  .scroll-left {
+    left: 50px;
+  }
+}
+
   
     

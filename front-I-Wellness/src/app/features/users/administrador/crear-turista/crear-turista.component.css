@@ -1,331 +1,614 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
+/* Design System Variables */
+:host {
+  --primary-color: #4a9c9f;
+  --secondary-color: #2c5f63;
+  --accent-color: #FF9843;
+  --danger-color: #E82A3C;
+  --success-color: #28a745;
+  --text-dark: #2c3e50;
+  --text-light: #6c757d;
+  --bg-light: #f8f9fa;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: transparent;
-    padding-top: 4%;
+/* Container */
+.crear-turista-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #34d399 100%);
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-.container {
-    display: flex;
-    width: 900px;
-    height: wrap-content;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-/* Panel izquierdo */
-.left-panel {
-    width: 50%;
-    background: url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/602524337.jpg?k=22bf85a61ea14645bc54c0ee436aae8583754e4154ef7b5f4e2c353bd7a86e34&o=&hp=1') no-repeat center/cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.logo {
-    text-align: center;
-    color: white;
-}
-
-.logo img {
-    width: 120px;
-    margin-bottom: 10px;
-}
-
-.logo h1 {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-/* Panel derecho */
-.right-panel {
-    width: 50%;
-    padding: 30px;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.title {
-    text-align: center;
-    font-size: 22px;
-    margin-bottom: 15px;
-}
-
-.turista {
-    color: #3166A6;
-    font-weight: bold;
-}
-
-.registro {
-    color: #A8D0C6;
-    font-weight: bold;
-}
-
-/* Botón de secciones */
-.btn-section {
-    width: 100%;
-    background: #3166A6;
-    color: white;
-    border: none;
-    padding: 10px;
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Campos de entrada */
-input[type="text"], input[type="email"], input[type="password"], select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-/* Checkbox */
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.checkbox-container input {
-    margin-right: 10px;
-}
-
-.checkbox-container label{
-    color: black;
-}
-
-/* Botón de envío */
-.btn-submit {
-    width: 100%;
-    background: #4B9E9E;
-    color: white;
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.error-message {
-    color: red;
-    font-size: 14px;
-    margin-top: 10px;
-}
-
-.preferencias-section {
-    margin-top: 20px;
-}
-
-.preferencias-section h3 {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #3166A6;
-    font-weight: bold;
-}
-
-.preferencias-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.preferencias-list label {
-    display: flex;
-    align-items: center;
-    background-color: #f6f3eb;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.preferencias-list label:hover {
-    background-color: #e6e2d8;
-}
-
-.preferencias-list input[type="checkbox"] {
-    margin-right: 8px;
-    accent-color: #3166A6; /* Para navegadores modernos */
-}
-
-.error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-/* Estilos específicos para el campo de fecha */
-.fecha-nacimiento-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.fecha-nacimiento-label {
-    margin-left: 5px;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
-    background: transparent;
-}
-
-input[type="date"] {
-    color: #333;
-    letter-spacing: 1px;
-}
-
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    background-color: #f6f3eb;
-    padding: 5px;
-    border-radius: 3px;
-}
-
-/* Estilo para que el placeholder de fecha se vea correctamente */
-input[type="date"]::-webkit-datetime-edit { 
-    color: #888;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    background-color: #f6f3eb;
-    padding: 5px;
-    border-radius: 3px;
-}
-
-::ng-deep ngx-intl-tel-input input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-  
-  ::ng-deep .iti {
-    display: block;
-    margin-top: 10px;
-  }
-  
-  ::ng-deep .iti__arrow {
-    display: none !important;
-  }
-  
-  ::ng-deep .iti .dropdown-menu.country-dropdown {
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    border-color: #c7cace;
-    margin-top: -1px;
-  }
-  
-  ::ng-deep .iti .iti__country-list {
-    box-shadow: none;
-    font-size: 14px;
-    margin-left: 0;
-    width: 244px;
-    max-height: 170px;
-  }
-  
-  ::ng-deep .iti__flag-container.open + input {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-  
-  ::ng-deep .iti .search-container input {
-    font-size: 14px;
-    border-color: #c7cace;
-    border-radius: 0;
-    padding: 5px 10px;
-  }
-  
-  ::ng-deep .iti .search-container input:focus {
-    outline: none;
-  }
-  
-  ::ng-deep ngx-intl-tel-input .iti {
-    position: relative;
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    padding: 5px 10px;
-  }
-  
-  ::ng-deep ngx-intl-tel-input .iti__flag-container {
-    position: static !important;
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-  }
-  
-  ::ng-deep ngx-intl-tel-input input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    padding: 5px;
-  }
-
-::ng-deep .iti--allow-dropdown input.iti__tel-input,
-.iti--show-selected-dial-code input.iti__tel-input {
-    padding-left: 10px !important;
-}
-
-/* Ocultar el input file nativo */
-.file-upload-label input[type="file"] {
-  display: none;
-}
-
-/* Estilo del label que actúa como botón */
-.file-upload-label {
-  display: inline-block;
+/* Main Card */
+.crear-turista-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: var(--shadow-xl);
+  max-width: 900px;
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background-color: #4B9E9E; 
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  user-select: none;
-  font-size: 14px;
-  box-shadow: 0 2px 5px rgba(49, 102, 166, 0.3);
+  padding: 40px;
+  margin: 20px auto;
 }
 
-/* Hover para el label */
-.file-upload-label:hover {
-  background-color: #3e8383;
-  box-shadow: 0 4px 10px rgba(37, 77, 127, 0.5);
+/* Header Section */
+.header-section {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-light);
+  border: none;
+  border-radius: 12px;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateX(-5px);
+}
+
+.back-button i {
+  font-size: 16px;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  margin-top: 10px;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+}
+
+.brand-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.highlight-crear {
+  color: var(--primary-color);
+  font-size: 32px;
+}
+
+.subtitle-text {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.welcome-text {
+  color: var(--text-light);
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form Content */
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+}
+
+/* Profile Photo Section */
+.profile-photo-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.file-upload-label {
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+}
+
+.upload-placeholder {
+  background: linear-gradient(135deg, var(--bg-light) 0%, #e9ecef 100%);
+  border: 2px dashed var(--border-color);
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-placeholder:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e8f5f5 0%, #d4f1f4 100%);
+  transform: translateY(-2px);
+}
+
+.upload-placeholder i {
+  font-size: 48px;
+  color: var(--primary-color);
+}
+
+.upload-placeholder span {
+  color: var(--text-light);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Form Sections */
+.form-section {
+  background: var(--bg-light);
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 25px 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.section-title i {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+.section-description {
+  color: var(--text-light);
+  font-size: 14px;
+  margin: -10px 0 20px 0;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+/* Inputs */
+.form-input,
+.form-select {
+  padding: 14px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text-dark);
+  background: white;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 156, 159, 0.1);
+}
+
+.form-input::placeholder {
+  color: #adb5bd;
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Password Container */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container .form-input {
+  width: 100%;
+  padding-right: 50px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: var(--primary-color);
+}
+
+.toggle-password i {
+  font-size: 18px;
+}
+
+/* Phone Input Customization */
+::ng-deep .custom {
+  width: 100% !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+::ng-deep .custom .iti {
+  width: 100% !important;
+}
+
+::ng-deep .custom .iti__flag-container {
+  border-right: 2px solid var(--border-color);
+}
+
+::ng-deep .custom input {
+  width: 100% !important;
+  padding: 14px 16px !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  color: var(--text-dark) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .custom input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(74, 156, 159, 0.1) !important;
+  outline: none !important;
+}
+
+::ng-deep .custom .iti__selected-flag {
+  padding: 14px 12px !important;
+  background: white !important;
+}
+
+/* Preferencias Grid */
+.preferencias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.preference-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.preference-item:hover {
+  border-color: var(--primary-color);
+  background: #e8f5f5;
+  transform: translateY(-2px);
+}
+
+.preference-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.preference-item input[type="checkbox"]:checked + .preference-label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.preference-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.preference-label i {
+  font-size: 16px;
+  color: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.preference-item input[type="checkbox"]:checked + .preference-label i {
+  opacity: 1;
+}
+
+/* Preferences Counter */
+.preferences-counter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  margin-top: 16px;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preferences-counter.error {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+  background: #fff5f5;
+}
+
+.preferences-counter i {
+  font-size: 16px;
+}
+
+/* Error Messages */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--danger-color);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.error-message i {
+  font-size: 14px;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 30px;
+  border-top: 2px solid var(--border-color);
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 16px 40px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  min-width: 200px;
+}
+
+.btn-cancel {
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+.btn-cancel:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel i,
+.btn-submit i {
+  font-size: 18px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .crear-turista-card {
+    max-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .crear-turista-container {
+    padding: 20px 15px;
+  }
+
+  .crear-turista-card {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
+  .header-section {
+    margin-bottom: 30px;
+  }
+
+  .back-button {
+    position: static;
+    margin-bottom: 20px;
+    width: fit-content;
+  }
+
+  .logo-brand {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .logo-img {
+    height: 50px;
+  }
+
+  .brand-title {
+    font-size: 28px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .highlight-crear {
+    font-size: 28px;
+  }
+
+  .welcome-text {
+    font-size: 14px;
+  }
+
+  .form-content {
+    gap: 25px;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .form-group.full-width {
+    grid-column: 1;
+  }
+
+  .preferencias-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .crear-turista-card {
+    padding: 25px 15px;
+  }
+
+  .logo-img {
+    height: 45px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .highlight-crear {
+    font-size: 24px;
+  }
+
+  .form-section {
+    padding: 18px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .upload-placeholder {
+    padding: 30px 20px;
+  }
+
+  .upload-placeholder i {
+    font-size: 40px;
+  }
 }
