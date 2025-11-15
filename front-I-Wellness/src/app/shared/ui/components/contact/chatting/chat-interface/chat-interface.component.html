@@ -1,98 +1,71 @@
-<div class="chat-interface-container">
+<div class="chat-interface">
   <!-- Estado de bienvenida: sin provider seleccionado -->
-  <div *ngIf="!(selectedProvider$ | async)" class="welcome-state">
-    <div class="welcome-content animate-fade-in">
-      <div class="welcome-icon">
-        <mat-icon class="large-icon">chat</mat-icon>
-      </div>
-      <h2 class="welcome-title">Bienvenido al Chat de Proveedores</h2>
-      <p class="welcome-description">Selecciona un proveedor para comenzar a conversar</p>
-    </div>
+  <div *ngIf="!(selectedProvider$ | async)" class="empty-chat">
+    <mat-icon class="empty-chat-icon">chat</mat-icon>
+    <h2 class="empty-chat-title">Bienvenido al Chat</h2>
+    <p class="empty-chat-subtitle">Selecciona un proveedor para comenzar a conversar.</p>
   </div>
 
   <!-- Chat activo: provider seleccionado -->
-  <div *ngIf="selectedProvider$ | async as selectedProvider" class="chat-active">
+  <ng-container *ngIf="selectedProvider$ | async as selectedProvider">
     <!-- Header del Chat -->
     <div class="chat-header">
       <div class="provider-info">
         <img
-          title="Volver a la lista de proveedores"
-          [src]="selectedProvider.photo"
+          [src]="selectedProvider.foto"
           [alt]="selectedProvider.contactName"
-          [title]="selectedProvider.contactName"
           class="provider-avatar">
-        <div class="provider-details">
-          <h2 class="provider-name">{{ selectedProvider.nombre }}</h2>
-          <p class="contact-name">{{ selectedProvider.contactName }}</p>
-          <div class="status-indicator">
-            <span
-              class="status-dot"
-              [class.online]="selectedProvider.isOnline"
-              [class.offline]="!selectedProvider.isOnline"></span>
-            <span class="status-text">
-              {{ selectedProvider.isOnline ? 'En línea' : 'Desconectado' }}
-              <span *ngIf="!selectedProvider.isOnline && selectedProvider.lastSeen" class="last-seen">
-                • Última vez {{ selectedProvider.lastSeen | date:'short' }}
-              </span>
-            </span>
-          </div>
-        </div>
+        <h2 class="provider-name">{{ selectedProvider.nombre }}</h2>
       </div>
     </div>
 
     <!-- Área de Mensajes -->
-    <div class="messages-area" #messagesContainer>
+    <div class="messages-container" #messagesContainer>
       <!-- Estado de carga de conversación -->
-      <div *ngIf="!(conversation$ | async)" class="loading-conversation">
-        <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+      <div *ngIf="!(conversation$ | async)" class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
         <p>Cargando conversación...</p>
       </div>
 
       <!-- Conversación cargada -->
-      <div *ngIf="conversation$ | async as conversation" class="messages-container">
+      <ng-container *ngIf="conversation$ | async as conversation">
         <!-- Sin mensajes -->
-        <div *ngIf="conversation.messages.length === 0" class="empty-conversation">
-          <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+        <div *ngIf="conversation.messages.length === 0" class="empty-chat">
+          <mat-icon class="empty-chat-icon">forum</mat-icon>
           <p>No hay mensajes aún. ¡Inicia la conversación!</p>
         </div>
 
         <!-- Lista de mensajes -->
-        <div *ngFor="let message of conversation.messages; trackBy: trackByMessageId"
-             class="message-wrapper">
+        <div *ngFor="let message of conversation.messages; trackBy: trackByMessageId">
           <app-chat-message
             [message]="message"
-            [provider]="selectedProvider"
             [isOwn]="isOwnMessage(message)"
             [animationClass]="getAnimationClass()">
           </app-chat-message>
         </div>
+      </ng-container>
 
-        <!-- Referencia para scroll automático -->
-        <div #messagesEnd></div>
-      </div>
-
-      <!-- Botón flotante para scroll to bottom -->
-      <button
-        mat-fab
-        color="primary"
-        class="scroll-to-bottom-button"
-        [class.hidden]="!showScrollButton"
-        (click)="onScrollToBottom()"
-        [attr.aria-label]="'Ir al final de la conversación'">
-        <mat-icon>arrow_downward</mat-icon>
-      </button>
-
-      <!-- Indicador de envío de mensaje -->
-      <div *ngIf="isLoading" class="loading-indicator">
-        <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-        <span>Enviando...</span>
-      </div>
+      <!-- Referencia para scroll automático -->
+      <div #messagesEnd></div>
     </div>
 
+    <!-- Botón flotante para scroll to bottom -->
+    <button
+      *ngIf="showScrollButton"
+      mat-fab
+      color="primary"
+      class="scroll-to-bottom"
+      (click)="onScrollToBottom()"
+      aria-label="Ir al final">
+      <mat-icon>arrow_downward</mat-icon>
+    </button>
+
     <!-- Área de Input -->
-    <app-chat-input
-      [disabled]="isLoading"
-      (sendMessage)="onSendMessage($event)">
-    </app-chat-input>
-  </div>
+    <div class="chat-input-area">
+      <app-chat-input
+        [disabled]="isLoading"
+        (sendMessage)="onSendMessage($event)">
+      </app-chat-input>
+    </div>
+  </ng-container>
 </div>

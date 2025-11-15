@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ChatLayoutService } from '../../shared/services/chat-layout.service';
+import { ChatRealtimeService } from './chat-realtime.service';
 import { ChatService } from './chat.service';
 
 @Injectable({
@@ -13,7 +14,8 @@ export class ChatIntegrationService {
     private authService: AuthService,
     private chatLayoutService: ChatLayoutService,
     private chatService: ChatService,
-    private router: Router
+    private router: Router,
+    private chatRealtimeService: ChatRealtimeService
   ) {}
 
   /**
@@ -25,16 +27,44 @@ export class ChatIntegrationService {
       return false;
     }
 
-    const userRole = this.authService.getCurrentUserRole();
-    if (userRole !== 'Proveedor') {
-      console.warn('Chat: Usuario no es proveedor', userRole);
+    console.log('Chat: Inicializado correctamente para proveedor');
+    return true;
+  }
+
+  /**
+   * Initializes chat for authenticated tourists.
+   */
+  initializeChatForTurista(): boolean {
+    if (!this.authService.isAuthenticated()) {
+      console.warn('Chat: Usuario no autenticado');
       return false;
     }
 
-    // Configurar el chat con valores por defecto para proveedores
-    this.chatLayoutService.showSidebar();
-    console.log('Chat: Inicializado correctamente para proveedor');
-    return true;
+    // Para usuarios turista debemos asegurarnos de que:
+    // 1) Se carguen las conversaciones/summaries iniciales
+    // 2) Se inicie la conexión de tiempo real (STOMP / polling)
+
+    try {
+      // Cargar resúmenes/conversaciones (HTTP) para poblar la UI
+      // Usamos la llamada existente en ChatService; si falla, devolvemos false
+      this.chatService.loadInitialConversations().subscribe({
+        next: () => {
+          console.log('Chat: Conversaciones iniciales cargadas para turista');
+        },
+        error: (err) => {
+          console.warn('Chat: Error cargando conversaciones iniciales para turista', err);
+        }
+      });
+
+      // Iniciar conexión en tiempo real para recibir nuevos mensajes
+      this.chatRealtimeService.connect();
+
+      console.log('Chat: Inicializado correctamente para turista (conexión y carga realizadas)');
+      return true;
+    } catch (err) {
+      console.error('Chat: Error inicializando chat para turista', err);
+      return false;
+    }
   }
 
   /**
@@ -43,31 +73,6 @@ export class ChatIntegrationService {
   disableChat(): void {
     this.chatLayoutService.reset();
     console.log('Chat: Deshabilitado');
-  }
-
-  /**
-   * Verifica y redirige según el rol del usuario
-   */
-  checkRoleAndRedirect(): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const userRole = this.authService.getCurrentUserRole();
-    switch (userRole) {
-      case 'Proveedor':
-        // Usuario correcto, no hacer nada
-        break;
-      case 'Turista':
-        this.router.navigate(['/turista/home']);
-        break;
-      case 'Admin':
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      default:
-        this.router.navigate(['/login']);
-    }
   }
 
   /**
@@ -106,20 +111,29 @@ export class ChatIntegrationService {
     }
   }
 
-startChatWithProvider(providerId: number): void {
-  console.log('[ChatIntegration] Iniciando chat con proveedor', providerId);
-
-  // 1. Mostrar el modal de chat
-  this.chatLayoutService.showModal();
-  this.chatLayoutService.setActiveTab('messages');
-
-  // 2. Seleccionar el proveedor (esto carga o crea la conversación)
-  this.chatService.selectProvider(providerId);
-
-  // 3. Si estamos en un dispositivo móvil, asegurar que el sidebar está oculto
-  const isMobile = window.innerWidth < 768;
-  if (isMobile) {
-    this.chatLayoutService.hideSidebar();
+  /**
+   * Checks if the current user has the expected role and redirects if not.
+   * @param expectedRole The role to check for ('Proveedor', 'Turista', 'Admin').
+   */
+  checkRoleAndRedirect(expectedRole: 'Proveedor' | 'Turista' | 'Admin'): void {
+    const currentUserRole = this.authService.getCurrentUserRole();
+    if (currentUserRole !== expectedRole) {
+      console.warn(`Chat: Acceso denegado. Rol esperado: ${expectedRole}, rol actual: ${currentUserRole}`);
+      this.handleNavigationError(new Error('Mismatched role for chat access'));
+    }
   }
-}
+
+  startChatWithProvider(providerId: number): void {
+    console.log('[ChatIntegration] Iniciando chat con proveedor', providerId);
+
+    // 2. Seleccionar el proveedor (esto carga o crea la conversación)
+    this.chatService.selectProvider(providerId);
+
+  }
+
+  startConversationWithUser(user: any): void {
+    this.chatService.startOrSelectConversationWithUser(user);
+    this.chatLayoutService.showModal();
+    this.chatLayoutService.setActiveTab('chat');
+  }
 }

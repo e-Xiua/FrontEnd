@@ -4,13 +4,13 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { UsuarioService } from '../../features/users/services/usuario.service';
 import {
-    ChatProvider,
-    ChatState,
-    Conversation,
-    ConversationSummary,
-    Message,
-    SendMessageResponse,
-    UsuarioDTO
+  ChatProvider,
+  ChatState,
+  Conversation,
+  ConversationSummary,
+  Message,
+  SendMessageResponse,
+  UsuarioDTO
 } from '../models/chat';
 import { ChatRealtimeService } from './chat-realtime.service';
 import { ConversationApiService } from './conversation-api.service';
@@ -274,6 +274,21 @@ export class ChatService {
       type: (messageData.type as Message['type']) || 'text',
       status
     };
+  }
+
+  /**
+   * Inicia o selecciona una conversación con un usuario específico.
+   * Este método es ideal para iniciar un chat desde una tarjeta de contacto o perfil.
+   * @param user El usuario (proveedor o turista) con quien iniciar la conversación.
+   */
+  startOrSelectConversationWithUser(user: any): void {
+    if (!user || !user.id) {
+      console.error('[ChatService] No se puede iniciar la conversación: usuario inválido', user);
+      return;
+    }
+    // Simplemente llama a selectProvider, que ya contiene toda la lógica
+    // para encontrar, crear y cargar la conversación.
+    this.selectProvider(user.id);
   }
 
   selectProvider(providerId: number | null): void {

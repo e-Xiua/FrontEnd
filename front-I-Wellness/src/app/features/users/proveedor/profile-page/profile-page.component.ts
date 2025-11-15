@@ -2,11 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ExtendedPlaceData } from '../../../../shared/models/place-data.model';
 import { Route, RouteSelectionEvent } from '../../../../shared/models/route';
 import { usuarios } from '../../../../shared/models/usuarios';
+import { ChatIntegrationService } from '../../../../shared/services/chat-integration.service';
+import { ChatLayoutService } from '../../../../shared/services/chat-layout.service';
 import { ProfileStateService } from '../../../../shared/services/profile-state.service';
-import { ReviewsCallService, ProviderRatingDTO } from '../../../../shared/services/reviews-call.service';
+import { ProviderRatingDTO, ReviewsCallService } from '../../../../shared/services/reviews-call.service';
 import { MakeNetworkingContactComponent } from '../../../../shared/ui/components/make-networking-contact/make-networking-contact.component';
 import { ProviderServiceListContainerComponent } from '../../../../shared/ui/components/provider-service-list/provider-service-list.container';
 import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
@@ -44,7 +47,10 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
   currentUserId: number | null = null;
   isContact = false;
   isAddingContact = false;
-  
+  isOwnProfile = false;
+  currentUserRole: string | null = null;
+
+
   // Rating data
   providerRating: ProviderRatingDTO | null = null;
   address: string = '';
@@ -55,7 +61,10 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly profileState: ProfileStateService,
-    private readonly reviewsService: ReviewsCallService
+    private readonly reviewsService: ReviewsCallService,
+    private readonly chatLayoutService: ChatLayoutService,
+    private readonly authService: AuthService,
+    private readonly chatIntegrationService: ChatIntegrationService
   ) {}
 
   // Reactive state from ProfileStateService (getter pattern for safe access)
@@ -68,6 +77,10 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
   get isAddingContact$() { return this.profileState.isAddingContact$; }
 
   ngOnInit(): void {
+    this.authService.userRole$.pipe(takeUntil(this.destroy$)).subscribe(role => {
+      this.currentUserRole = role;
+    });
+
     // Subscribe to all state changes - this ensures reactive updates
     this.profileState.state$
       .pipe(takeUntil(this.destroy$))
@@ -75,7 +88,7 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
         // Preservar rating y totalReviews si ya los tenemos cargados
         const currentRating = this.provider?.rating;
         const currentTotalReviews = this.provider?.totalReviews;
-        
+
         this.provider = state.provider;
         this.services = state.services;
         this.isLoading = state.isLoading;
@@ -83,6 +96,8 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
         this.currentUserId = state.currentUserId;
         this.isContact = state.isContact;
         this.isAddingContact = state.isAddingContact;
+        this.isOwnProfile = state.currentUserId !== null && state.targetProviderId !== null && state.currentUserId === state.targetProviderId;
+
 
         // Restaurar rating si ya lo teníamos cargado y el nuevo provider no tiene uno válido
         if (this.provider && this.providerRating) {
@@ -121,12 +136,12 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
             rating: state.provider.rating,
             totalReviews: state.provider.totalReviews,
           });
-          
+
           // Cargar dirección cuando el provider esté disponible
           if (state.provider.provider?.proveedorInfo) {
             this.loadAddressFromCoordinates();
           }
-          
+
           // Cargar rating cuando tengamos el ID del proveedor (solo si no lo tenemos ya)
           if (!this.providerRating) {
             this.loadProviderRating(state.provider.id);
@@ -142,7 +157,7 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
         if (idParam) {
           const newProviderId = Number(idParam);
           console.log('🔄 ProfilePage: Route param changed, loading provider ID:', newProviderId);
-          
+
           // Update providerId if it comes from route
           if (!this.providerId || this.providerId !== newProviderId) {
             this.providerId = newProviderId;
@@ -161,15 +176,15 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     if ('providerId' in changes) {
       const currentId = changes['providerId'].currentValue;
       const previousId = changes['providerId'].previousValue;
-      
+
       console.log('🔄 ProfilePage ngOnChanges:', {
         currentId,
         previousId,
         isFirstChange: changes['providerId'].firstChange
       });
-      
+
       // Si es el primer cambio y tenemos un ID válido, o si el ID cambió
-      if ((changes['providerId'].firstChange && currentId) || 
+      if ((changes['providerId'].firstChange && currentId) ||
           (!changes['providerId'].firstChange && currentId !== previousId)) {
         this.loadProvider();
       }
@@ -187,14 +202,27 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     this.profileState.addContact()
       .pipe(takeUntil(this.destroy$))
       .subscribe();
+
+    this.chatLayoutService.setActiveTab('contacts');
   }
 
   goBack(): void {
     this.router.navigate(['/proveedor/home']);
   }
 
+  startChat(): void {
+    if (this.provider) {
+      this.chatIntegrationService.startConversationWithUser(this.provider);
+    }
+  }
+
   startConversation(): void {
     this.router.navigate(['/proveedor/chat-demo']);
+  }
+
+  viewMyContacts(): void {
+    this.chatLayoutService.showModal();
+    this.chatLayoutService.setActiveTab('contacts');
   }
 
   // ========== PRIVATE METHODS ==========
@@ -205,19 +233,19 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
 
     // Load services after provider is set
     this.profileState.loadServices(this.showServiceManager);
-    
+
     // Load rating if provider ID is available
     if (this.providerId) {
       this.loadProviderRating(this.providerId);
     }
   }
-  
+
   /**
    * Carga el rating promedio del proveedor desde la API de reviews
    */
   private loadProviderRating(providerId: number): void {
     console.log('🌟 Cargando rating para proveedor ID:', providerId);
-    
+
     this.reviewsService.getProviderRating(providerId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -229,13 +257,13 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
             parsedValue: this.parseRatingValue(rating.averageRating),
             totalReviews: rating.totalReviews
           });
-          
+
           // Actualizar el provider con el rating obtenido
           if (this.provider) {
             const parsedRating = this.parseRatingValue(rating.averageRating);
             this.provider.rating = parsedRating;
             this.provider.totalReviews = rating.totalReviews;
-            
+
             console.log('✅ Provider rating actualizado:', {
               rating: this.provider.rating,
               totalReviews: this.provider.totalReviews
@@ -253,7 +281,7 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
         }
       });
   }
-  
+
   /**
    * Parsea el valor de rating que puede venir como objeto {source, parsedValue} o número
    */
@@ -266,7 +294,7 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     }
     return 0;
   }
-  
+
   /**
    * Genera dirección a partir de coordenadas usando reverse geocoding
    */
@@ -274,24 +302,24 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.provider?.provider?.proveedorInfo) {
       return;
     }
-    
+
     const lat = this.provider.provider.proveedorInfo.coordenadaX;
     const lon = this.provider.provider.proveedorInfo.coordenadaY;
-    
+
     if (!lat || !lon) {
       this.address = 'Ubicación no disponible';
       return;
     }
-    
+
     console.log('📍 Obteniendo dirección para coordenadas:', { lat, lon });
-    
+
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
       .then(response => response.json())
       .then(data => {
         if (data && data.display_name) {
           this.address = data.display_name;
           console.log('✅ Dirección obtenida:', this.address);
-          
+
           // Actualizar el provider con la dirección
           if (this.provider) {
             this.provider.address = this.address;

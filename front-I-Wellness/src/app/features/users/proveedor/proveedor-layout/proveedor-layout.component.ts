@@ -27,14 +27,14 @@ import { ProveedorChatDemoComponent } from "../proveedor-chat-demo/proveedor-cha
 
       <!-- Contenedor para chat layout y contenido principal debajo del header -->
       <div class="layout-body" [ngStyle]="bodyStyles">
-
-        <app-proveedor-chat-demo></app-proveedor-chat-demo>
+        <app-proveedor-chat-demo [isModalVisible]="modalVisible"></app-proveedor-chat-demo>
         <!-- Chat layout con estilos adaptativos -->
         <app-chat-layout
           [enableSidebar]="true"
           [autoLoadProviders]="true"
           [sidebarDefaultVisible]="false"
           [ngStyle]="chatLayoutStyles"
+          [style.display]="sidebarVisible ? 'flex' : 'none'"
           class="layout-sidebar">
         </app-chat-layout>
 
@@ -129,6 +129,8 @@ import { ProveedorChatDemoComponent } from "../proveedor-chat-demo/proveedor-cha
 })
 export class ProveedorLayoutComponent implements OnInit, OnDestroy {
   sidebarCollapsed = false;
+  sidebarVisible = false; // Track sidebar visibility
+  modalVisible = true;
   headerStyles: any = {};
   chatLayoutStyles: any = {};
   bodyStyles: any = { marginTop: '64px' };
@@ -145,7 +147,7 @@ export class ProveedorLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Verificar autenticación y rol usando el integration service
-    this.chatIntegrationService.checkRoleAndRedirect();
+    this.chatIntegrationService.initializeChatForProvider();
 
     // Suscribirse a estilos adaptativos del header
     this.layoutAdapter.headerStyle$
@@ -165,13 +167,13 @@ export class ProveedorLayoutComponent implements OnInit, OnDestroy {
     if (this.chatIntegrationService.initializeChatForProvider()) {
       // Forzar la visibilidad del modal de chat al iniciar
       this.chatLayoutService.showModal();
-
       // Suscribirse a cambios en el estado del sidebar y sincronizar con layout adapter
       this.chatLayoutService.state$
         .pipe(takeUntil(this.destroy$))
         .subscribe((state: any) => {
           this.sidebarCollapsed = state.sidebarCollapsed;
-
+          this.sidebarVisible = state.sidebarVisible; // Update visibility state
+          this.modalVisible = state.modalVisible; // Update modal visibility state
           // Sincronizar estado con el layout adapter
           this.layoutAdapter.updateSidebarState(
             state.sidebarVisible,

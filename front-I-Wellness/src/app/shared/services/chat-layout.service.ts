@@ -5,7 +5,7 @@ import { ChatProvider, Conversation } from '../models/chat';
 import { ChatService } from './chat.service';
 import { PaginatedResult, PaginationOptions } from './provider-mapper.service';
 
-export type ModalTab = 'contacts' | 'messages';
+export type ModalTab = 'conversations' | 'chat' | 'contacts';
 export type SlideDirection = 'up' | 'down';
 
 export interface ChatLayoutState {
@@ -45,7 +45,7 @@ export class ChatLayoutService {
     // Modal state
     modalVisible: false,
     modalSlideDirection: 'down',
-    activeTab: 'contacts',
+    activeTab: 'conversations',
 
     // Data state
     allProviders: [],
@@ -168,7 +168,7 @@ export class ChatLayoutService {
     this.chatService.selectProvider(providerId);
 
     // Switch to messages tab when a provider is selected
-    this.setActiveTab('messages');
+    this.setActiveTab('chat');
   }
 
   // Method to send a message through ChatService
@@ -235,9 +235,15 @@ export class ChatLayoutService {
   }
 
   setActiveTab(tab: ModalTab): void {
-    this.updateState({ activeTab: tab });
-  }
+    const isModalTab = tab === 'conversations' || tab === 'chat';
 
+    this.updateState({
+      activeTab: tab,
+      modalVisible: isModalTab,
+      sidebarVisible: !isModalTab,
+      modalSlideDirection: isModalTab ? 'up' : 'down'
+    });
+  }
   // Data actions
   setProviders(providers: ChatProvider[]): void {
     this.updateState({
@@ -384,7 +390,7 @@ export class ChatLayoutService {
       sidebarCollapsed: false,
       modalVisible: false,
       modalSlideDirection: 'down',
-      activeTab: 'contacts',
+      activeTab: 'conversations',
       allProviders: [],
       filteredProviders: [],
       activeConversations: [],

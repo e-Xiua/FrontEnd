@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { ChatLayoutService } from '../../../services/chat-layout.service';
 
 export type TabOrientation = 'horizontal' | 'vertical';
+export type TabControl = 'sidebar' | 'modal';
 
 @Component({
   selector: 'app-floating-tab',
@@ -9,11 +12,11 @@ export type TabOrientation = 'horizontal' | 'vertical';
   imports: [CommonModule],
   template: `
     <button
+      *ngIf="isVisible"
       type="button"
       class="floating-tab"
       [class.horizontal]="orientation === 'horizontal'"
       [class.vertical]="orientation === 'vertical'"
-      [class.visible]="visible"
       [class.right-position]="position === 'right'"
       [class.left-position]="position === 'left'"
       [class.top-position]="position === 'top'"
@@ -45,9 +48,6 @@ export type TabOrientation = 'horizontal' | 'vertical';
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateX(-100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       font-size: 14px;
       font-weight: 500;
@@ -60,20 +60,14 @@ export type TabOrientation = 'horizontal' | 'vertical';
       user-select: none;
     }
 
-    .floating-tab.visible {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
-    }
-
     .floating-tab:hover {
       background: #f5f5f5;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-      transform: translateX(0) scale(1.05);
+      transform: scale(1.05);
     }
 
     .floating-tab:active {
-      transform: translateX(0) scale(0.98);
+      transform: scale(0.98);
     }
 
     /* Orientación horizontal */
@@ -88,21 +82,11 @@ export type TabOrientation = 'horizontal' | 'vertical';
       transform: translateX(-50%);
     }
 
-    .floating-tab.horizontal.top-position.visible {
-      transform: translateX(-50%) translateY(0);
-    }
-
     .floating-tab.horizontal.bottom-position {
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
     }
-
-    .floating-tab.horizontal.bottom-position.visible {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* La clase previa .floating-tab.chat-tab-bottom-right se reemplaza por estilos en :host */
 
     /* Orientación vertical */
     .floating-tab.vertical {
@@ -115,21 +99,11 @@ export type TabOrientation = 'horizontal' | 'vertical';
     .floating-tab.vertical.left-position {
       top: 50%;
       left: 20px;
-      transform: translateY(-50%) translateX(-100%);
-    }
-
-    .floating-tab.vertical.left-position.visible {
-      transform: translateY(-50%) translateX(0);
     }
 
     .floating-tab.vertical.right-position {
       top: 50%;
       right: 20px;
-      transform: translateY(-50%) translateX(100%);
-    }
-
-    .floating-tab.vertical.right-position.visible {
-      transform: translateY(-50%) translateX(0);
     }
 
     /* Contenido del tab */
@@ -198,21 +172,49 @@ export type TabOrientation = 'horizontal' | 'vertical';
     }
   `]
 })
-export class FloatingTabComponent {
+export class FloatingTabComponent implements OnInit, OnDestroy {
   @Input() label: string = '';
   @Input() iconClass?: string;
   @Input() orientation: TabOrientation = 'horizontal';
   @Input() position: 'left' | 'right' | 'top' | 'bottom' = 'left';
-  @Input() visible: boolean = false;
+  @Input() controls: TabControl = 'sidebar'; // 'sidebar' or 'modal'
   @Input() customAriaLabel?: string;
 
   @Output() tabClick = new EventEmitter<void>();
+
+  isVisible: boolean = false;
+  private destroy$ = new Subject<void>();
+  private chatLayoutService = inject(ChatLayoutService);
+
+  ngOnInit(): void {
+    this.chatLayoutService.state$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(state => {
+      if (this.controls === 'sidebar') {
+        // El tab es visible si el sidebar NO lo es
+        this.isVisible = !state.sidebarVisible;
+      } else if (this.controls === 'modal') {
+        // El tab es visible si el modal NO lo es
+        this.isVisible = !state.modalVisible;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   get ariaLabel(): string {
     return this.customAriaLabel || `Mostrar ${this.label}`;
   }
 
   onTabClick(): void {
+    if (this.controls === 'sidebar') {
+      this.chatLayoutService.showSidebar();
+    } else if (this.controls === 'modal') {
+      this.chatLayoutService.showModal();
+    }
     this.tabClick.emit();
   }
 }

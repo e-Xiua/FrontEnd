@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { ChatProvider } from '../../../../models/chat';
 import { AnimationContext } from '../../../../services/animation-strategy.service';
 import { ChatIntegrationService } from '../../../../services/chat-integration.service';
+import { ChatLayoutService } from '../../../../services/chat-layout.service';
 import { ContactMenuComponent } from '../contact-menu/contact-menu.component';
 import { EmailBulkModalComponent } from '../email-bulk-modal/email-bulk-modal.component';
 
@@ -36,7 +37,8 @@ export class ContactCardComponent {
   constructor(
     private router: Router,
     private animationContext: AnimationContext,
-    private chatIntegration: ChatIntegrationService
+    private chatIntegration: ChatIntegrationService,
+    private chatLayoutService: ChatLayoutService
   ) {}
 
   onCardClick(): void {
@@ -47,6 +49,7 @@ export class ContactCardComponent {
     event.stopPropagation();
     this.chatClick.emit(this.provider);
     this.chatIntegration.startChatWithProvider(this.provider.id);
+    this.chatLayoutService.setActiveTab('chat');
   }
 
   onProfileClick(event: Event): void {
@@ -143,7 +146,7 @@ export class ContactCardComponent {
 
     return iconMap[category.toLowerCase()] || iconMap['default'];
   }
-  
+
   onBulkEmailClick(event: Event): void {
     event.stopPropagation();
     const dialogRef = this.dialog.open(EmailBulkModalComponent, {

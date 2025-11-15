@@ -1,6 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,23 +40,20 @@ import { ContactCardComponent } from '../../../../shared/ui/components/contact/c
     trigger('slideToggle', [
       state('hidden', style({
         transform: 'translateY(100%)',
-        opacity: 0
+        opacity: 0,
+        visibility: 'hidden'
       })),
       state('visible', style({
         transform: 'translateY(0)',
-        opacity: 1
+        opacity: 1,
+        visibility: 'visible'
       })),
       state('minimized', style({
         transform: 'translateY(calc(100% - 60px))',
-        opacity: 1
+        opacity: 1,
+        visibility: 'visible'
       })),
-      transition('hidden <=> visible', [
-        animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)')
-      ]),
-      transition('visible <=> minimized', [
-        animate('200ms cubic-bezier(0.25, 0.8, 0.25, 1)')
-      ]),
-      transition('hidden <=> minimized', [
+      transition('* <=> *', [
         animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)')
       ])
     ]),
@@ -68,13 +65,18 @@ import { ContactCardComponent } from '../../../../shared/ui/components/contact/c
     ])
   ]
 })
-export class FloatingChatModalComponent implements OnInit, OnDestroy {
+export class FloatingChatModalComponent implements OnInit, OnDestroy, OnChanges {
   private destroy$ = new Subject<void>();
   private chatLayoutService = inject(ChatLayoutService);
   private chatService = inject(ChatService);
   private chatRealtimeService = inject(ChatRealtimeService);
   private animationFactory = inject(AnimationStrategyFactory);
   private animationContext = inject(AnimationContext);
+
+  // Inputs & State
+  @Input() isVisible: boolean = false;
+  modalState: 'hidden' | 'visible' | 'minimized' = 'hidden';
+  isMinimized = false;
 
   // State observables
   layoutState$ = this.chatLayoutService.state$;
@@ -85,9 +87,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   paginatedContacts$ = this.chatLayoutService.paginatedContacts$;
   paginatedProviders$ = this.chatLayoutService.paginatedContacts$; // Alias for consistency
   // Modal state
-  modalState: 'hidden' | 'visible' | 'minimized' = 'hidden';
   activeTab: ModalTab = 'contacts';
-  isMinimized = false;
 
   // Selected data
   selectedProvider: ChatProvider | null = null;
@@ -96,8 +96,8 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
 
   // Tab labels
   readonly tabLabels = {
-    contacts: 'Contactos',
-    messages: 'Mensajes'
+    conversations: 'Conversaciones',
+    chat: 'Chat Activo'
   };
 
   ngOnInit(): void {
@@ -105,6 +105,12 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     this.subscribeToLayoutState();
     this.subscribeToChatState();
     this.setupRealtimeUpdates();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isVisible']) {
+      this.updateModalState(changes['isVisible'].currentValue);
+    }
   }
 
   ngOnDestroy(): void {
@@ -123,11 +129,10 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     this.layoutState$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(state => {
-      this.updateModalState(state.modalVisible);
       this.activeTab = state.activeTab;
 
       // Actualizar selectedTabIndex cuando cambia el tab
-      this.selectedTabIndex = state.activeTab === 'contacts' ? 0 : 1;
+      this.selectedTabIndex = state.activeTab === 'conversations' ? 0 : 1;
 
       this.selectedProvider = state.filteredProviders.find(p => p.id === this.selectedProvider?.id) || null;
     });
@@ -154,30 +159,16 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   private updateModalState(isVisible: boolean): void {
     if (!isVisible) {
       this.modalState = 'hidden';
-      this.isMinimized = false;
-    } else if (this.isMinimized) {
-      this.modalState = 'minimized';
+      this.isMinimized = false; // Reset minimized state when hidden
     } else {
-      this.modalState = 'visible';
-    }
-  }
-
-  onToggleModal(): void {
-    if (this.modalState === 'hidden') {
-      this.chatLayoutService.showModal();
-    } else {
-      this.chatLayoutService.hideModal();
+      // Si es visible, el estado depende de si está minimizado o no
+      this.modalState = this.isMinimized ? 'minimized' : 'visible';
     }
   }
 
   onMinimizeModal(): void {
-    if (this.modalState === 'visible') {
-      this.isMinimized = true;
-      this.modalState = 'minimized';
-    } else if (this.modalState === 'minimized') {
-      this.isMinimized = false;
-      this.modalState = 'visible';
-    }
+    this.isMinimized = !this.isMinimized;
+    this.updateModalState(this.isVisible);
   }
 
   onCloseModal(): void {
@@ -209,6 +200,11 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     console.log('Navigate to provider profile:', provider);
   }
 
+  onBackToConversations(): void {
+    this.chatService.selectProvider(null);
+    this.chatLayoutService.setActiveTab('conversations');
+  }
+
   onConversationSelect(conversation: Conversation): void {
     console.log('FloatingChatModal: Seleccionando conversación', conversation);
 
@@ -227,6 +223,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
 
     // El provider se actualizará automáticamente a través de la suscripción a chatState$
     console.log('FloatingChatModal: Conversación seleccionada, cargando mensajes...');
+    this.chatLayoutService.setActiveTab('chat');
   }
 
   // Método para enviar mensajes
@@ -273,10 +270,6 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
     return tab === 'contacts' ? 'contacts' : 'chat';
   }
 
-  get isVisible(): boolean {
-    return this.modalState !== 'hidden';
-  }
-
   get showContent(): boolean {
     return this.modalState === 'visible';
   }
@@ -287,19 +280,19 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
   }
 
   get modalTitle(): string {
-    if (this.activeTab === 'messages' && this.activeConversation) {
+    if (this.activeTab === 'chat' && this.activeConversation) {
       // Mostrar nombre del participante de la conversación
       const participantName = this.activeConversation.participant?.nombre ||
                              this.activeConversation.participant2?.nombre ||
                              `Usuario #${this.selectedProviderId}`;
       return `Chat con ${participantName}`;
     }
-    return this.tabLabels[this.activeTab];
+    return this.tabLabels[this.activeTab as keyof typeof this.tabLabels];
   }
 
   tabIndexToModalTab(index: number): ModalTab {
   // Adjust this mapping according to your tab order and ModalTab definition
-  return index === 0 ? 'contacts' : 'messages';
+  return index === 0 ? 'conversations' : 'chat';
 }
 
   getAnimationClass(): string {
@@ -328,7 +321,7 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
             console.log('FloatingChatModal: Conversaciones actualizadas automáticamente');
 
             // Si el modal está en el tab de mensajes, mostrar notificación visual
-            if (this.activeTab === 'messages') {
+            if (this.activeTab === 'conversations') {
               this.showNewMessageIndicator();
             }
           },
@@ -357,10 +350,9 @@ export class FloatingChatModalComponent implements OnInit, OnDestroy {
    * (puede ser un badge, notificación, etc.)
    */
   private showNewMessageIndicator(): void {
-    // TODO: Implementar indicador visual
+
     console.log('FloatingChatModal: 💬 Nuevos mensajes disponibles');
 
-    // Ejemplo: Podría emitir un evento al header para mostrar badge
-    // o simplemente hacer scroll al último mensaje automáticamente
+
   }
 }

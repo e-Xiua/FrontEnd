@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Observable, Subject, combineLatest, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ChatProvider, Conversation, Message } from '../../../../../models/chat';
 import { AnimationContext, AnimationStrategyFactory } from '../../../../../services/animation-strategy.service';
 import { ChatService } from '../../../../../services/chat.service';
@@ -20,8 +21,9 @@ import { ChatMessageComponent } from '../chat-message/chat-message.component';
     MatButtonModule,
     MatCardModule,
     ChatMessageComponent,
-    ChatInputComponent
-  ],
+    ChatInputComponent,
+    MatProgressSpinner
+],
   templateUrl: './chat-interface.component.html',
   styleUrl: './chat-interface.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -176,6 +176,9 @@ export class ChatRealtimeService implements OnDestroy {
     const token = this.authService.getToken();
     const userId = this.authService.getCurrentUserIdSynchronous();
 
+    console.log(`[ChatRealtimeService] Attempting to connect for user ID: ${userId}`);
+    console.log(`[ChatRealtimeService] Token available: ${!!token}`);
+
     if (!token || !userId) {
       console.error('[ChatRealtimeService] No hay token o userId. Usando polling como fallback.');
       this.startPollingFallback();

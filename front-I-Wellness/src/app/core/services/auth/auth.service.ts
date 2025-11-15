@@ -11,6 +11,9 @@ export class AuthService {
   private readonly userIdSubject = new BehaviorSubject<number | null>(this.getCurrentUserIdSynchronous());
   readonly userId$ = this.userIdSubject.asObservable();
 
+  private readonly userRoleSubject = new BehaviorSubject<string | null>(this.getCurrentUserRole());
+  readonly userRole$ = this.userRoleSubject.asObservable();
+
   private apiUrl = 'http://localhost:8082/auth'; // URL completa al backend
   //private apiUrl = 'http://localhost:8765/api/auth';
 
@@ -42,9 +45,11 @@ export class AuthService {
           // Store the user ID in localStorage
           localStorage.setItem('USER_ID', userInfo.id.toString());
           // Store the role as well
-          localStorage.setItem('rol', userInfo.rol || ''); // FIX: Changed from userInfo.role to userInfo.rol
-          console.log('Role stored in localStorage:', userInfo.rol); // Log para confirmar el rol
+          const userRole = userInfo.rol || '';
+          localStorage.setItem('rol', userRole); // FIX: Changed from userInfo.role to userInfo.rol
+          console.log('Role stored in localStorage:', userRole); // Log para confirmar el rol
           this.userIdSubject.next(userInfo.id);
+          this.userRoleSubject.next(userRole); // Update role subject
         }),
         map((userInfo: any) => {
           return {
@@ -61,6 +66,8 @@ export class AuthService {
         localStorage.removeItem('token');
         localStorage.removeItem('USER_ID');
         localStorage.removeItem('rol');
+        this.userIdSubject.next(null);
+        this.userRoleSubject.next(null);
         return throwError(() => new Error(error.error || 'Error en el inicio de sesión'));
       })
     );
@@ -207,6 +214,7 @@ export class AuthService {
     localStorage.removeItem('USER_ID');
     localStorage.removeItem('rol');
     this.userIdSubject.next(null);
+    this.userRoleSubject.next(null);
   }
 
   getUserInfo(): Observable<any> {

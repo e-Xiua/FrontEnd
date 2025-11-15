@@ -54,17 +54,37 @@
                   <span class="rating-value">{{ provider.rating?.toFixed(1) || '0.0' }}</span>
                   <span class="rating-count">({{ provider.totalReviews || 0 }} reseñas)</span>
                 </div>
-                
+
                 <button
-                  *ngIf="currentUserId && provider && currentUserId !== provider.id"
+                  *ngIf="isOwnProfile"
                   class="btn-follow"
-                  (click)="addContact()"
-                  [disabled]="(isAddingContact$ | async) || (isContact$ | async)">
-                  <i *ngIf="!(isAddingContact$ | async) && !(isContact$ | async)" class="fas fa-user-plus"></i>
-                  <span *ngIf="(isAddingContact$ | async)" class="loading-spinner-small"></span>
-                  <span *ngIf="!(isContact$ | async)">Seguir</span>
-                  <span *ngIf="(isContact$ | async)">Siguiendo</span>
+                  (click)="viewMyContacts()">
+                  <i class="fas fa-address-book"></i>
+                  <span>Ver mis contactos</span>
                 </button>
+
+                <!-- Botón de acción: Seguir, Siguiendo o Escribir Mensaje -->
+                <div class="action-button-container">
+                  <!-- Caso 1: El usuario es Turista y no es su propio perfil -->
+                  <ng-container *ngIf="currentUserRole === 'Turista' && !isOwnProfile">
+                    <button class="btn btn-follow btn-message" (click)="startChat()">
+                      <i class="fas fa-paper-plane"></i> Escribir Mensaje
+                    </button>
+                  </ng-container>
+
+                  <!-- Caso 2: El usuario NO es Turista (o es su propio perfil) -->
+                  <ng-container *ngIf="currentUserRole !== 'Turista' && !isOwnProfile">
+                    <button
+                      class="btn btn-follow"
+                      [class.following]="isContact"
+                      [disabled]="isAddingContact || isContact"
+                      (click)="addContact()">
+                      <span *ngIf="!isAddingContact && !isContact"><i class="fas fa-plus"></i> Seguir</span>
+                      <span *ngIf="isAddingContact"><i class="fas fa-spinner fa-spin"></i> Agregando...</span>
+                      <span *ngIf="isContact && !isAddingContact"><i class="fas fa-check"></i> Siguiendo</span>
+                    </button>
+                  </ng-container>
+                </div>
               </div>
 
               <!-- Location -->
@@ -192,26 +212,26 @@
               <div class="service-content">
                 <h3 class="service-name">{{ service.nombre || 'Servicio sin nombre' }}</h3>
                 <p class="service-description">{{ service.descripcion || 'Sin descripción disponible' }}</p>
-                
+
                 <!-- Horario del servicio específico -->
                 <div *ngIf="service.horario" class="service-schedule">
                   <i class="fas fa-clock"></i>
                   <span>{{ service.horario }}</span>
                 </div>
-                
+
                 <!-- Tiempo aproximado -->
                 <div *ngIf="service.tiempoAproximado" class="service-duration">
                   <i class="fas fa-hourglass-half"></i>
                   <span>{{ service.tiempoAproximado }} min</span>
                 </div>
-                
+
                 <div class="service-footer">
                   <span class="service-price">
                     {{ service.precio?.parsedValue !== undefined ? (service.precio.parsedValue | currency:'USD':'symbol':'1.2-2') : (service.precio | currency:'USD':'symbol':'1.2-2') }}
                   </span>
                   <span class="service-category">{{ service.categoria || 'General' }}</span>
-                  <span *ngIf="service.estado !== undefined" 
-                        class="service-status" 
+                  <span *ngIf="service.estado !== undefined"
+                        class="service-status"
                         [class.active]="service.estado"
                         [class.inactive]="!service.estado">
                     {{ service.estado ? 'Activo' : 'Inactivo' }}
