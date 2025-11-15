@@ -108,6 +108,11 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomeProveedorComponent },
+      { path: 'calendario', component: CalendarioComponent},
+       {
+      path: 'tasks',
+      loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule)
+      },
       { path: 'chat-demo', component: ProveedorChatDemoComponent },
       { path: 'agregar-servicio', component: AgregarServicioComponent },
       { path: 'editar-servicio/:id', component: EditarServicioComponent },
@@ -116,8 +121,8 @@ export const routes: Routes = [
       { path: 'rutas', component: GeneradorDeRutasProveedorComponent},
       { path: 'ruta/:id', component: RutaDetalleComponent },
       { path: 'servicio/:id', component: InfoServicioComponent },
-      { 
-        path: 'ver-perfil/:id', 
+      {
+        path: 'ver-perfil/:id',
         component: ProfilePageComponent,
         runGuardsAndResolvers: 'paramsOrQueryParamsChange'
       },
@@ -141,8 +146,8 @@ export const routes: Routes = [
       { path: 'crear-proveedor', component: CrearProveedorComponent },
       { path: 'rutas', component: CreadorDeRutasComponent },
       { path: 'ruta/:id', component: RutaDetalleComponent },
-      { 
-        path: 'ver-perfil/:id', 
+      {
+        path: 'ver-perfil/:id',
         component: ProfilePageComponent,
         runGuardsAndResolvers: 'paramsOrQueryParamsChange'
       },

@@ -301,8 +301,10 @@ export class RouteBuilderStateService {
 
   /**
    * Update a row with selected service
+   * @deprecated Services are now displayed automatically, not selected individually
    */
   updateRowService(rowId: string, serviceId: number): void {
+    console.warn('updateRowService is deprecated - services are now auto-displayed when provider is selected');
     const currentRows = this._selectedPois$.value;
     const targetRow = currentRows.find(row => row.id === rowId);
 

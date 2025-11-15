@@ -128,13 +128,19 @@ export class HeaderService {
           { label: 'Inicio', route: '/proveedor/home', icon: 'home' },
           { label: 'Dashboard', route: '/proveedor/dashboard', icon: 'dashboard' },
           { label: 'Rutas', route: '/proveedor/rutas', icon: 'map' },
-          { label: 'Tareas', route: '/tasks', icon: 'task_alt' },
-          { label: 'Calendario', route: '/calendario', icon: 'event' },
+          { label: 'Tareas', route: '/proveedor/tasks', icon: 'task_alt' },
+          { label: 'Calendario', route: '/proveedor/calendario', icon: 'event' },
           { label: 'Temas', route: '/temas', icon: 'explore' },
           { label: 'Buscador', route: '/buscador-web', icon: 'search' },
           { label: 'Observatorio', route: '/observatorio', icon: 'cloud_queue' },
         ],
         actions: [
+          {
+            id: 'contacts',
+            label: 'Contacts',
+            icon: 'contacts',
+            action: () => this.chatLayoutService.setActiveTab('contacts')
+          },
           {
             id: 'profile',
             label: 'Mi Perfil',

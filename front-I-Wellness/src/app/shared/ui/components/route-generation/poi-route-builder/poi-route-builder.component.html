@@ -1,14 +1,4 @@
 <div class="route-builder-container">
-  <!-- Header Section -->
-  <div class="builder-header">
-    <h2 class="builder-title">
-      <i class="fas fa-route"></i>
-      Build Your Route
-    </h2>
-    <p class="builder-subtitle">
-      Select providers and services to create an optimized route
-    </p>
-  </div>
 
   <!-- Error Message -->
   <div *ngIf="error" class="error-banner">
@@ -22,15 +12,15 @@
       <thead>
         <tr>
           <th class="col-order">#</th>
-          <th class="col-provider">Provider</th>
-          <th class="col-service">Service</th>
-          <th class="col-cost">Cost</th>
-          <th class="col-duration">Duration</th>
-          <th class="col-actions">Actions</th>
+          <th class="col-provider">Proveedor</th>
+          <th class="col-service">Servicio</th>
+          <th class="col-cost">Costo</th>
+          <th class="col-duration">Duración</th>
+          <th class="col-actions">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr 
+        <tr
           *ngFor="let row of rows; let i = index; trackBy: trackByRowId"
           [class.row-valid]="isRowValid(row)"
           [class.row-incomplete]="!isRowValid(row)"
@@ -42,15 +32,16 @@
 
           <!-- Provider Selection -->
           <td class="col-provider">
-            <select 
+            <select
+              title="Seleccionar proveedor"
               class="form-select"
               [value]="row.providerId || ''"
               (change)="onProviderChange(row.id, $event)"
               [disabled]="isLoading"
             >
-              <option value="">Select a provider...</option>
-              <option 
-                *ngFor="let provider of items" 
+              <option value="">Selecciona un proveedor...</option>
+              <option
+                *ngFor="let provider of items"
                 [value]="provider.provider.id"
               >
                 {{ provider.provider.nombre_empresa }}
@@ -58,25 +49,28 @@
             </select>
           </td>
 
-          <!-- Service Selection -->
+          <!-- Services Display -->
           <td class="col-service">
-            <select 
-              class="form-select"
-              [value]="row.selectedService?.idServicio || ''"
-              (change)="onServiceChange(row.id, $event)"
-              [disabled]="!row.providerId || isLoading"
-            >
-              <option value="">Select a service...</option>
-              <option 
-                *ngFor="let service of getServicesForRow(row)" 
-                [value]="service.idServicio"
-              >
-                {{ service.nombre }}
-              </option>
-            </select>
-            <small class="service-description" *ngIf="row.selectedService">
-              {{ row.selectedService.descripcion }}
-            </small>
+            <div *ngIf="!row.providerId" class="no-services-message">
+              Selecciona un proveedor primero
+            </div>
+            <div *ngIf="row.providerId && getServicesForRow(row).length === 0" class="no-services-message">
+              Sin servicios disponibles
+            </div>
+            <div *ngIf="row.providerId && getServicesForRow(row).length > 0" class="services-list">
+              <div *ngFor="let service of getServicesForRow(row); let last = last" class="service-item">
+                <strong>{{ service.nombre }}</strong>
+                <span class="service-meta">
+                  <span class="service-price">{{ service.precio | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span class="service-duration">
+                    <i class="far fa-clock"></i> {{ service.tiempoAproximado }} min
+                  </span>
+                </span>
+                <small class="service-description" *ngIf="service.descripcion">
+                  {{ service.descripcion }}
+                </small>
+              </div>
+            </div>
           </td>
 
           <!-- Cost Display -->
@@ -102,7 +96,7 @@
 
           <!-- Actions -->
           <td class="col-actions">
-            <button 
+            <button
               class="btn-remove"
               (click)="onRemoveRow(row.id)"
               [disabled]="rows.length <= 1 || isLoading"
@@ -118,39 +112,39 @@
 
   <!-- Add Row Button -->
   <div class="add-row-section">
-    <button 
+    <button
       class="btn-add-row"
       (click)="onAddRow()"
       [disabled]="isLoading"
     >
       <i class="fas fa-plus-circle"></i>
-      Add Another POI
+      Añade otro punto de interés
     </button>
   </div>
 
   <!-- Route Summary & Optimization Controls -->
   <div class="route-summary-section">
     <div class="summary-card">
-      <h3 class="summary-title">Route Summary</h3>
+      <h3 class="summary-title">Resumen de la Ruta</h3>
       <div class="summary-stats">
         <div class="stat-item">
           <i class="fas fa-map-marker-alt"></i>
           <div class="stat-content">
-            <span class="stat-label">Total POIs</span>
+            <span class="stat-label">Número de Puntos de Interés</span>
             <span class="stat-value">{{ routeAverages.totalPOIs }}</span>
           </div>
         </div>
         <div class="stat-item">
           <i class="fas fa-euro-sign"></i>
           <div class="stat-content">
-            <span class="stat-label">Avg Cost</span>
+            <span class="stat-label">Coste Medio</span>
             <span class="stat-value">{{ routeAverages.avgCost | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
         </div>
         <div class="stat-item">
           <i class="far fa-clock"></i>
           <div class="stat-content">
-            <span class="stat-label">Avg Duration</span>
+            <span class="stat-label">Duración Media</span>
             <span class="stat-value">{{ routeAverages.avgDuration | number:'1.0-0' }} min</span>
           </div>
         </div>
@@ -159,65 +153,65 @@
 
     <!-- Optimization Controls -->
     <div class="optimization-controls">
-      <h3 class="controls-title">Optimize Route For:</h3>
+      <h3 class="controls-title">Optimizar Ruta Para</h3>
       <div class="radio-group">
         <label class="radio-option">
-          <input 
-            type="radio" 
-            name="optimization" 
+          <input
+            type="radio"
+            name="optimization"
             value="distance"
             [(ngModel)]="selectedOptimizationCriteria"
             [disabled]="isLoading"
           >
           <span class="radio-label">
             <i class="fas fa-route"></i>
-            Shortest Distance
+            Distancia Más Corta
           </span>
         </label>
         <label class="radio-option">
-          <input 
-            type="radio" 
-            name="optimization" 
+          <input
+            type="radio"
+            name="optimization"
             value="cost"
             [(ngModel)]="selectedOptimizationCriteria"
             [disabled]="isLoading"
           >
           <span class="radio-label">
             <i class="fas fa-dollar-sign"></i>
-            Lowest Cost
+            Coste Más Bajo
           </span>
         </label>
         <label class="radio-option">
-          <input 
-            type="radio" 
-            name="optimization" 
+          <input
+            type="radio"
+            name="optimization"
             value="time"
             [(ngModel)]="selectedOptimizationCriteria"
             [disabled]="isLoading"
           >
           <span class="radio-label">
             <i class="fas fa-clock"></i>
-            Shortest Time
+            Tiempo Más Corto
           </span>
         </label>
       </div>
 
-      <button 
+      <button
         class="btn-optimize"
         (click)="onOptimize()"
         [disabled]="!canOptimize"
       >
         <i class="fas fa-magic"></i>
-        <span *ngIf="!isLoading">Generate Optimized Route</span>
+        <span *ngIf="!isLoading">Generar Ruta Optimizada</span>
         <span *ngIf="isLoading">
           <i class="fas fa-spinner fa-spin"></i>
-          Processing...
+          Procesando...
         </span>
       </button>
 
       <p class="optimization-hint" *ngIf="!canOptimize && !isLoading">
         <i class="fas fa-info-circle"></i>
-        Select at least 2 providers with services to optimize the route
+        Selecciona al menos 2 proveedores para optimizar la ruta
       </p>
     </div>
   </div>

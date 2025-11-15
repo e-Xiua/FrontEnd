@@ -8,14 +8,13 @@ import { FloatingChatModalComponent } from "../../../../features/chat/components
   imports: [CommonModule, FloatingChatModalComponent],
   template: `
       <app-floating-chat-modal
-        [isVisible]="isModalVisible"
-        class="chat-modal-wrapper">
+        [isVisible]="isModalVisible">
       </app-floating-chat-modal>
   `,
   styles: [`
-    .chat-modal-wrapper {
-      position: relative;
-      z-index: 1100;
+    /* No wrapper styles needed - modal uses position: fixed */
+    :host {
+      display: contents; /* Makes the host transparent in the layout */
     }
   `]
 })

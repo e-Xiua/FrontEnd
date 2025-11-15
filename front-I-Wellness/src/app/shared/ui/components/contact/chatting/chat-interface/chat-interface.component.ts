@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +29,7 @@ import { ChatMessageComponent } from '../chat-message/chat-message.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
-export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
   @ViewChild('messagesEnd', { static: false }) messagesEnd!: ElementRef;
   @ViewChild('messagesContainer', { static: false }) messagesContainer!: ElementRef;
 
@@ -99,8 +99,10 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewCheck
       this.shouldScroll = true;
       this.cdr.markForCheck();
     });
+  }
 
-    // Detectar scroll para mostrar/ocultar botón "scroll to bottom"
+  ngAfterViewInit(): void {
+    // El contenedor de mensajes ya está disponible aquí, es seguro configurar el scroll.
     this.setupScrollDetection();
   }
 
@@ -110,18 +112,15 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewCheck
   }
 
   private setupScrollDetection(): void {
-    // Esperar a que el ViewChild esté disponible
-    setTimeout(() => {
-      if (this.messagesContainer?.nativeElement) {
-        fromEvent(this.messagesContainer.nativeElement, 'scroll').pipe(
-          debounceTime(100),
-          distinctUntilChanged(),
-          takeUntil(this.destroy$)
-        ).subscribe(() => {
-          this.checkScrollPosition();
-        });
-      }
-    }, 500);
+    if (this.messagesContainer?.nativeElement) {
+      fromEvent(this.messagesContainer.nativeElement, 'scroll').pipe(
+        debounceTime(100),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      ).subscribe(() => {
+        this.checkScrollPosition();
+      });
+    }
   }
 
   private checkScrollPosition(): void {

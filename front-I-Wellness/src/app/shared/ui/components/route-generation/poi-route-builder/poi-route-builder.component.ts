@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 // Models
 import { EnrichedProviderData } from '../../../../models/provider.models';
-import { RouteRow, RouteAverages } from '../../../../models/route-builder.models';
+import { RouteAverages, RouteRow } from '../../../../models/route-builder.models';
 
 /**
  * POI Route Builder Component (Dumb/Presentational)
- * 
+ *
  * Dynamic table for building a route by selecting providers and services.
  * Purely presentational - receives data via @Input and emits events via @Output.
  */
@@ -16,20 +16,20 @@ import { RouteRow, RouteAverages } from '../../../../models/route-builder.models
   selector: 'app-poi-route-builder',
   imports: [CommonModule, FormsModule],
   templateUrl: './poi-route-builder.component.html',
-  styleUrl: './poi-route-builder.component.css', 
+  styleUrl: './poi-route-builder.component.css',
   standalone: true
 })
 export class PoiRouteBuilderComponent {
 
   // ========== INPUTS (Data from parent) ==========
-  
+
   @Input() items: EnrichedProviderData[] = [];
   @Input() rows: RouteRow[] = [];
   @Input() isLoading: boolean = false;
   @Input() error: string | null = null;
 
   // ========== OUTPUTS (Events to parent) ==========
-  
+
   @Output() addRow = new EventEmitter<void>();
   @Output() removeRow = new EventEmitter<string>(); // rowId
   @Output() providerSelected = new EventEmitter<{ rowId: string; providerId: number }>();
@@ -37,18 +37,17 @@ export class PoiRouteBuilderComponent {
   @Output() startOptimization = new EventEmitter<'distance' | 'cost' | 'time'>();
 
   // ========== LOCAL STATE ==========
-  
+
   selectedOptimizationCriteria: 'distance' | 'cost' | 'time' = 'distance';
 
   // ========== COMPUTED PROPERTIES ==========
 
   /**
    * Calculate route averages from selected rows
-   * Now considers both specific service values AND provider averages
+   * Uses provider averages (backend-calculated from all services)
    */
   get routeAverages(): RouteAverages {
-    // Include rows with either specific service OR just provider selected
-    const validRows = this.rows.filter(row => 
+    const validRows = this.rows.filter(row =>
       row.providerId && row.providerData
     );
 
@@ -64,11 +63,8 @@ export class PoiRouteBuilderComponent {
     let totalDuration = 0;
 
     validRows.forEach(row => {
-      // Use specific service if selected, otherwise use provider averages
-      if (row.selectedService) {
-        totalCost += row.selectedService.precio || 0;
-        totalDuration += row.selectedService.tiempoAproximado || 0;
-      } else if (row.providerData) {
+      // Use provider averages (all services considered)
+      if (row.providerData) {
         totalCost += row.providerData.averageCost || 0;
         totalDuration += row.providerData.averageVisitDuration || 30;
       }
@@ -83,10 +79,10 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Check if optimization can be started
-   * Now allows optimization with just providers selected (no service required)
+   * Requires at least 2 providers selected
    */
   get canOptimize(): boolean {
-    const validRows = this.rows.filter(row => 
+    const validRows = this.rows.filter(row =>
       row.providerId && row.providerData
     );
     return validRows.length >= 2 && !this.isLoading;
@@ -114,7 +110,7 @@ export class PoiRouteBuilderComponent {
   onProviderChange(rowId: string, event: Event): void {
     const select = event.target as HTMLSelectElement;
     const providerId = parseInt(select.value, 10);
-    
+
     if (!isNaN(providerId)) {
       this.providerSelected.emit({ rowId, providerId });
     }
@@ -122,14 +118,11 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Handle service selection change
+   * NO LONGER USED - Services are displayed, not selected
    */
   onServiceChange(rowId: string, event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const serviceId = parseInt(select.value, 10);
-    
-    if (!isNaN(serviceId)) {
-      this.serviceSelected.emit({ rowId, serviceId });
-    }
+    // Deprecated: Services are now displayed automatically when provider is selected
+    console.warn('onServiceChange is deprecated - services are now auto-displayed');
   }
 
   /**
@@ -152,10 +145,10 @@ export class PoiRouteBuilderComponent {
   }
 
   /**
-   * Check if a row is valid (has both provider and service selected)
+   * Check if a row is valid (has provider selected)
    */
   isRowValid(row: RouteRow): boolean {
-    return !!(row.providerId && row.selectedService);
+    return !!(row.providerId && row.providerData);
   }
 
   /**
@@ -169,14 +162,9 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Get cost to display for a row
-   * - If specific service selected: show service cost
-   * - If only provider selected: show provider average cost
-   * - Otherwise: return null
+   * Shows provider average cost (calculated from all services)
    */
   getCostForRow(row: RouteRow): number | null {
-    if (row.selectedService) {
-      return row.selectedService.precio || 0;
-    }
     if (row.providerData && row.providerId) {
       return row.providerData.averageCost || 0;
     }
@@ -185,14 +173,9 @@ export class PoiRouteBuilderComponent {
 
   /**
    * Get duration to display for a row
-   * - If specific service selected: show service duration
-   * - If only provider selected: show provider average duration
-   * - Otherwise: return null
+   * Shows provider average duration (calculated from all services)
    */
   getDurationForRow(row: RouteRow): number | null {
-    if (row.selectedService) {
-      return row.selectedService.tiempoAproximado || 0;
-    }
     if (row.providerData && row.providerId) {
       return row.providerData.averageVisitDuration || 30;
     }
@@ -200,10 +183,10 @@ export class PoiRouteBuilderComponent {
   }
 
   /**
-   * Check if cost/duration shown are from provider averages (not specific service)
-   * Used to style differently (e.g., show as estimated)
+   * Check if cost/duration shown are from provider averages
+   * Always true when provider is selected (services are displayed, not used for calculation)
    */
   isShowingAverages(row: RouteRow): boolean {
-    return !row.selectedService && !!row.providerData && !!row.providerId;
+    return !!row.providerData && !!row.providerId;
   }
 }

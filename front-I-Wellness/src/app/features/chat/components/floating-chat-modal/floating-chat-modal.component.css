@@ -93,8 +93,21 @@
 
 .mat-mdc-tab-body-content {
   height: 100%;
-  overflow-y: auto;
-  padding: 1rem;
+  overflow: hidden; /* NO scroll aquí - el scroll está en chat-interface */
+  padding: 0;
+}
+
+/* Wrapper for tab content with proper padding */
+.tab-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem; /* Padding para listas de conversaciones */
+}
+
+/* Exception: Remove padding when chat-interface is active (needs full height) */
+.tab-content:has(.chat-interface-container) {
+  padding: 0; /* chat-interface maneja su propio spacing */
 }
 
 /* Estilo para scrollbar en el contenido del tab */
@@ -178,6 +191,27 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.5rem 0;
+  flex: 1;
+  overflow-y: auto; /* Scroll SOLO para la lista de conversaciones */
+  min-height: 0; /* Fix para flexbox */
+}
+
+/* Scrollbar para la lista de conversaciones */
+.conversations-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
 }
 
 .conversation-item {

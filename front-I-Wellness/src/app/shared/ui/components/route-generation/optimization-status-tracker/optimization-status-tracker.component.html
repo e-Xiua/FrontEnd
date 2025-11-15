@@ -3,7 +3,7 @@
   <div class="tracker-header">
     <h2 class="tracker-title">
       <i class="fas fa-tasks"></i>
-      Optimization Jobs
+      Trabajos de Optimización de Rutas
     </h2>
   </div>
 
@@ -12,12 +12,12 @@
     <div class="section-header">
       <h3 class="section-title">
         <i class="fas fa-sync-alt fa-spin"></i>
-        Active Jobs ({{ activeJobs.length }})
+        Trabajos Activos ({{ activeJobs.length }})
       </h3>
     </div>
 
     <div class="jobs-list">
-      <div 
+      <div
         *ngFor="let job of activeJobs; trackBy: trackByJobId"
         class="job-card job-active"
       >
@@ -27,7 +27,7 @@
             <i [class]="'fas ' + getStatusIcon(job.status)" [class.spinner]="job.status === 'PROCESSING'"></i>
             <div class="job-info">
               <h4 class="job-name">{{ job.routeName }}</h4>
-              <span class="job-id">Job ID: {{ job.jobId }}</span>
+              <span class="job-id">ID del Trabajo de Optimización {{ job.jobId }}</span>
             </div>
           </div>
           <span [class]="'status-badge ' + getStatusClass(job.status)">
@@ -38,7 +38,7 @@
         <!-- Progress Bar -->
         <div class="progress-section">
           <div class="progress-bar-container">
-            <div 
+            <div
               class="progress-bar-fill"
               [style.width.%]="job.progress"
               [style.background-color]="getProgressColor(job.status)"
@@ -67,7 +67,7 @@
 
         <!-- Actions -->
         <div class="job-actions">
-          <button 
+          <button
             class="btn-action btn-cancel"
             (click)="onCancelJob(job.jobId)"
             title="Cancel this job"
@@ -85,20 +85,20 @@
     <div class="section-header">
       <h3 class="section-title">
         <i class="fas fa-check-double"></i>
-        Completed Jobs ({{ completedJobs.length }})
+        Trabajos Completados ({{ completedJobs.length }})
       </h3>
-      <button 
+      <button
         class="btn-clear-all"
         (click)="onClearCompleted()"
         *ngIf="completedJobs.length > 0"
       >
         <i class="fas fa-broom"></i>
-        Clear All
+        Limpiar Todo
       </button>
     </div>
 
     <div class="jobs-list">
-      <div 
+      <div
         *ngFor="let job of completedJobs; trackBy: trackByJobId"
         class="job-card job-completed"
         [class.job-success]="job.status === 'COMPLETED'"
@@ -171,22 +171,22 @@
 
         <!-- Actions -->
         <div class="job-actions">
-          <button 
+          <button
             *ngIf="job.status === 'COMPLETED'"
             class="btn-action btn-view"
             (click)="onViewResult(job)"
             title="View optimized route"
           >
             <i class="fas fa-eye"></i>
-            View Route
+            Ver Rutas
           </button>
-          <button 
+          <button
             class="btn-action btn-remove"
             (click)="onRemoveJob(job.jobId)"
             title="Remove from list"
           >
             <i class="fas fa-trash-alt"></i>
-            Remove
+            Eliminar
           </button>
         </div>
       </div>
@@ -198,9 +198,9 @@
     <div class="empty-icon">
       <i class="fas fa-inbox"></i>
     </div>
-    <h3 class="empty-title">No Optimization Jobs</h3>
+    <h3 class="empty-title">No Hay Trabajos de Optimización</h3>
     <p class="empty-description">
-      Submit a route optimization to see the progress here
+      Envía una optimización de ruta para ver el progreso aquí
     </p>
   </div>
 
@@ -209,9 +209,9 @@
     <div class="empty-icon">
       <i class="fas fa-coffee"></i>
     </div>
-    <h3 class="empty-title">All Caught Up!</h3>
+    <h3 class="empty-title">Ya terminamos</h3>
     <p class="empty-description">
-      No active optimization jobs at the moment
+      No hay trabajos de optimización activos en este momento
     </p>
   </div>
 </div>
