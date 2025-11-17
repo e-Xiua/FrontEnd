@@ -25,7 +25,7 @@ export class ReviewStateBuilder {
   /**
    * Establece el tipo de entidad
    */
-  ofType(entityType: 'proveedor' | 'servicio'): this {
+  ofType(entityType: 'PROVIDER' | 'SERVICE'): this {
     this.config.entityType = entityType;
     return this;
   }

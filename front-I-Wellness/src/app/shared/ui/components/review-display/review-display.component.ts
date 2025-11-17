@@ -22,7 +22,7 @@ export interface Review {
   styleUrl: './review-display.component.css'
 })
 export class ReviewDisplayComponent implements OnInit, OnDestroy {
-  @Input() entityType: 'proveedor' | 'servicio' = 'proveedor';
+  @Input() entityType: 'PROVIDER' | 'SERVICE' = 'PROVIDER';
   @Input() entityId!: number;
   @Input() autoLoad: boolean = true; // Si debe cargar automáticamente
 

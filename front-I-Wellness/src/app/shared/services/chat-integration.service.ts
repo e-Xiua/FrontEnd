@@ -132,8 +132,18 @@ export class ChatIntegrationService {
   }
 
   startConversationWithUser(user: any): void {
+    // Asegurar que el layout del chat está inicializado y suscrito
+    // al estado del ChatService para que activeConversations se actualice
+    // cuando se cree/recupere la conversación.
+    this.chatLayoutService.initializeChatData();
+
+    // Iniciar o seleccionar la conversación en el ChatService
     this.chatService.startOrSelectConversationWithUser(user);
+
+    // Mostrar el modal y navegar al tab de "conversaciones" para que
+    // el usuario vea el resumen (y pueda seleccionar la conversación)
+    // Si el objetivo es abrir directamente el chat activo, cambiar a 'chat'.
     this.chatLayoutService.showModal();
-    this.chatLayoutService.setActiveTab('chat');
+    this.chatLayoutService.setActiveTab('conversations');
   }
 }

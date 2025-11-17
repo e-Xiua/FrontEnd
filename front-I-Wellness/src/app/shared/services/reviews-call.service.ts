@@ -5,22 +5,17 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { Review } from '../ui/components/review-display/review-display.component';
 import { ReviewSubmission } from '../ui/components/review-form/review-form.component';
 
-// DTOs que coinciden con el backend
 export interface ReviewRequestDTO {
-  serviceId: number;
-  rating: number;
-  comment: string;
-}
-
-export interface ProviderReviewRequestDTO {
-  providerId: number;
+  entityId: number;
+  entityType: 'SERVICE' | 'PROVIDER';
   rating: number;
   comment: string;
 }
 
 export interface ReviewResponseDTO {
   id: number;
-  serviceId: number;
+  entityId: number;
+  entityType: string;
   userId: number;
   nombre: string;
   foto: string;
@@ -30,17 +25,9 @@ export interface ReviewResponseDTO {
   updatedAt: string;
 }
 
-export interface ServiceRatingDTO {
-  serviceId: number;
-  averageRating: number;
-  totalReviews: number;
-  ratingDistribution: {
-    [key: number]: number;
-  };
-}
-
-export interface ProviderRatingDTO {
-  providerId: number;
+export interface RatingDTO {
+  entityId: number;
+  entityType: string;
   averageRating: number;
   totalReviews: number;
   distribution: {
@@ -68,339 +55,107 @@ export class ReviewsCallService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  /**
-   * Obtiene el ID del usuario actual del localStorage
-   */
-
   private getCurrentUserId(): number {
     const userId = this.authService.getCurrentUserIdSynchronous();
-
-    console.log('User ID obtenido para ConversationApiService:', userId);
-
     if (userId == null) {
-      throw new Error('User ID no disponible para la petición de API');
+      throw new Error('User ID no disponible');
     }
-
     return userId;
   }
+
   private createHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     const userId = this.authService.getCurrentUserIdSynchronous();
-
-    console.log('User ID obtenido para ConversationApiService:', userId);
     if (!token || userId == null) {
-      throw new Error('Token o User ID no disponibles para la petición de API');
+      throw new Error('Token o User ID no disponibles');
     }
-
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
+      'Authorization': `Bearer ${token}`,
       'X-User-Id': String(userId)
     });
   }
 
-  /**
-   * Crea una nueva reseña para un servicio
-   */
-  createReviewForService(submission: ReviewSubmission): Observable<ReviewResponseDTO> {
-    if (submission.entityType !== 'servicio') {
-      return throwError(() => new Error('Este método solo acepta reseñas de servicios'));
+  submitReview(submission: ReviewSubmission, reviewId?: number): Observable<ReviewResponseDTO> {
+    const entityTypeUpper = this.toEnglishEntityType(submission.entityType);
+    const request: ReviewRequestDTO = {
+      entityId: submission.entityId,
+      entityType: entityTypeUpper,
+      rating: submission.rating,
+      comment: submission.comment
+    };
+    const headers = this.createHeaders();
+    if (reviewId) {
+      return this.http.put<ReviewResponseDTO>(`${this.API_URL}/${reviewId}`, request, { headers }).pipe(
+        catchError(error => {
+          console.error('Error al actualizar reseña:', error);
+          return throwError(() => new Error('Error al actualizar la reseña'));
+        })
+      );
+    } else {
+      return this.http.post<ReviewResponseDTO>(this.API_URL, request, { headers }).pipe(
+        catchError(error => {
+          console.error('Error al crear reseña:', error);
+          return throwError(() => new Error('Error al crear la reseña'));
+        })
+      );
     }
-
-    const request: ReviewRequestDTO = {
-      serviceId: submission.entityId,
-      rating: submission.rating,
-      comment: submission.comment
-    };
-
-    return this.http.post<ReviewResponseDTO>(
-      this.API_URL,
-      request,
-      { headers: this.createHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error al crear reseña:', error);
-        if (error.status === 409) {
-          return throwError(() => new Error('Ya has publicado una reseña para este servicio'));
-        }
-        return throwError(() => new Error('Error al crear la reseña. Intenta de nuevo.'));
-      })
-    );
   }
 
-  /**
-   * Actualiza una reseña existente
-   */
-  updateReview(reviewId: number, submission: ReviewSubmission): Observable<ReviewResponseDTO> {
-    const request: ReviewRequestDTO = {
-      serviceId: submission.entityId,
-      rating: submission.rating,
-      comment: submission.comment
-    };
-
-    return this.http.put<ReviewResponseDTO>(
-      `${this.API_URL}/${reviewId}`,
-      request,
-      { headers: this.createHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error al actualizar reseña:', error);
-        if (error.status === 403) {
-          return throwError(() => new Error('No tienes permiso para editar esta reseña'));
-        }
-        return throwError(() => new Error('Error al actualizar la reseña. Intenta de nuevo.'));
-      })
-    );
-  }
-
-  /**
-   * Elimina una reseña
-   */
   deleteReview(reviewId: number): Observable<void> {
-    return this.http.delete<void>(
-      `${this.API_URL}/${reviewId}`,
-      { headers: this.createHeaders() }
-    ).pipe(
+    return this.http.delete<void>(`${this.API_URL}/${reviewId}`, { headers: this.createHeaders() }).pipe(
       catchError(error => {
         console.error('Error al eliminar reseña:', error);
-        if (error.status === 403) {
-          return throwError(() => new Error('No tienes permiso para eliminar esta reseña'));
-        }
-        return throwError(() => new Error('Error al eliminar la reseña. Intenta de nuevo.'));
+        return throwError(() => new Error('Error al eliminar la reseña'));
       })
     );
   }
 
-  /**
-   * Obtiene una reseña por ID
-   */
-  getReviewById(reviewId: number): Observable<Review> {
-    return this.http.get<ReviewResponseDTO>(`${this.API_URL}/${reviewId}`, { headers: this.createHeaders() })
-      .pipe(
-        map(dto => this.mapToReview(dto)),
-        catchError(error => {
-          console.error('Error al obtener reseña:', error);
-          return throwError(() => new Error('Error al cargar la reseña'));
-        })
-      );
+  getAllReviewsForEntity(entityType: 'servicio' | 'proveedor', entityId: number): Observable<Review[]> {
+    const entityTypeUpper = this.toEnglishEntityType(entityType);
+    const params = new HttpParams().set('page', '0').set('size', '100').set('sortBy', 'createdAt');
+    return this.http.get<PagedReviewResponse>(`${this.API_URL}/entity/${entityTypeUpper}/${entityId}`, { params, headers: this.createHeaders() }).pipe(
+      map(pagedResponse => pagedResponse.content.map(dto => this.mapToReview(dto))),
+      catchError(() => throwError(() => new Error('Error al cargar reseñas')))
+    );
   }
 
-  /**
-   * Obtiene todas las reseñas de un servicio con paginación
-   */
-  getReviewsByService(
-    serviceId: number,
-    page: number = 0,
-    size: number = 10,
-    sortBy: string = 'createdAt'
-  ): Observable<PagedReviewResponse> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('sortBy', sortBy);
-
-    return this.http.get<PagedReviewResponse>(
-      `${this.API_URL}/service/${serviceId}`,
-      { params , headers: this.createHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error al obtener reseñas del servicio:', error);
-        return throwError(() => new Error('Error al cargar las reseñas'));
-      })
+  getEntityRating(entityType: 'servicio' | 'proveedor', entityId: number): Observable<RatingDTO> {
+    const entityTypeUpper = this.toEnglishEntityType(entityType);
+    return this.http.get<RatingDTO>(`${this.API_URL}/entity/${entityTypeUpper}/${entityId}/rating`, { headers: this.createHeaders() }).pipe(
+      catchError(() => throwError(() => new Error('Error al cargar rating')))
     );
   }
 
   /**
-   * Obtiene todas las reseñas de un servicio (sin paginación) para mostrar en componentes
+   * Normaliza distintos valores posibles de entityType a los esperados por el backend
+   * Acepta valores en español ('servicio'|'proveedor') o en inglés ('SERVICE'|'PROVIDER') y devuelve
+   * la cadena con el nombre de enum que espera el backend: 'SERVICE' o 'PROVIDER'.
    */
-  getAllReviewsForService(serviceId: number): Observable<Review[]> {
-    // Obtenemos todas las reseñas con un tamaño grande
-    return this.getReviewsByService(serviceId, 0, 100)
-      .pipe(
-        map(pagedResponse => pagedResponse.content.map(dto => this.mapToReview(dto)))
-      );
-  }
-
-  /**
-   * Obtiene todas las reseñas de un proveedor (sin paginación)
-   */
-  getAllReviewsForProvider(providerId: number): Observable<Review[]> {
-    return this.getReviewsByProvider(providerId, 0, 100)
-      .pipe(
-        map(pagedResponse => pagedResponse.content.map(dto => this.mapToReview(dto)))
-      );
-  }
-
-  /**
-   * Obtiene todas las reseñas de un proveedor con paginación
-   */
-  getReviewsByProvider(
-    providerId: number,
-    page: number = 0,
-    size: number = 10,
-    sortBy: string = 'createdAt'
-  ): Observable<PagedReviewResponse> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('sortBy', sortBy);
-
-    return this.http.get<PagedReviewResponse>(
-      `${this.API_URL}/provider/${providerId}`,
-      { params , headers: this.createHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error al obtener reseñas del proveedor:', error);
-        return throwError(() => new Error('Error al cargar las reseñas del proveedor'));
-      })
-    );
-  }
-
-  /**
-   * Obtiene el rating promedio de un proveedor
-   */
-  getProviderRating(providerId: number): Observable<ProviderRatingDTO> {
-    return this.http.get<ProviderRatingDTO>(`${this.API_URL}/provider/${providerId}/rating`, { headers: this.createHeaders() })
-      .pipe(
-        catchError(error => {
-          console.error('Error al obtener rating del proveedor:', error);
-          return throwError(() => new Error('Error al cargar el rating del proveedor'));
-        })
-      );
-  }
-
-    /**
-   * Crea una reseña para un proveedor
-   */
-  createReviewForProvider(submission: ReviewSubmission): Observable<ReviewResponseDTO> {
-    if (submission.entityType !== 'proveedor') {
-      return throwError(() => new Error('Este método solo acepta reseñas de proveedores'));
+  private toEnglishEntityType(entityType: string): 'SERVICE' | 'PROVIDER' {
+    if (!entityType) {
+      throw new Error('Tipo de entidad inválido');
     }
+    const t = entityType.trim().toLowerCase();
+    if (t === 'servicio' || t === 'servicios' || t === 'service' || t === 'servicio') {
+      return 'SERVICE';
+    }
+    if (t === 'proveedor' || t === 'provider' || t === 'proveedores') {
+      return 'PROVIDER';
+    }
+    // Si viene ya en mayúsculas en inglés, intentar mapear directamente
+    if (entityType === 'SERVICE' || entityType === 'PROVIDER') {
+      return entityType as 'SERVICE' | 'PROVIDER';
+    }
+    // fallback: intentar comparar por english names
+    const up = entityType.toUpperCase();
+    if (up === 'SERVICE') return 'SERVICE';
+    if (up === 'PROVIDER') return 'PROVIDER';
 
-    const request: ProviderReviewRequestDTO = {
-      providerId: submission.entityId,
-      rating: submission.rating,
-      comment: submission.comment
-    };
-
-    return this.http.post<ReviewResponseDTO>(
-      `${this.API_URL}/provider`,
-      request,
-      { headers: this.createHeaders() }
-    ).pipe(
-      catchError(error => {
-        console.error('Error al crear reseña de proveedor:', error);
-        if (error.status === 409) {
-          return throwError(() => new Error('Ya has escrito una reseña para este proveedor'));
-        }
-        return throwError(() => new Error('Error al crear la reseña del proveedor. Intenta de nuevo.'));
-      })
-    );
+    throw new Error(`Tipo de entidad no reconocido: ${entityType}`);
   }
 
-  /**
-   * Actualiza una reseña de servicio
-   * Wrapper específico para servicios
-   */
-  updateReviewForService(reviewId: number, submission: ReviewSubmission): Observable<ReviewResponseDTO> {
-    return this.updateReview(reviewId, submission);
-  }
-
-  /**
-   * Actualiza una reseña de proveedor
-   */
-  updateReviewForProvider(reviewId: number, submission: ReviewSubmission): Observable<ReviewResponseDTO> {
-    // El backend usa el mismo endpoint para actualizar reseñas de servicios y proveedores
-    return this.updateReview(reviewId, submission);
-  }
-
-  /**
-   * Elimina una reseña de servicio
-   */
-  deleteReviewForService(reviewId: number): Observable<void> {
-    return this.deleteReview(reviewId);
-  }
-
-  /**
-   * Elimina una reseña de proveedor
-   */
-  deleteReviewForProvider(reviewId: number): Observable<void> {
-    // El backend usa el mismo endpoint para eliminar reseñas de servicios y proveedores
-    return this.deleteReview(reviewId);
-  }
-
-  /**
-   * Obtiene las reseñas más recientes de un proveedor
-   */
-  getRecentProviderReviews(providerId: number, limit: number = 5): Observable<Review[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-
-    return this.http.get<ReviewResponseDTO[]>(
-      `${this.API_URL}/provider/${providerId}/recent`,
-      { params, headers: this.createHeaders() }
-    ).pipe(
-      map(dtos => dtos.map(dto => this.mapToReview(dto))),
-      catchError(error => {
-        console.error('Error al obtener reseñas recientes del proveedor:', error);
-        return throwError(() => new Error('Error al cargar las reseñas recientes'));
-      })
-    );
-  }
-
-  /**
-   * Obtiene todas las reseñas de un usuario
-   */
-  getReviewsByUser(userId: number, page: number = 0, size: number = 10): Observable<PagedReviewResponse> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
-
-    return this.http.get<PagedReviewResponse>(
-      `${this.API_URL}/user/${userId}`,
-      { params, headers: this.createHeaders()}
-    ).pipe(
-      catchError(error => {
-        console.error('Error al obtener reseñas del usuario:', error);
-        return throwError(() => new Error('Error al cargar las reseñas del usuario'));
-      })
-    );
-  }
-
-  /**
-   * Obtiene las estadísticas de calificación de un servicio
-   */
-  getServiceRating(serviceId: number): Observable<ServiceRatingDTO> {
-    return this.http.get<ServiceRatingDTO>(`${this.API_URL}/service/${serviceId}/rating`,  { headers: this.createHeaders() })
-      .pipe(
-        catchError(error => {
-          console.error('Error al obtener calificación del servicio:', error);
-          return throwError(() => new Error('Error al cargar la calificación'));
-        })
-      );
-  }
-
-  /**
-   * Obtiene las reseñas más recientes de un servicio
-   */
-  getRecentReviews(serviceId: number, limit: number = 5): Observable<Review[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-
-    return this.http.get<ReviewResponseDTO[]>(
-      `${this.API_URL}/service/${serviceId}/recent`,
-      { params, headers: this.createHeaders() }
-    ).pipe(
-      map(dtos => dtos.map(dto => this.mapToReview(dto))),
-      catchError(error => {
-        console.error('Error al obtener reseñas recientes:', error);
-        return throwError(() => new Error('Error al cargar las reseñas recientes'));
-      })
-    );
-  }
-
-  /**
-   * Mapea ReviewResponseDTO a Review (formato del componente)
-   */
   private mapToReview(dto: ReviewResponseDTO): Review {
     return {
       id: dto.id,
@@ -413,29 +168,31 @@ export class ReviewsCallService {
     };
   }
 
-  /**
-   * Verifica si el usuario actual puede editar una reseña
-   */
   canEditReview(review: Review): boolean {
-    const currentUserId = this.getCurrentUserId();
-    return review.authorId === currentUserId;
+    return review.authorId === this.getCurrentUserId();
   }
 
-  /**
-   * Verifica si el usuario ya tiene una reseña para un servicio
-   * (Se puede hacer en el backend, pero aquí está la lógica del frontend)
-   */
-  userHasReviewForService(serviceId: number): Observable<boolean> {
-    const currentUserId = this.getCurrentUserId();
-    return this.getReviewsByUser(currentUserId, 0, 100)
-      .pipe(
-        map(pagedResponse =>
-          pagedResponse.content.some(review => review.serviceId === serviceId)
-        ),
-        catchError(() => {
-          // En caso de error, asumimos que no tiene reseña
-          return throwError(() => false);
-        })
-      );
+  createReviewForService(submission: ReviewSubmission): Observable<ReviewResponseDTO> {
+    return this.submitReview(submission);
+  }
+
+  createReviewForProvider(submission: ReviewSubmission): Observable<ReviewResponseDTO> {
+    return this.submitReview(submission);
+  }
+
+  getAllReviewsForService(serviceId: number): Observable<Review[]> {
+    return this.getAllReviewsForEntity('servicio', serviceId);
+  }
+
+  getAllReviewsForProvider(providerId: number): Observable<Review[]> {
+    return this.getAllReviewsForEntity('proveedor', providerId);
+  }
+
+  getServiceRating(serviceId: number): Observable<RatingDTO> {
+    return this.getEntityRating('servicio', serviceId);
+  }
+
+  getProviderRating(providerId: number): Observable<RatingDTO> {
+    return this.getEntityRating('proveedor', providerId);
   }
 }

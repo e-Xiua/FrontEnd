@@ -34,7 +34,7 @@ export interface ReviewState {
  */
 export interface ReviewStateConfig {
   entityId: number;
-  entityType: 'proveedor' | 'servicio';
+  entityType: 'PROVIDER' | 'SERVICE';
   userId?: number;
   userRole?: string;
   reviewService: any; // El servicio específico de reviews (ReviewsCallService)
@@ -60,7 +60,7 @@ export class ReviewStateService {
   /**
    * Genera una clave única para identificar el estado de una entidad
    */
-  private getStateKey(entityType: 'proveedor' | 'servicio', entityId: number): string {
+  private getStateKey(entityType: 'PROVIDER' | 'SERVICE', entityId: number): string {
     return `${entityType}-${entityId}`;
   }
 
@@ -136,7 +136,7 @@ export class ReviewStateService {
   /**
    * Obtiene el estado observable de una entidad
    */
-  getState(entityType: 'proveedor' | 'servicio', entityId: number): Observable<ReviewState> {
+  getState(entityType: 'PROVIDER' | 'SERVICE', entityId: number): Observable<ReviewState> {
     const key = this.getStateKey(entityType, entityId);
     return this.getOrCreateState(key).asObservable();
   }
@@ -144,7 +144,7 @@ export class ReviewStateService {
   /**
    * Obtiene el valor actual del estado (síncrono)
    */
-  getCurrentState(entityType: 'proveedor' | 'servicio', entityId: number): ReviewState {
+  getCurrentState(entityType: 'PROVIDER' | 'SERVICE', entityId: number): ReviewState {
     const key = this.getStateKey(entityType, entityId);
     return this.getOrCreateState(key).value;
   }
@@ -159,16 +159,15 @@ export class ReviewStateService {
 
     // Determinar si es creación o edición
     const isEdit = currentState.permissions.existingReviewId !== undefined;
+    const reviewId = isEdit ? currentState.permissions.existingReviewId : undefined;
 
-    const operation$ = isEdit
-      ? this.updateReview(config, currentState.permissions.existingReviewId!, reviewData)
-      : this.createReview(config, reviewData);
-
-    return operation$.pipe(
+    // Usar el método unificado submitReview
+    return config.reviewService.submitReview(reviewData, reviewId).pipe(
       tap(() => {
         // Recargar el estado completo después de enviar
         this.initializeState(config).subscribe();
-      })
+      }),
+      map((): void => void 0) // Convertir Observable<ReviewResponseDTO> a Observable<void>
     );
   }
 
@@ -176,11 +175,8 @@ export class ReviewStateService {
    * Elimina una reseña
    */
   deleteReview(config: ReviewStateConfig, reviewId: number): Observable<void> {
-    const deleteOp$ = config.entityType === 'servicio'
-      ? config.reviewService.deleteReviewForService(reviewId)
-      : config.reviewService.deleteReviewForProvider(reviewId);
-
-    return deleteOp$.pipe(
+    // Usar el método unificado deleteReview
+    return config.reviewService.deleteReview(reviewId).pipe(
       tap(() => {
         // Recargar el estado después de eliminar
         this.initializeState(config).subscribe();
@@ -191,7 +187,7 @@ export class ReviewStateService {
   /**
    * Limpia el estado de una entidad específica
    */
-  clearState(entityType: 'proveedor' | 'servicio', entityId: number): void {
+  clearState(entityType: 'PROVIDER' | 'SERVICE', entityId: number): void {
     const key = this.getStateKey(entityType, entityId);
     if (this.statesMap.has(key)) {
       this.statesMap.get(key)!.next(this.getInitialState());
@@ -211,11 +207,7 @@ export class ReviewStateService {
    * Carga las reseñas de una entidad
    */
   private loadReviews(config: ReviewStateConfig): Observable<Review[]> {
-    const reviews$ = config.entityType === 'servicio'
-      ? config.reviewService.getAllReviewsForService(config.entityId)
-      : config.reviewService.getAllReviewsForProvider(config.entityId);
-
-    return reviews$.pipe(
+    return config.reviewService.getAllReviewsForEntity(config.entityType, config.entityId).pipe(
       catchError(() => of([]))
     );
   }
@@ -224,11 +216,7 @@ export class ReviewStateService {
    * Carga el rating de una entidad
    */
   private loadRating(config: ReviewStateConfig): Observable<number> {
-    const rating$ = config.entityType === 'servicio'
-      ? config.reviewService.getServiceRating(config.entityId)
-      : config.reviewService.getProviderRating(config.entityId);
-
-    return rating$.pipe(
+    return config.reviewService.getEntityRating(config.entityType, config.entityId).pipe(
       map((response: any) => response.averageRating || 0),
       catchError(() => of(0))
     );
@@ -261,7 +249,7 @@ export class ReviewStateService {
     }
 
     // Para turistas en servicios, verificar reserva
-    if (config.entityType === 'servicio' && (config.userRole === 'TURISTA' || config.userRole === 'Turista')) {
+    if (config.entityType === 'SERVICE' && (config.userRole === 'TURISTA' || config.userRole === 'Turista')) {
       return this.checkReservation(config.entityId, config.userId).pipe(
         map(hasReservation => {
           if (!hasReservation) {
@@ -324,11 +312,7 @@ export class ReviewStateService {
       return of(undefined);
     }
 
-    const reviews$ = config.entityType === 'servicio'
-      ? config.reviewService.getAllReviewsForService(config.entityId)
-      : config.reviewService.getAllReviewsForProvider(config.entityId);
-
-    return reviews$.pipe(
+    return config.reviewService.getAllReviewsForEntity(config.entityType, config.entityId).pipe(
       map((reviews: Review[]) => {
         const userReview = reviews.find(r => r.authorId === config.userId);
         return userReview?.id;
@@ -352,23 +336,5 @@ export class ReviewStateService {
       }),
       catchError(() => of(false))
     );
-  }
-
-  /**
-   * Crea una nueva reseña
-   */
-  private createReview(config: ReviewStateConfig, reviewData: ReviewSubmission): Observable<any> {
-    return config.entityType === 'servicio'
-      ? config.reviewService.createReviewForService(reviewData)
-      : config.reviewService.createReviewForProvider(reviewData);
-  }
-
-  /**
-   * Actualiza una reseña existente
-   */
-  private updateReview(config: ReviewStateConfig, reviewId: number, reviewData: ReviewSubmission): Observable<any> {
-    return config.entityType === 'servicio'
-      ? config.reviewService.updateReviewForService(reviewId, reviewData)
-      : config.reviewService.updateReviewForProvider(reviewId, reviewData);
   }
 }

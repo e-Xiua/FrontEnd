@@ -9,7 +9,7 @@ import { ReviewsCallService } from '../../../services/reviews-call.service';
 
 export interface ReviewSubmission {
   entityId: number;
-  entityType: 'proveedor' | 'servicio';
+  entityType: 'PROVIDER' | 'SERVICE';
   rating: number;
   comment: string;
 }
@@ -22,7 +22,7 @@ export interface ReviewSubmission {
   styleUrl: './review-form.component.css'
 })
 export class ReviewFormComponent implements OnInit, OnDestroy {
-  @Input() entityType: 'proveedor' | 'servicio' = 'proveedor';
+  @Input() entityType: 'PROVIDER' | 'SERVICE' = 'PROVIDER';
   @Input() entityId!: number;
   @Input() autoCheck: boolean = true; // Si debe verificar permisos automáticamente
   @Output() reviewSubmitted = new EventEmitter<ReviewSubmission>();

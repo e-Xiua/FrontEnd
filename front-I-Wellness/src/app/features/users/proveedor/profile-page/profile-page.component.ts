@@ -9,7 +9,7 @@ import { usuarios } from '../../../../shared/models/usuarios';
 import { ChatIntegrationService } from '../../../../shared/services/chat-integration.service';
 import { ChatLayoutService } from '../../../../shared/services/chat-layout.service';
 import { ProfileStateService } from '../../../../shared/services/profile-state.service';
-import { ProviderRatingDTO, ReviewsCallService } from '../../../../shared/services/reviews-call.service';
+import { RatingDTO, ReviewsCallService } from '../../../../shared/services/reviews-call.service';
 import { MakeNetworkingContactComponent } from '../../../../shared/ui/components/make-networking-contact/make-networking-contact.component';
 import { ProviderServiceListContainerComponent } from '../../../../shared/ui/components/provider-service-list/provider-service-list.container';
 import { ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
@@ -52,7 +52,7 @@ export class ProfilePageComponent implements OnInit, OnChanges, OnDestroy {
 
 
   // Rating data
-  providerRating: ProviderRatingDTO | null = null;
+  providerRating: RatingDTO | null = null;
   address: string = '';
 
   private readonly destroy$ = new Subject<void>();
