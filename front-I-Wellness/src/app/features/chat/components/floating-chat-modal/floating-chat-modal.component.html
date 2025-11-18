@@ -42,7 +42,7 @@
           <span>Conversaciones</span>
         </ng-template>
 
-        <div class="tab-content">
+        <div class="tab-content" [class.chat-active]="activeTab === 'chat'">
           <!-- Loading State -->
           <div *ngIf="(layoutState$ | async)?.isLoading" class="loading-state">
             <mat-spinner diameter="40"></mat-spinner>

@@ -80,6 +80,11 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewInit,
   }
 
   ngOnInit(): void {
+
+    setTimeout(() => {
+    this.setupScrollDetection();
+  }, 100);
+
     // Configurar animaciones
     this.setupAnimations();
 
@@ -97,7 +102,14 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewInit,
     ).subscribe(conversation => {
       console.log('[ChatInterface] conversation changed:', conversation);
       this.shouldScroll = true;
-      this.cdr.markForCheck();
+
+      // Wait for messages to render
+          setTimeout(() => {
+            this.scrollToBottom();
+            this.shouldScroll = false;
+          }, 150); // Increased delay for safety
+
+          this.cdr.markForCheck();
     });
   }
 
@@ -112,29 +124,36 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy, AfterViewInit,
   }
 
   private setupScrollDetection(): void {
-    if (this.messagesContainer?.nativeElement) {
-      fromEvent(this.messagesContainer.nativeElement, 'scroll').pipe(
-        debounceTime(100),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      ).subscribe(() => {
-        this.checkScrollPosition();
-      });
-    }
+  if (!this.messagesContainer?.nativeElement) {
+    console.warn('messagesContainer not found - scroll disabled');
+    return;
   }
 
-  private checkScrollPosition(): void {
-    if (!this.messagesContainer?.nativeElement) return;
+  fromEvent(this.messagesContainer.nativeElement, 'scroll').pipe(
+    debounceTime(100),
+    distinctUntilChanged(),
+    takeUntil(this.destroy$)
+  ).subscribe(() => {
+    this.checkScrollPosition();
+  });
 
-    const element = this.messagesContainer.nativeElement;
-    const scrollTop = element.scrollTop;
-    const scrollHeight = element.scrollHeight;
-    const clientHeight = element.clientHeight;
+  // Initial check
+  this.checkScrollPosition();
+}
 
-    // Mostrar botón si no estamos cerca del final (100px de margen)
-    this.showScrollButton = (scrollHeight - scrollTop - clientHeight) > 100;
-    this.cdr.markForCheck();
-  }
+
+private checkScrollPosition(): void {
+  if (!this.messagesContainer?.nativeElement) return;
+
+  const element = this.messagesContainer.nativeElement;
+  const { scrollTop, scrollHeight, clientHeight } = element;
+
+  // Show button when NOT near bottom (100px threshold)
+  this.showScrollButton = (scrollHeight - scrollTop - clientHeight) > 100;
+
+  // Force immediate UI update
+  this.cdr.detectChanges(); // Use detectChanges() not markForCheck()
+}
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {

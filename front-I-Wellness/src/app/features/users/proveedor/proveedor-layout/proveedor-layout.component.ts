@@ -27,7 +27,7 @@ import { ProveedorChatDemoComponent } from "../proveedor-chat-demo/proveedor-cha
 
       <!-- Contenedor para chat layout y contenido principal debajo del header -->
       <div class="layout-body" [ngStyle]="bodyStyles">
-        <app-proveedor-chat-demo [isModalVisible]="modalVisible"></app-proveedor-chat-demo>
+        <app-proveedor-chat-demo  [isModalVisible]="modalVisible"></app-proveedor-chat-demo>
         <!-- Chat layout con estilos adaptativos -->
         <app-chat-layout
           [enableSidebar]="true"
@@ -43,7 +43,7 @@ import { ProveedorChatDemoComponent } from "../proveedor-chat-demo/proveedor-cha
           [adaptForSidebar]="true"
           [adaptForHeader]="false"
           [adaptForModal]="true"
-          class="layout-content">
+          class="layout-content debug-height">
           <main class="main-content">
             <router-outlet></router-outlet>
           </main>

@@ -12,6 +12,7 @@
     <div class="chat-header">
       <div class="provider-info">
         <img
+          title="profile"
           [src]="selectedProvider.foto"
           [alt]="selectedProvider.contactName"
           class="provider-avatar">
@@ -54,14 +55,14 @@
       *ngIf="showScrollButton"
       mat-fab
       color="primary"
-      class="scroll-to-bottom"
+      class="scroll-to-bottom "
       (click)="onScrollToBottom()"
       aria-label="Ir al final">
       <mat-icon>arrow_downward</mat-icon>
     </button>
 
     <!-- Área de Input -->
-    <div class="chat-input-area">
+    <div class="chat-input">
       <app-chat-input
         [disabled]="isLoading"
         (sendMessage)="onSendMessage($event)">

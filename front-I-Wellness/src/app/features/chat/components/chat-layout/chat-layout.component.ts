@@ -86,41 +86,6 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     console.log('ChatLayout: Manejo de cambio de estado', state);
   }
 
-
-
-/*
-  private async loadProviders(): Promise<void> {
-    console.log('ChatLayout: Iniciando carga de proveedores');
-    try {
-      this.chatLayoutService.setLoading(true);
-      this.chatLayoutService.setError(null); // Limpiar errores previos
-
-      // Obtener proveedores del servicio
-      const usuarios = await this.usuarioService.obtenerProveedores().toPromise();
-      console.log('ChatLayout: Proveedores obtenidos', usuarios?.length || 0);
-
-      if (usuarios && usuarios.length > 0) {
-        // Mapear usuarios a ChatProvider
-        const providers: ChatProvider[] = usuarios.map((usuario: any) =>
-          this.providerMapperService.mapUsuarioToChatProvider(usuario)
-        );
-
-        console.log('ChatLayout: Proveedores mapeados', providers.length);
-        // Actualizar el estado del layout con los providers
-        this.chatLayoutService.setProviders(providers);
-      } else {
-        console.warn('ChatLayout: No se encontraron proveedores');
-        this.chatLayoutService.setError('No se encontraron proveedores disponibles.');
-      }
-    } catch (error) {
-      console.error('ChatLayout: Error loading providers:', error);
-      this.chatLayoutService.setError('Error al cargar proveedores. Intenta nuevamente.');
-    } finally {
-      this.chatLayoutService.setLoading(false);
-      console.log('ChatLayout: Carga de proveedores finalizada');
-    }
-  }
-*/
   // Métodos públicos para control desde componentes padre
   public toggleSidebar(): void {
     this.chatLayoutService.toggleSidebar();

@@ -13,6 +13,7 @@ import { FloatingChatModalComponent } from "../../../../features/chat/components
   `,
   styles: [`
     /* No wrapper styles needed - modal uses position: fixed */
+
     :host {
       display: contents; /* Makes the host transparent in the layout */
     }
