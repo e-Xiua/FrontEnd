@@ -1,22 +1,121 @@
 
-<div class="form-container">
-  <h2>Formulario de Gustos</h2>
-  <p>Por favor completa los campos solicitados para mejorar tu experiencia en I-Wellness, recuerda que después los puedes modificar en tu perfil</p>
-  
-  <div class="gustos-container">
-  <p>Escoge las actividades y/o eventos que más te gusten</p>
-  <p class="subtext">Escoge entre <strong>3 y 5</strong> opciones</p>
-  
-  <div class="grid-container">
-      <div class="card" 
-           *ngFor="let item of preferencias" 
-           (click)="seleccionarGusto(item)"
-           [class.selected]="seleccionados.includes(item)">
-        <img [src]="item.imagen" [alt]="item.nombre" />
-        <span>{{ item.nombre }}</span>
+<div class="preferencias-container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <i class="fas fa-heart hero-icon"></i>
+      <h1>Personaliza tu Experiencia</h1>
+      <p class="hero-subtitle">
+        Selecciona tus actividades favoritas para recibir recomendaciones personalizadas
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content-wrapper">
+    <div class="form-card">
+      <!-- Introduction Section -->
+      <div class="intro-section">
+        <div class="intro-header">
+          <i class="fas fa-info-circle"></i>
+          <h2>¿Qué te interesa?</h2>
+        </div>
+        <p class="intro-text">
+          Elige las actividades y eventos que más disfrutes. Esto nos ayudará a ofrecerte 
+          las mejores recomendaciones adaptadas a tus gustos.
+        </p>
+        
+        <!-- Indicador de preferencias actuales -->
+        <div class="status-badge" *ngIf="preferenciasOriginales.length > 0 && !isLoading">
+          <i class="fas fa-star"></i>
+          <span>Actualmente tienes {{ preferenciasOriginales.length }} preferencias guardadas</span>
+        </div>
+
+        <div class="selection-counter">
+          <span class="counter-label">Seleccionados:</span>
+          <span class="counter-value" [class.valid]="seleccionados.length >= 3 && seleccionados.length <= 5">
+            {{ seleccionados.length }} / 5
+          </span>
+        </div>
+        <p class="requirement-text">
+          <i class="fas fa-check-circle"></i>
+          Selecciona entre <strong>3 y 5</strong> opciones
+        </p>
+        
+        <!-- Leyenda -->
+        <div class="legend" *ngIf="preferenciasOriginales.length > 0 && !isLoading">
+          <div class="legend-item">
+            <span class="legend-badge original-active"></span>
+            <span>Preferencias actuales (activas)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge original-removed"></span>
+            <span>Antes seleccionada (removida)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-badge new"></span>
+            <span>Nueva selección</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences Grid -->
+      <div class="preferences-section">
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Cargando tus preferencias...</p>
+        </div>
+
+        <!-- Grid de preferencias -->
+        <div class="preferences-grid" *ngIf="!isLoading">
+          <div class="preference-card" 
+               *ngFor="let item of preferencias; let i = index" 
+               (click)="seleccionarGusto(item)"
+               [class.selected]="estaSeleccionado(item)"
+               [class.was-original]="esPreferenciaOriginal(item) && !estaSeleccionado(item)"
+               [class.original-selected]="esPreferenciaOriginal(item) && estaSeleccionado(item)"
+               [class.new-selection]="esNuevaSeleccion(item)"
+               [style.animation-delay.ms]="i * 50">
+            <div class="card-image-wrapper">
+              <img [src]="item.imagen" [alt]="item.nombre" class="card-image" />
+              <div class="card-overlay"></div>
+              
+              <!-- Badge para preferencias originales seleccionadas -->
+              <div class="original-badge" *ngIf="esPreferenciaOriginal(item) && estaSeleccionado(item)">
+                <i class="fas fa-star"></i>
+              </div>
+              
+              <!-- Badge para selección actual -->
+              <div class="selection-badge" *ngIf="estaSeleccionado(item)">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              
+              <!-- Indicador sutil para preferencias que estaban antes pero ya no -->
+              <div class="was-selected-indicator" *ngIf="esPreferenciaOriginal(item) && !estaSeleccionado(item)">
+                <i class="fas fa-history"></i>
+              </div>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">{{ item.nombre }}</h3>
+              <p class="card-status" *ngIf="esPreferenciaOriginal(item) && estaSeleccionado(item)">
+                <i class="fas fa-star"></i> Actual
+              </p>
+              <p class="card-status-removed" *ngIf="esPreferenciaOriginal(item) && !estaSeleccionado(item)">
+                <i class="fas fa-history"></i> Antes seleccionada
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button class="btn-save" (click)="agregarPreferencias()">
+          <i class="fas fa-arrow-right"></i>
+          Guardar y Continuar
+        </button>
       </div>
     </div>
   </div>
-  
-  <button class="next-button" (click)="agregarPreferencias()">Siguiente</button>
 </div>

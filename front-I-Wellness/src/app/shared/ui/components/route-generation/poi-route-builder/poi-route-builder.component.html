@@ -1,0 +1,218 @@
+<div class="route-builder-container">
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Route Builder Table -->
+  <div class="table-container">
+    <table class="route-table">
+      <thead>
+        <tr>
+          <th class="col-order">#</th>
+          <th class="col-provider">Proveedor</th>
+          <th class="col-service">Servicio</th>
+          <th class="col-cost">Costo</th>
+          <th class="col-duration">Duración</th>
+          <th class="col-actions">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let row of rows; let i = index; trackBy: trackByRowId"
+          [class.row-valid]="isRowValid(row)"
+          [class.row-incomplete]="!isRowValid(row)"
+        >
+          <!-- Order Number -->
+          <td class="col-order">
+            <div class="order-badge">{{ i + 1 }}</div>
+          </td>
+
+          <!-- Provider Selection -->
+          <td class="col-provider">
+            <select
+              title="Seleccionar proveedor"
+              class="form-select"
+              [value]="row.providerId || ''"
+              (change)="onProviderChange(row.id, $event)"
+              [disabled]="isLoading"
+            >
+              <option value="">Selecciona un proveedor...</option>
+              <option
+                *ngFor="let provider of items"
+                [value]="provider.provider.id"
+              >
+                {{ provider.provider.nombre_empresa }}
+              </option>
+            </select>
+          </td>
+
+          <!-- Services Display -->
+          <td class="col-service">
+            <div *ngIf="!row.providerId" class="no-services-message">
+              Selecciona un proveedor primero
+            </div>
+            <div *ngIf="row.providerId && getServicesForRow(row).length === 0" class="no-services-message">
+              Sin servicios disponibles
+            </div>
+            <div *ngIf="row.providerId && getServicesForRow(row).length > 0" class="services-list">
+              <div *ngFor="let service of getServicesForRow(row); let last = last" class="service-item">
+                <strong>{{ service.nombre }}</strong>
+                <span class="service-meta">
+                  <span class="service-price">{{ service.precio | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span class="service-duration">
+                    <i class="far fa-clock"></i> {{ service.tiempoAproximado }} min
+                  </span>
+                </span>
+                <small class="service-description" *ngIf="service.descripcion">
+                  {{ service.descripcion }}
+                </small>
+              </div>
+            </div>
+          </td>
+
+          <!-- Cost Display -->
+          <td class="col-cost">
+            <!-- Show cost if provider or service selected -->
+            <span class="cost-value" *ngIf="getCostForRow(row) !== null" [class.cost-estimated]="isShowingAverages(row)">
+              {{ getCostForRow(row) | currency:'EUR':'symbol':'1.2-2' }}
+              <small *ngIf="isShowingAverages(row)" class="avg-indicator">(avg)</small>
+            </span>
+            <span class="empty-value" *ngIf="getCostForRow(row) === null">—</span>
+          </td>
+
+          <!-- Duration Display -->
+          <td class="col-duration">
+            <!-- Show duration if provider or service selected -->
+            <span class="duration-value" *ngIf="getDurationForRow(row) !== null" [class.duration-estimated]="isShowingAverages(row)">
+              <i class="far fa-clock"></i>
+              {{ getDurationForRow(row) }} min
+              <small *ngIf="isShowingAverages(row)" class="avg-indicator">(avg)</small>
+            </span>
+            <span class="empty-value" *ngIf="getDurationForRow(row) === null">—</span>
+          </td>
+
+          <!-- Actions -->
+          <td class="col-actions">
+            <button
+              class="btn-remove"
+              (click)="onRemoveRow(row.id)"
+              [disabled]="rows.length <= 1 || isLoading"
+              title="Remove this POI"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Row Button -->
+  <div class="add-row-section">
+    <button
+      class="btn-add-row"
+      (click)="onAddRow()"
+      [disabled]="isLoading"
+    >
+      <i class="fas fa-plus-circle"></i>
+      Añade otro punto de interés
+    </button>
+  </div>
+
+  <!-- Route Summary & Optimization Controls -->
+  <div class="route-summary-section">
+    <div class="summary-card">
+      <h3 class="summary-title">Resumen de la Ruta</h3>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div class="stat-content">
+            <span class="stat-label">Número de Puntos de Interés</span>
+            <span class="stat-value">{{ routeAverages.totalPOIs }}</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-euro-sign"></i>
+          <div class="stat-content">
+            <span class="stat-label">Coste Medio</span>
+            <span class="stat-value">{{ routeAverages.avgCost | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="far fa-clock"></i>
+          <div class="stat-content">
+            <span class="stat-label">Duración Media</span>
+            <span class="stat-value">{{ routeAverages.avgDuration | number:'1.0-0' }} min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optimization Controls -->
+    <div class="optimization-controls">
+      <h3 class="controls-title">Optimizar Ruta Para</h3>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="optimization"
+            value="distance"
+            [(ngModel)]="selectedOptimizationCriteria"
+            [disabled]="isLoading"
+          >
+          <span class="radio-label">
+            <i class="fas fa-route"></i>
+            Distancia Más Corta
+          </span>
+        </label>
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="optimization"
+            value="cost"
+            [(ngModel)]="selectedOptimizationCriteria"
+            [disabled]="isLoading"
+          >
+          <span class="radio-label">
+            <i class="fas fa-dollar-sign"></i>
+            Coste Más Bajo
+          </span>
+        </label>
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="optimization"
+            value="time"
+            [(ngModel)]="selectedOptimizationCriteria"
+            [disabled]="isLoading"
+          >
+          <span class="radio-label">
+            <i class="fas fa-clock"></i>
+            Tiempo Más Corto
+          </span>
+        </label>
+      </div>
+
+      <button
+        class="btn-optimize"
+        (click)="onOptimize()"
+        [disabled]="!canOptimize"
+      >
+        <i class="fas fa-magic"></i>
+        <span *ngIf="!isLoading">Generar Ruta Optimizada</span>
+        <span *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          Procesando...
+        </span>
+      </button>
+
+      <p class="optimization-hint" *ngIf="!canOptimize && !isLoading">
+        <i class="fas fa-info-circle"></i>
+        Selecciona al menos 2 proveedores para optimizar la ruta
+      </p>
+    </div>
+  </div>
+</div>

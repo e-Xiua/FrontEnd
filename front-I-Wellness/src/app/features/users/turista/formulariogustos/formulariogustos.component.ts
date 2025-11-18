@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { PreferenciasService } from '../../../preferencias/services/preferencias/preferencias.service';
-import { AuthService } from '../../../../core/services/auth/auth.service';
-import { UsuarioService } from '../../services/usuario.service';
-import { TuristaXPreferenciaService } from '../../../preferencias/services/turistaXpreferencias/turista-xpreferencia.service';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { PreferenciasService } from '../../../preferencias/services/preferencias/preferencias.service';
+import { TuristaXPreferenciaService } from '../../../preferencias/services/turistaXpreferencias/turista-xpreferencia.service';
 
 @Component({
   selector: 'app-formulariogustos',
@@ -24,8 +23,8 @@ export class FormulariogustosComponent implements OnInit {
   preferencias: any[] = [];
 
   constructor(
-    private router: Router, 
-    private preferenciasService: PreferenciasService, 
+    private router: Router,
+    private preferenciasService: PreferenciasService,
     private turistaXPreferencia: TuristaXPreferenciaService,
     private authService: AuthService // Añadimos el servicio de autenticación
   ) {}
@@ -33,7 +32,7 @@ export class FormulariogustosComponent implements OnInit {
   ngOnInit() {
     // Obtener correo registrado o autenticado
     this.correoUsuario = localStorage.getItem('registeredEmail') || '';
-    
+
     if (!this.correoUsuario) {
       // Si no tenemos correo, verificamos autenticación
       if (!this.authService.isAuthenticated()) {
@@ -41,20 +40,20 @@ export class FormulariogustosComponent implements OnInit {
         this.router.navigate(['login']);
         return;
       }
-      
+
       // Intentamos obtener información del usuario autenticado
       this.authService.usuarioHome().subscribe({
         next: (userData: any) => {
           try {
             // Convertir la respuesta a objeto si viene como string
             const user = typeof userData === 'string' ? JSON.parse(userData) : userData;
-            
+
             if (user) {
               this.usuario = user;
               this.usuarioId = user.id;
               this.correoUsuario = user.correo || '';
               console.log('Usuario obtenido:', this.usuario);
-              
+
               // Cargar preferencias
               this.cargarPreferencias();
             } else {
@@ -74,12 +73,12 @@ export class FormulariogustosComponent implements OnInit {
     } else {
       // Si tenemos correo registrado, intentamos obtener el usuario
       console.log('Buscando usuario con correo:', this.correoUsuario);
-      
+
       // Intentamos obtener el usuario por correo
       this.obtenerUsuarioPorCorreo();
     }
   }
-  
+
   // Método para obtener usuario por correo
   obtenerUsuarioPorCorreo() {
     // Intentamos iniciar sesión si no estamos autenticados
@@ -103,7 +102,7 @@ export class FormulariogustosComponent implements OnInit {
       this.cargarInfoUsuario();
     }
   }
-  
+
   // Cargar información del usuario
   cargarInfoUsuario() {
     // Intentamos obtener la información del usuario
@@ -134,7 +133,7 @@ export class FormulariogustosComponent implements OnInit {
       }
     });
   }
-  
+
   // Método para cargar preferencias
   cargarPreferencias() {
     this.preferenciasService.obtenerPreferencias().subscribe({
@@ -148,7 +147,7 @@ export class FormulariogustosComponent implements OnInit {
       }
     });
   }
-  
+
   // Método para manejar errores del usuario
   manejarErrorUsuario() {
     // Crear usuario temporal para la sesión
@@ -157,13 +156,13 @@ export class FormulariogustosComponent implements OnInit {
       nombre: 'Usuario',
       correo: this.correoUsuario || 'usuario@ejemplo.com'
     };
-    
+
     this.usuarioId = this.usuario.id;
     localStorage.setItem('tempUserId', this.usuarioId.toString());
-    
+
     console.log('Usando usuario temporal:', this.usuario);
   }
-  
+
   // Método para seleccionar preferencias
   seleccionarGusto(item: any) {
     const index = this.seleccionados.indexOf(item);
@@ -173,7 +172,7 @@ export class FormulariogustosComponent implements OnInit {
       this.seleccionados.push(item); // Agregar a seleccionados si hay espacio
     }
   }
-  
+
   agregarPreferencias() {
     if (this.seleccionados.length >= 3 && this.seleccionados.length <= 5) {
       if (!this.authService.isAuthenticated() || !this.usuario || !this.usuario.id) {
@@ -189,9 +188,9 @@ export class FormulariogustosComponent implements OnInit {
         });
         return;
       }
-  
+
       const idUsuario = this.usuario.id;
-  
+
       try {
         const peticiones = this.seleccionados.map(pref => {
           const turistaXPreferencia = {
@@ -202,7 +201,7 @@ export class FormulariogustosComponent implements OnInit {
           };
           return this.turistaXPreferencia.crear(turistaXPreferencia);
         });
-  
+
         if (peticiones.length > 0) {
           Swal.fire({
             title: 'Guardando tus preferencias...',
@@ -211,7 +210,7 @@ export class FormulariogustosComponent implements OnInit {
               Swal.showLoading();
             }
           });
-  
+
           forkJoin(peticiones).subscribe({
             next: () => {
               Swal.fire({
@@ -220,7 +219,7 @@ export class FormulariogustosComponent implements OnInit {
                 text: 'Tus preferencias se han guardado exitosamente.',
                 confirmButtonText: 'Continuar',
                 confirmButtonColor: '#4a9c9f',
-              }).then(() => this.router.navigate(['/hometurista']));
+              }).then(() => this.router.navigate(['/turista/home']));
             },
             error: (err) => {
               console.error('Error al guardar alguna preferencia:', err);
@@ -230,11 +229,11 @@ export class FormulariogustosComponent implements OnInit {
                 text: 'Hubo un problema al guardar tus preferencias. Intenta de nuevo.',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: '#4a9c9f',
-              }).then(() => this.router.navigate(['/hometurista']));
+              }).then(() => this.router.navigate(['/turista/home']));
             }
           });
         } else {
-          this.router.navigate(['/hometurista']);
+          this.router.navigate(['/turista/home']);
         }
       } catch (error) {
         console.error('Error general al guardar preferencias:', error);
@@ -244,7 +243,7 @@ export class FormulariogustosComponent implements OnInit {
           text: 'Ocurrió un problema inesperado.',
           confirmButtonText: 'Volver',
           confirmButtonColor: '#4a9c9f',
-        }).then(() => this.router.navigate(['/hometurista']));
+        }).then(() => this.router.navigate(['/turista/home']));
       }
     } else {
       Swal.fire({

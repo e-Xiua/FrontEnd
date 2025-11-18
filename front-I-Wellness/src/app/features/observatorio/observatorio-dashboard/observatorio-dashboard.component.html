@@ -1,0 +1,299 @@
+<div class="observatorio-container">
+  <!-- Header del Observatorio -->
+  <header class="observatorio-header">
+    <div class="header-content">
+      <div class="title-section">
+        <span class="material-icons header-icon">visibility</span>
+        <div>
+          <h1>Observatorio Ambiental</h1>
+          <p class="subtitle">La Fortuna, Costa Rica - Monitoreo en Tiempo Real</p>
+        </div>
+      </div>
+      <div class="update-info">
+        <button class="back-btn" (click)="volverAlInicio()">
+          <span class="material-icons">home</span>
+          {{ authService.isAuthenticated() ? 'Volver al Sistema' : 'Volver al Inicio' }}
+        </button>
+        <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+          <span class="material-icons" [class.spinning]="loading">refresh</span>
+          Actualizar
+        </button>
+        <span class="last-update">
+          <span class="material-icons">schedule</span>
+          Última actualización: {{ lastUpdate | date:'short' }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando datos del observatorio...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="material-icons">error_outline</span>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="refreshData()">Reintentar</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error" class="dashboard-grid">
+    
+    <!-- Clima Card -->
+    <div class="dashboard-card clima-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-icons">{{ getTemperatureIcon() }}</span>
+          <h2>Clima Actual</h2>
+        </div>
+        <a routerLink="/observatorio/clima" class="view-details">
+          Ver detalles
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      </div>
+      
+      <div class="card-content" *ngIf="climaData?.success && climaData.data">
+        <div class="main-metric">
+          <div class="temperature">
+            {{ climaData.data!.temperature }}°C
+          </div>
+          <div class="feels-like">
+            Sensación térmica: {{ climaData.data!.feels_like }}°C
+          </div>
+        </div>
+        
+        <div class="weather-description">
+          <span class="material-icons">cloud</span>
+          {{ climaData.data!.description }}
+        </div>
+        
+        <div class="weather-details">
+          <div class="detail-item">
+            <span class="material-icons">water_drop</span>
+            <div>
+              <span class="detail-label">Humedad</span>
+              <span class="detail-value">{{ climaData.data!.humidity }}%</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="material-icons">air</span>
+            <div>
+              <span class="detail-label">Viento</span>
+              <span class="detail-value">{{ climaData.data!.wind_speed }} m/s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-content error-content" *ngIf="!climaData?.success">
+        <span class="material-icons">cloud_off</span>
+        <p>Datos de clima no disponibles</p>
+      </div>
+    </div>
+
+    <!-- Índice UV Card -->
+    <div class="dashboard-card uv-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-icons">wb_sunny</span>
+          <h2>Índice UV</h2>
+        </div>
+        <a routerLink="/observatorio/uv" class="view-details">
+          Ver detalles
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      </div>
+      
+      <div class="card-content" *ngIf="uvData?.success && uvData.data">
+        <div class="uv-indicator" [style.background-color]="getUVColor()">
+          <div class="uv-value">{{ uvData.data!.uv_index }}</div>
+          <div class="uv-level">{{ uvData.data!.level }}</div>
+        </div>
+        
+        <div class="uv-category">
+          <span class="material-icons">info</span>
+          {{ uvData.data!.risk_category }}
+        </div>
+        
+        <div class="uv-recommendations">
+          <h4>Recomendaciones:</h4>
+          <ul>
+            <li *ngFor="let rec of uvData.data!.recommendations?.slice(0, 2)">
+              {{ rec }}
+            </li>
+          </ul>
+        </div>
+        
+        <div class="uv-protection" *ngIf="uvData.data!.protection_needed">
+          <span class="material-icons">shield</span>
+          <span>Protección solar necesaria</span>
+        </div>
+      </div>
+      
+      <div class="card-content error-content" *ngIf="!uvData?.success">
+        <span class="material-icons">wb_sunny_off</span>
+        <p>Datos de UV no disponibles</p>
+      </div>
+    </div>
+
+    <!-- Volcán Arenal Card -->
+    <div class="dashboard-card volcano-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-icons">landscape</span>
+          <h2>Volcán Arenal</h2>
+        </div>
+        <a routerLink="/observatorio/volcan" class="view-details">
+          Ver detalles
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      </div>
+      
+      <div class="card-content" *ngIf="volcanoData?.success && volcanoData.data">
+        <div class="volcano-status">
+          <div class="status-indicator" [style.background-color]="getVolcanoStatusColor()">
+            <span class="material-icons">{{ getVolcanoStatusIcon() }}</span>
+          </div>
+          <div class="status-info">
+            <h3>{{ volcanoData.data!.status }}</h3>
+            <p class="alert-level">Nivel de alerta: {{ volcanoData.data!.alert_level }}</p>
+          </div>
+        </div>
+        
+        <div class="volcano-description">
+          <p>{{ volcanoData.data!.activity_description }}</p>
+        </div>
+        
+        <div class="tourism-status" [class.safe]="volcanoData.data!.tourism_safe" 
+             [class.warning]="!volcanoData.data!.tourism_safe">
+          <span class="material-icons">
+            {{ volcanoData.data!.tourism_safe ? 'check_circle' : 'warning' }}
+          </span>
+          <span>
+            {{ volcanoData.data!.tourism_safe ? 'Seguro para turismo' : 'Precaución recomendada' }}
+          </span>
+        </div>
+        
+        <div class="last-update-volcano">
+          <span class="material-icons">update</span>
+          Actualizado: {{ formatDate(volcanoData.data!.last_update) }}
+        </div>
+      </div>
+      
+      <div class="card-content error-content" *ngIf="!volcanoData?.success">
+        <span class="material-icons">landscape_off</span>
+        <p>Datos del volcán no disponibles</p>
+      </div>
+    </div>
+
+    <!-- Eventos y Noticias Card -->
+    <div class="dashboard-card events-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="material-icons">newspaper</span>
+          <h2>Noticias y Eventos</h2>
+        </div>
+        <a routerLink="/observatorio/eventos" class="view-details">
+          Ver todos
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      </div>
+      
+      <div class="card-content" *ngIf="eventsData?.success && eventsData.news">
+        <div class="events-list">
+          <div class="event-item" *ngFor="let event of eventsData.news!">
+            <div class="event-icon">
+              <span class="material-icons">article</span>
+            </div>
+            <div class="event-content">
+              <h4>{{ event.title }}</h4>
+              <p class="event-summary">{{ event.summary }}</p>
+              <div class="event-meta">
+                <span class="event-date">
+                  <span class="material-icons">calendar_today</span>
+                  {{ event.date }}
+                </span>
+                <a [href]="event.url" target="_blank" class="event-link">
+                  Leer más
+                  <span class="material-icons">open_in_new</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="no-events" *ngIf="eventsData.news!.length === 0">
+          <span class="material-icons">event_busy</span>
+          <p>No hay eventos recientes</p>
+        </div>
+      </div>
+      
+      <div class="card-content error-content" *ngIf="!eventsData?.success">
+        <span class="material-icons">newspaper_off</span>
+        <p>Noticias no disponibles</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer con información adicional -->
+  <footer class="observatorio-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Sobre el Observatorio</h3>
+        <p>
+          Sistema de monitoreo en tiempo real que integra datos meteorológicos, 
+          índice UV, actividad volcánica y noticias turísticas para La Fortuna, Costa Rica.
+        </p>
+      </div>
+      <div class="footer-section">
+        <h3>Fuentes de Datos</h3>
+        <ul class="data-sources">
+          <li>
+            <span class="material-icons">cloud</span>
+            OpenWeather & IMN Costa Rica
+          </li>
+          <li>
+            <span class="material-icons">wb_sunny</span>
+            Análisis de Índice UV
+          </li>
+          <li>
+            <span class="material-icons">landscape</span>
+            OVSICORI - UNA
+          </li>
+          <li>
+            <span class="material-icons">newspaper</span>
+            Instituto Costarricense de Turismo
+          </li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Dashboards Especializados</h3>
+        <nav class="footer-nav">
+          <a routerLink="/observatorio/clima">
+            <span class="material-icons">thermostat</span>
+            Dashboard de Clima
+          </a>
+          <a routerLink="/observatorio/uv">
+            <span class="material-icons">wb_sunny</span>
+            Dashboard UV
+          </a>
+          <a routerLink="/observatorio/volcan">
+            <span class="material-icons">landscape</span>
+            Dashboard Volcán
+          </a>
+          <a routerLink="/observatorio/eventos">
+            <span class="material-icons">event</span>
+            Dashboard Eventos
+          </a>
+        </nav>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 e-Xiua - Observatorio de Turismo de Bienestar</p>
+    </div>
+  </footer>
+</div>

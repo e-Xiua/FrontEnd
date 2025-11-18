@@ -1,9 +1,9 @@
+import { CommonModule, Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule, Location } from '@angular/common';
+import Swal from 'sweetalert2';
 import { PreferenciasService } from '../../../preferencias/services/preferencias/preferencias.service';
 import { TuristaXPreferenciaService } from '../../../preferencias/services/turistaXpreferencias/turista-xpreferencia.service';
-import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-edit-preferencias',
@@ -17,17 +17,72 @@ export class EditPreferenciasComponent {
   preferencias: any[] = [];
   idUsuario!: number;
   peticiones: any[]= [];
+  preferenciasOriginales: any[] = []; // Guardar las preferencias originales del usuario
+  isLoading = true; // Para mostrar estado de carga
 
   seleccionarGusto(item: any) {
-    const index = this.seleccionados.indexOf(item);
+    // Buscar si el item ya está seleccionado usando el ID para una comparación más confiable
+    const index = this.seleccionados.findIndex(
+      pref => pref._idPreferencias === item._idPreferencias
+    );
+    
     if (index > -1) {
-      this.seleccionados.splice(index, 1); // Si ya está seleccionado, se deselecciona
-    } else if (this.seleccionados.length < 5) {
-      this.seleccionados.push(item); // Agregar a seleccionados si hay espacio
+      // Si ya está seleccionado, SIEMPRE permitir deseleccionar
+      this.seleccionados.splice(index, 1);
+      console.log('✅ Preferencia deseleccionada:', item.nombre);
+      console.log('📊 Total seleccionados:', this.seleccionados.length);
+    } else {
+      // Solo agregar si no se ha alcanzado el límite
+      if (this.seleccionados.length < 5) {
+        this.seleccionados.push(item);
+        console.log('✅ Preferencia seleccionada:', item.nombre);
+        console.log('📊 Total seleccionados:', this.seleccionados.length);
+      } else {
+        // Mostrar mensaje cuando se alcanza el límite
+        Swal.fire({
+          icon: 'info',
+          title: 'Límite alcanzado',
+          text: 'Has alcanzado el máximo de 5 preferencias. Deselecciona una para agregar otra.',
+          confirmButtonColor: '#4a9c9f',
+          timer: 2500,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
+        console.log('⚠️ Límite máximo alcanzado (5/5)');
+      }
     }
   }
 
-  constructor(  
+  /**
+   * Verificar si una preferencia estaba seleccionada originalmente
+   */
+  esPreferenciaOriginal(item: any): boolean {
+    return this.preferenciasOriginales.some(
+      pref => pref._idPreferencias === item._idPreferencias
+    );
+  }
+
+  /**
+   * Verificar si una preferencia fue recién seleccionada (no estaba antes)
+   */
+  esNuevaSeleccion(item: any): boolean {
+    const estaSeleccionado = this.seleccionados.some(
+      pref => pref._idPreferencias === item._idPreferencias
+    );
+    return estaSeleccionado && !this.esPreferenciaOriginal(item);
+  }
+
+  /**
+   * Verificar si una preferencia está actualmente seleccionada
+   */
+  estaSeleccionado(item: any): boolean {
+    return this.seleccionados.some(
+      pref => pref._idPreferencias === item._idPreferencias
+    );
+  }
+
+  constructor(
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
@@ -41,6 +96,7 @@ export class EditPreferenciasComponent {
         this.idUsuario = +id;
         console.log('ID del usuario:', this.idUsuario);
         this.cargarPreferencias();
+        this.cargarPreferenciasUsuario(); // Cargar las preferencias actuales del usuario
       }
     });
   }
@@ -50,9 +106,11 @@ export class EditPreferenciasComponent {
       next: (data) => {
         this.preferencias = data;
         console.log('Preferencias cargadas:', this.preferencias);
+        this.verificarCargaCompleta();
       },
       error: (error) => {
         console.error('Error al obtener preferencias:', error);
+        this.isLoading = false;
         Swal.fire({
           icon: 'error',
           title: 'Error al cargar preferencias',
@@ -61,6 +119,39 @@ export class EditPreferenciasComponent {
         });
       }
     });
+  }
+
+  /**
+   * Cargar las preferencias actuales del usuario
+   */
+  cargarPreferenciasUsuario() {
+    this.turistaXPreferencia.obtenerPorTurista(this.idUsuario).subscribe({
+      next: (preferenciasUsuario) => {
+        console.log('Preferencias del usuario cargadas:', preferenciasUsuario);
+        this.preferenciasOriginales = preferenciasUsuario.map((p: any) => p.preferencia);
+        
+        // Pre-seleccionar las preferencias del usuario
+        this.seleccionados = [...this.preferenciasOriginales];
+        
+        console.log('Preferencias originales:', this.preferenciasOriginales);
+        console.log('Seleccionados iniciales:', this.seleccionados);
+        this.verificarCargaCompleta();
+      },
+      error: (error) => {
+        console.error('Error al obtener preferencias del usuario:', error);
+        this.isLoading = false;
+        // No mostrar error, el usuario simplemente no tiene preferencias previas
+      }
+    });
+  }
+
+  /**
+   * Verificar si ambas cargas están completas
+   */
+  verificarCargaCompleta() {
+    if (this.preferencias.length > 0 && this.preferenciasOriginales !== undefined) {
+      this.isLoading = false;
+    }
   }
 
   agregarPreferencias() {
@@ -131,8 +222,8 @@ export class EditPreferenciasComponent {
       });
     });
   }
-  
-  
+
+
 
   finalizarGuardado(exitos: number, errores: number) {
     if (exitos === this.peticiones.length) {
@@ -152,13 +243,13 @@ export class EditPreferenciasComponent {
     }
 
     // Obtener el rol del usuario desde el localStorage
-    const rol = localStorage.getItem('rol'); 
+    const rol = localStorage.getItem('rol');
 
     // Verificar el rol y redirigir a la página correspondiente
     if (rol === 'Admin') {
       this.router.navigate(['/visitantes']);
     } else if (rol === 'Turista') {
-      this.router.navigate(['/hometurista']);
-    } 
+      this.router.navigate(['/turista/home']);
+    }
   }
 }

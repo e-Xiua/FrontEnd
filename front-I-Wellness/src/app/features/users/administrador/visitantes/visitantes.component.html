@@ -1,33 +1,116 @@
-<body>
-    <div class="container">
-      <h2>Aquí está tu lista de visitantes:</h2>
-  
-      <div class="add-button-wrapper">
-        <button class="add-service-btn" (click)="agregar('crearturista')">
-          Añadir nuevo visitante <span>+</span>
-        </button>
+<div class="visitantes-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-users"></i>
       </div>
-  
-      <div class="services-box">
-        <ng-container *ngFor="let visitante of visitantes">
-          <div class="service-card">
+      <h1>Gestión de Visitantes</h1>
+      <p class="hero-subtitle">Administra y visualiza todos los turistas registrados en el sistema</p>
+    </div>
+  </section>
+
+  <!-- Stats and Actions Bar -->
+  <section class="action-bar">
+    <div class="action-bar-content">
+      <div class="stats-info">
+        <div class="stat-badge">
+          <i class="fas fa-user-friends"></i>
+          <span class="stat-number">{{ visitantes.length }}</span>
+          <span class="stat-label">Visitantes Registrados</span>
+        </div>
+      </div>
+      
+      <button class="add-button" (click)="agregar('crearturista')">
+        <i class="fas fa-user-plus"></i>
+        <span>Añadir Nuevo Visitante</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Visitors Grid -->
+  <section class="visitors-section">
+    <div class="visitors-grid" *ngIf="visitantes.length > 0; else emptyState">
+      <div class="visitor-card" *ngFor="let visitante of visitantes">
+        <!-- Card Header with Image -->
+        <div class="card-header">
+          <div class="image-container">
             <img 
               [src]="visitante.foto ? visitante.foto : 'https://via.placeholder.com/300x200.png?text=Visitante'" 
-              alt="{{ visitante.nombre }}" 
-              class="service-image"
+              [alt]="visitante.nombre" 
+              class="visitor-image"
             >
-            <div class="service-info">
-              <h3>{{ visitante.nombre }}</h3>
-              <p>{{ visitante.turista?.ciudad }}, {{ visitante.turista?.pais }}</p>
-              <p class="categoria">{{ visitante.turista?.actividadesInteres }}</p>
-            </div>
-            <div class="service-actions">
-              <button class="edit-btn" (click)="navigateTo('perfilturista', visitante.id)">✏️</button>
-              <button type="button" class="delete-btn" (click)="deleteVisitante(visitante.id)">🗑</button>
+            <div class="image-overlay">
+              <div class="overlay-badge">
+                <i class="fas fa-user"></i>
+              </div>
             </div>
           </div>
-        </ng-container>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="visitor-info">
+            <h3 class="visitor-name">{{ visitante.nombre }}</h3>
+            
+            <div class="info-item" *ngIf="visitante.turista?.ciudad || visitante.turista?.pais">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ visitante.turista?.ciudad }}<span *ngIf="visitante.turista?.ciudad && visitante.turista?.pais">, </span>{{ visitante.turista?.pais }}</span>
+            </div>
+
+            <div class="info-item" *ngIf="visitante.turista?.actividadesInteres">
+              <i class="fas fa-heart"></i>
+              <span>{{ visitante.turista?.actividadesInteres }}</span>
+            </div>
+
+            <div class="info-item" *ngIf="visitante.email">
+              <i class="fas fa-envelope"></i>
+              <span>{{ visitante.email }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer with Actions -->
+        <div class="card-footer">
+          <button 
+            class="action-btn edit-btn" 
+            (click)="navigateTo('perfilturista', visitante.id)"
+            title="Editar visitante">
+            <i class="fas fa-edit"></i>
+            <span>Editar</span>
+          </button>
+          
+          <button 
+            type="button" 
+            class="action-btn delete-btn" 
+            (click)="deleteVisitante(visitante.id)"
+            title="Eliminar visitante">
+            <i class="fas fa-trash-alt"></i>
+            <span>Eliminar</span>
+          </button>
+        </div>
       </div>
     </div>
-  </body>
-  
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-users-slash"></i>
+        </div>
+        <h3>No hay visitantes registrados</h3>
+        <p>Comienza agregando tu primer visitante al sistema</p>
+        <button class="add-button-large" (click)="agregar('crearturista')">
+          <i class="fas fa-user-plus"></i>
+          <span>Agregar Primer Visitante</span>
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="errorMessage">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+</div>

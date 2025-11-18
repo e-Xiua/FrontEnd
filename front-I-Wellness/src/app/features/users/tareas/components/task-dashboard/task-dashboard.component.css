@@ -1,0 +1,328 @@
+/* === BASE GENERAL === */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f6f7fb;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    transition: background 0.3s ease;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 40px;
+}
+
+/* === CABECERAS === */
+h1, h2, h3 {
+    font-weight: 600;
+    color: #20293a;
+}
+
+h1 {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+/* === BLOQUES ESTILO NOTION === */
+.block {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.block:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* === ENCABEZADO DE BLOQUE === */
+.block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.block-header h3 {
+    margin: 0;
+    color: #2973B2;
+    background: linear-gradient(45deg, #2973B2, #9ACBD0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* === BOTONES === */
+.btn {
+    background: #2973B2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #50a6d4;
+    transform: scale(1.05);
+}
+
+/* === SECCIÓN INTERACTIVA / EDITABLE === */
+.interactive-block {
+    border-left: 4px solid #2973B2;
+    background: #fafbfd;
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+}
+
+.interactive-block:focus-within {
+    border-left: 4px solid #50a6d4;
+    background: #f0f8ff;
+}
+
+/* === CAMPOS DE TEXTO / INPUTS === */
+input[type="text"], textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    font-size: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #2973B2;
+    background-color: #f9fcff;
+}
+
+/* === TABLAS INTERACTIVAS === */
+.table-block {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.table-block th, .table-block td {
+    padding: 14px 18px;
+    text-align: left;
+}
+
+.table-block th {
+    background: #f1f5f9;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.table-block tr:hover {
+    background: #f9fafc;
+}
+
+/* === NAVBAR ESTILO LIMPIO === */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.navbar .logo {
+    font-weight: 700;
+    color: #2973B2;
+    font-size: 1.3rem;
+}
+
+.navbar a {
+    color: #475569;
+    text-decoration: none;
+    margin: 0 12px;
+    transition: color 0.2s;
+}
+
+.navbar a:hover {
+    color: #2973B2;
+}
+
+/* === SECCIÓN DE BLOQUES TIPO DASHBOARD === */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* === TARJETAS INTERACTIVAS === */
+.card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.card h4 {
+    margin-bottom: 0.75rem;
+    color: #2973B2;
+}
+
+.card p {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* === ANIMACIONES SUAVES === */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.block, .card {
+    animation: fadeInUp 0.6s ease both;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.1rem; }
+}
+
+.dashboard-container {
+  background: #F2EFE7;
+  padding: 2.5rem;
+  border-radius: 30px;
+  min-height: 100vh;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Columnas tipo Notion */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Cada columna */
+.column {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.column:hover {
+  transform: translateY(-5px);
+}
+
+/* Tarjetas de tarea */
+.task-card {
+  margin-bottom: 1rem;
+  background: #fafbfd;
+  border-left: 4px solid #2973B2;
+  padding: 1.2rem;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.task-card:hover {
+  background: #f0f8ff;
+}
+
+/* Encabezados */
+h2 {
+  text-align: center;
+  color: #2973B2;
+  background: linear-gradient(45deg, #2973B2, #9ACBD0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2rem;
+}
+
+h3 {
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Input para nuevas tareas */
+.new-task input,
+.new-task textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.new-task textarea {
+  resize: vertical;
+  height: 100px;
+}
+
+.new-task button {
+  background: #2973B2;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.new-task button:hover {
+  background: #50a6d4;
+  transform: scale(1.05);
+}
+
+/* Botones de acción */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.8rem;
+}
+

@@ -53,7 +53,7 @@ export class ServiciosComponent {
 
   crearServicio(): void {
     sessionStorage.setItem('idProveedor', this.idProveedor.toString());
-    this.router.navigate(['/agregarservicio'])
+    this.router.navigate(['/proveedor/agregar-servicio'])
   }
 
   cambiarEstado(servicio: any) {

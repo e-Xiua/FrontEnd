@@ -1,0 +1,21 @@
+/* Asegurar que el componente principal sea transparente */
+:host {
+  background: transparent;
+  min-height: 100vh;
+  display: block;
+}
+
+/* Asegurar que el router-outlet no tenga fondo */
+router-outlet {
+  background: transparent;
+}
+
+/* Evitar cualquier fondo blanco en Material components */
+.mat-toolbar {
+  background: transparent !important;
+}
+
+/* Transparencia general para elementos Angular Material */
+.mat-app-background {
+  background: transparent !important;
+}

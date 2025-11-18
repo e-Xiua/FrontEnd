@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -11,7 +11,7 @@ import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryFiel
 @Component({
   selector: 'app-registro-turista',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxIntlTelInputModule],
+  imports: [CommonModule, FormsModule, NgxIntlTelInputModule, RouterModule],
   templateUrl: './registro-turista.component.html',
   styleUrl: './registro-turista.component.css',
   
@@ -207,7 +207,7 @@ export class RegistroTuristaComponent implements OnInit {
         foto: this.imagenPerfil || this.defaultImg
       };
 
-      // Registrar al usuario - el servicio actualizará guarda credenciales en localStorage
+      // Registrar al usuario - el servicio ya hace login automático y guarda credenciales en localStorage
       this.authService.registerTurista(userData).subscribe({
         next: (response) => {
           this.isLoading = false;
@@ -225,12 +225,12 @@ export class RegistroTuristaComponent implements OnInit {
             this.authService.login(userData.correo, userData.contraseña).subscribe({
               next: () => {
                 // Redirigir al formulario de gustos tras login exitoso
-                this.router.navigate(['formulariogustos']);
+                this.router.navigate(['/turista/formulariogustos']);
               },
               error: (loginError) => {
                 console.error('Error en login automático:', loginError);
                 // Aun sin login, redirigimos al formulario de gustos para mantener el flujo
-                this.router.navigate(['formulariogustos']);
+                this.router.navigate(['/turista/formulariogustos']);
               }
             });
           });

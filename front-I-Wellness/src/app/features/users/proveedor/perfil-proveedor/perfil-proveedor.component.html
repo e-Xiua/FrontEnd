@@ -1,114 +1,221 @@
-<body>
-    <!-- Mostrar spinner mientras carga -->
-    <div *ngIf="isLoading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Cargando perfil...</p>
+<div class="perfil-proveedor-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner-modern"></div>
+      <p>Cargando perfil...</p>
     </div>
+  </div>
 
-    <!-- Mostrar mensaje de error si no tiene autorización -->
-    <div *ngIf="unauthorized && !isLoading" class="unauthorized-container">
-        <div class="alert alert-danger">
-            <h2>Acceso denegado</h2>
-            <p>{{ error }}</p>
-            <button class="btn btn-primary" (click)="navigateTo()">Volver al inicio</button>
+  <!-- Unauthorized State -->
+  <div *ngIf="unauthorized && !isLoading" class="unauthorized-state">
+    <div class="unauthorized-content">
+      <i class="fas fa-lock"></i>
+      <h2>Acceso denegado</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="navigateTo()">Volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" *ngIf="!unauthorized && !isLoading">
+  <!-- Main Content -->
+  <div class="main-content" *ngIf="!unauthorized && !isLoading">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-icon">
+          <i class="fas fa-user-edit"></i>
         </div>
-    </div>
+        <h1>Editar Perfil</h1>
+        <p class="hero-subtitle">Actualiza la información de contacto o de tu negocio</p>
+      </div>
+    </section>
 
-    <!-- Mostrar contenido normal solo si tiene autorización y no está cargando -->
-    <div class="container" *ngIf="!unauthorized && !isLoading">
-        <aside class="sidebar">
-            <p>Hola, {{proveedor.nombre}}</p>
-            <ul>
-                <li class="active">📝 Editar perfil</li>
-                <li><a [routerLink]="['/servicios', proveedor.id]">🛎️ Servicios</a></li>
-            </ul>
+    <!-- Form Section -->
+    <section class="form-section">
+      <div class="form-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav">
+          <div class="nav-header">
+            <p class="welcome-text">Hola, {{proveedor.nombre}}</p>
+          </div>
+          <ul class="nav-menu">
+            <li class="nav-item active">
+              <i class="fas fa-user-edit"></i>
+              <span>Editar perfil</span>
+            </li>
+          </ul>
         </aside>
-        <main class="content">
-            <div class="profile-header">
-                <h1>Editar perfil</h1>
-                <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
-                <img 
-                    [src]="fotoPreview || proveedor.foto" 
-                    alt="Profile Picture" 
-                    class="profile-pic"
-                    (click)="seleccionarFoto()"
-                    title="Haz clic para cambiar tu foto de perfil">
+
+        <!-- Form Content -->
+        <div class="form-content">
+          <div class="form-card">
+            <!-- Profile Photo Section -->
+            <div class="profile-photo-section">
+              <h3 class="section-title">
+                <i class="fas fa-camera"></i>
+                Foto de Perfil
+              </h3>
+              <input type="file" id="fotoInput" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+              <div class="photo-container" (click)="seleccionarFoto()">
+                <img
+                  [src]="fotoPreview || proveedor.foto"
+                  alt="Foto de Perfil"
+                  class="profile-photo"
+                  title="Haz clic para cambiar tu foto de perfil">
+                <div class="photo-overlay">
+                  <i class="fas fa-camera"></i>
+                  <span>Cambiar foto</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Profile Form -->
             <form class="profile-form">
-                <div class="input-group full-width">
-                    <label>Nombre</label>
-                    <input type="text" [(ngModel)]="proveedor.nombre" name="nombre">
+              <!-- Personal Information -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-user"></i>
+                  Información Personal
+                </h3>
+                
+                <div class="input-group">
+                  <label for="nombre">Nombre Completo *</label>
+                  <input 
+                    id="nombre"
+                    type="text" 
+                    [(ngModel)]="proveedor.nombre" 
+                    name="nombre"
+                    placeholder="Tu nombre completo"
+                    required>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Número de Contacto</label>
-                    <ngx-intl-tel-input
-                        [cssClass]="'form-control'"
-                        [preferredCountries]="preferredCountries"
-                        [enableAutoCountrySelect]="true"
-                        [enablePlaceholder]="true"
-                        [searchCountryFlag]="true"
-                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-                        [selectFirstCountry]="false"
-                        [maxLength]="15"
-                        [phoneValidation]="true"
-                        [separateDialCode]="separateDialCode"
-                        name="telefono"
-                        [(ngModel)]="proveedor.proveedorInfo.telefono"
-                        (ngModelChange)="onTelefonoChange($event)">
-                    </ngx-intl-tel-input>
+                <div class="input-group">
+                  <label for="telefono">Número de Contacto *</label>
+                  <ngx-intl-tel-input
+                    [cssClass]="'custom-phone-input'"
+                    [preferredCountries]="preferredCountries"
+                    [enableAutoCountrySelect]="true"
+                    [enablePlaceholder]="true"
+                    [searchCountryFlag]="true"
+                    [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                    [selectFirstCountry]="false"
+                    [maxLength]="15"
+                    [phoneValidation]="true"
+                    [separateDialCode]="separateDialCode"
+                    name="telefono"
+                    [(ngModel)]="proveedor.proveedorInfo.telefono"
+                    (ngModelChange)="onTelefonoChange($event)">
+                  </ngx-intl-tel-input>
+                </div>
+              </div>
+
+              <!-- Business Information -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-briefcase"></i>
+                  Información Empresarial
+                </h3>
+
+                <div class="input-group">
+                  <label for="nombre_empresa">Nombre de la Empresa *</label>
+                  <input 
+                    id="nombre_empresa"
+                    type="text" 
+                    [(ngModel)]="proveedor.proveedorInfo.nombre_empresa" 
+                    name="nombre_empresa"
+                    placeholder="Nombre de tu empresa"
+                    required>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Teléfono de la Empresa</label>
-                    <ngx-intl-tel-input
-                        [cssClass]="'form-control'"
-                        [preferredCountries]="preferredCountries"
-                        [enableAutoCountrySelect]="true"
-                        [enablePlaceholder]="true"
-                        [searchCountryFlag]="true"
-                        [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-                        [selectFirstCountry]="false"
-                        [maxLength]="15"
-                        [phoneValidation]="true"
-                        [separateDialCode]="separateDialCode"
-                        name="telefonoEmpresa"
-                        [(ngModel)]="proveedor.proveedorInfo.telefonoEmpresa"
-                        (ngModelChange)="onTelefonoEmpresaChange($event)">
-                    </ngx-intl-tel-input>
+                <div class="input-group">
+                  <label for="telefonoEmpresa">Teléfono de la Empresa *</label>
+                  <ngx-intl-tel-input
+                    [cssClass]="'custom-phone-input'"
+                    [preferredCountries]="preferredCountries"
+                    [enableAutoCountrySelect]="true"
+                    [enablePlaceholder]="true"
+                    [searchCountryFlag]="true"
+                    [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                    [selectFirstCountry]="false"
+                    [maxLength]="15"
+                    [phoneValidation]="true"
+                    [separateDialCode]="separateDialCode"
+                    name="telefonoEmpresa"
+                    [(ngModel)]="proveedor.proveedorInfo.telefonoEmpresa"
+                    (ngModelChange)="onTelefonoEmpresaChange($event)">
+                  </ngx-intl-tel-input>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Nombre de la Empresa</label>
-                    <input type="text" [(ngModel)]="proveedor.proveedorInfo.nombre_empresa" name="nombre_empresa">
+                <div class="input-group">
+                  <label for="cargoContacto">Cargo de Contacto</label>
+                  <input 
+                    id="cargoContacto"
+                    type="text" 
+                    [(ngModel)]="proveedor.proveedorInfo.cargoContacto" 
+                    name="cargoContacto"
+                    placeholder="Ej: Director, Gerente">
+                </div>
+              </div>
+
+              <!-- Location Section -->
+              <div class="form-group">
+                <h3 class="section-title">
+                  <i class="fas fa-map-marker-alt"></i>
+                  Ubicación
+                </h3>
+
+                <div class="location-search">
+                  <div class="input-group">
+                    <label for="direccionInput">Buscar Dirección</label>
+                    <div class="search-input-wrapper">
+                      <input 
+                        id="direccionInput" 
+                        type="text" 
+                        placeholder="Escribe una dirección para buscar..." />
+                      <button type="button" class="btn-search" (click)="buscarDireccion()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Search Results Dropdown -->
+                  <select 
+                    *ngIf="searchResults.length > 0" 
+                    class="search-results-select" 
+                    (change)="handleResultSelection($event)">
+                    <option disabled selected>Selecciona una dirección</option>
+                    <option *ngFor="let result of searchResults" [value]="result.display_name">
+                      {{ result.display_name }}
+                    </option>
+                  </select>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Cargo de Contacto</label>
-                    <input type="text" [(ngModel)]="proveedor.proveedorInfo.cargoContacto" name="cargoContacto">
-                </div>
-
-                <div class="input-group full-width">
-                <label>Ubicacion</label>
-                <input id="direccionInput" type="text" placeholder="Buscar dirección..." />
-                <button (click)="buscarDireccion()" class="save">Buscar</button>
-                </div>
-
-                <!-- Desplegable que solo se muestra si hay resultados de búsqueda -->
-                <select *ngIf="searchResults.length > 0" class="form-control mt-2" (change)="handleResultSelection($event)">
-                <option disabled selected>Selecciona una dirección</option>
-                <option *ngFor="let result of searchResults" [value]="result.display_name">
-                    {{ result.display_name }}
-                </option>
-                </select>
-
+                <!-- Map -->
                 <div id="reg-map" class="map-container"></div>
+                <p class="helper-text">
+                  <i class="fas fa-info-circle"></i>
+                  Haz clic en el mapa para seleccionar una ubicación precisa
+                </p>
+              </div>
 
-                <div class="buttons">
-                    <button class="cancel" (click)="navigateTo()">Cancelar</button>
-                    <button class="save" type="button" (click)="guardarCambios()">Guardar</button>
-                </div>
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="navigateTo()">
+                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+                <button type="button" class="btn-save" (click)="guardarCambios()">
+                  <i class="fas fa-save"></i>
+                  Guardar Cambios
+                </button>
+              </div>
             </form>
-        </main>
-    </div>
-</body>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

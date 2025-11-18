@@ -1,133 +1,188 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, take, takeUntil } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ServicioService } from '../../../servicios/services/servicio.service';
-import { CommonModule } from '@angular/common';
-import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-home-proveedor',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './home-proveedor.component.html',
   styleUrl: './home-proveedor.component.css'
 })
-export class HomeProveedorComponent {
-  
-  usuario: any;
+export class HomeProveedorComponent implements OnInit, OnDestroy {
   servicios: any[] = [];
+  providerId: number = 0;
+  isLoading = false;
+  
+  private readonly destroy$ = new Subject<void>();
 
-  constructor(private router: Router, private authService: AuthService, private servicioService: ServicioService) {}
-
-  navigateTo(path: string,id?: any) {
-    this.router.navigate([path, id]);
-  } 
-
-  agregar(path: string){
-    this.router.navigate([path]);
-  }
+  constructor(
+    private readonly servicioService: ServicioService,
+    private readonly router: Router,
+    private readonly authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.authService.usuarioHome().subscribe({
-      next: (data) => {
-        this.usuario = data;
-        this.usuario = JSON.parse(data);
-        console.log(this.usuario)
-        this.traerServicios();
-      },
-      error: (err) => {
-        console.error('Error al obtener el usuario:', err);
-      }
-    });
+    console.log('🏠 HomeProveedorComponent: Inicializando...');
+    this.loadUser();
   }
 
-  traerServicios(): void {
-    this.servicioService.obtenerServiciosPorProveedor(this.usuario.id).subscribe({
-      next: (data) => {
-        this.servicios = data;
-        console.log(this.servicios);
-      }
-    })
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
-  
-  eliminarServicio(servicio: any) {
-    // Confirmación antes de eliminar el servicio
+
+  /**
+   * Cargar información del usuario autenticado
+   */
+  private loadUser(): void {
+    this.authService.usuarioHome()
+      .pipe(take(1))
+      .subscribe({
+        next: (userData) => {
+          try {
+            const user = JSON.parse(userData);
+            this.providerId = user?.id ?? 0;
+            console.log('✅ Usuario cargado, providerId:', this.providerId);
+            this.loadServices();
+          } catch (error) {
+            console.error('❌ Error al parsear usuario:', error);
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error al obtener el usuario:', error);
+        }
+      });
+  }
+
+  /**
+   * Cargar servicios del proveedor
+   */
+  private loadServices(): void {
+    if (!this.providerId) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.servicioService.obtenerServiciosPorProveedor(this.providerId)
+      .pipe(take(1))
+      .subscribe({
+        next: (servicios) => {
+          this.servicios = servicios;
+          this.isLoading = false;
+          console.log('✅ Servicios cargados:', this.servicios.length);
+        },
+        error: (error) => {
+          console.error('❌ Error al obtener servicios:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  /**
+   * Navegar a una ruta específica
+   */
+  agregar(ruta: string): void {
+    // Guardar el ID del proveedor en sessionStorage para usar en otras páginas
+    sessionStorage.setItem('idProveedor', this.providerId.toString());
+    // Asegurarse de usar el formato con guiones que coincida con las rutas definidas
+    const formattedRoute = ruta === 'agregarservicio' ? 'agregar-servicio' : ruta;
+    this.router.navigate([`/proveedor/${formattedRoute}`]);
+  }
+
+  /**
+   * Navegar a una ruta con ID
+   */
+  navigateTo(ruta: string, id: number): void {
+    // Para rutas de edición que pertenecen al área de proveedor
+    if (ruta === 'editar-servicio' || ruta === 'editarservicio') {
+      this.router.navigate(['/proveedor/editar-servicio', id]);
+    } else {
+      // Para otras rutas como 'infoservicio' que están en el nivel superior
+      this.router.navigate([`/${ruta}`, id]);
+    }
+  }
+
+  /**
+   * Cambiar el estado de un servicio (activo/inactivo)
+   */
+  cambiarEstado(servicio: any): void {
+    const estadoAnterior = servicio.estado;
+    servicio.estado = !servicio.estado;
+
+    this.servicioService.actualizar(servicio._idServicio, servicio)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          console.log('✅ Estado del servicio actualizado:', servicio.nombre);
+        },
+        error: (error) => {
+          console.error('❌ Error al actualizar el estado del servicio:', error);
+          // Revertir el cambio en caso de error
+          servicio.estado = estadoAnterior;
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al actualizar el estado del servicio.',
+            icon: 'error',
+            confirmButtonColor: '#4a9c9f'
+          });
+        }
+      });
+  }
+
+  /**
+   * Eliminar un servicio
+   */
+  eliminarServicio(servicio: any): void {
     Swal.fire({
       title: '¿Estás seguro?',
-      text: `¿Seguro que deseas eliminar el servicio: ${servicio.nombre}?`,
+      text: `Se eliminará el servicio "${servicio.nombre}"`,
       icon: 'warning',
       showCancelButton: true,
+      confirmButtonColor: '#E82A3C',
+      cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#4a9c9f',
-      cancelButtonColor: '#d33',
+      cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        var index = this.servicios.indexOf(servicio);
-        this.servicios.splice(index, 1);
+        // Guardar referencia del array actual
+        const serviciosBackup = [...this.servicios];
         
-        // Llamada al servicio para eliminar el servicio en el backend
-        this.servicioService.eliminar(servicio._idServicio).subscribe({
-          next: () => {
-            console.log("Servicio eliminado correctamente");
-  
-            // Alerta de éxito después de eliminar el servicio
-            Swal.fire({
-              title: '¡Eliminado!',
-              text: 'El servicio se ha eliminado correctamente.',
-              icon: 'success',
-              confirmButtonColor: '#4a9c9f',
-              confirmButtonText: 'Aceptar'
-            });
-          },
-          error: (err) => {
-            console.error("Error al eliminar:", err);
-  
-            // Alerta de error si no se pudo eliminar el servicio
-            Swal.fire({
-              title: 'Error',
-              text: 'Hubo un problema al eliminar el servicio.',
-              icon: 'error',
-              confirmButtonColor: '#4a9c9f',
-              confirmButtonText: 'Aceptar'
-            });
-          }
-        });
+        // Optimistic update: remover del array inmediatamente
+        this.servicios = this.servicios.filter(s => s._idServicio !== servicio._idServicio);
+
+        this.servicioService.eliminar(servicio._idServicio)
+          .pipe(take(1))
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: '¡Eliminado!',
+                text: 'El servicio se ha eliminado correctamente.',
+                icon: 'success',
+                confirmButtonColor: '#4a9c9f'
+              });
+            },
+            error: (error) => {
+              console.error('❌ Error al eliminar el servicio:', error);
+              // Revertir cambios en caso de error
+              this.servicios = serviciosBackup;
+              Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al eliminar el servicio.',
+                icon: 'error',
+                confirmButtonColor: '#4a9c9f'
+              });
+            }
+          });
       }
     });
   }
-  
-  cambiarEstado(servicio: any) {
-    servicio.estado = !servicio.estado; // Cambia el estado localmente
-  
-    // Llamada al servicio para actualizar el estado en el backend
-    this.servicioService.actualizar(servicio._idServicio, servicio).subscribe({
-      next: () => {
-        // Alerta de éxito al cambiar el estado
-        Swal.fire({
-          title: 'Estado actualizado',
-          text: `El estado del servicio ha sido cambiado a ${servicio.estado ? 'activo' : 'inactivo'}.`,
-          icon: 'success',
-          confirmButtonColor: '#4a9c9f',
-          confirmButtonText: 'Aceptar'
-        });
-      },
-      error: (err) => {
-        console.error('Error al actualizar el estado del servicio:', err);
-  
-        // Alerta de error si no se pudo actualizar el estado
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un problema al actualizar el estado del servicio.',
-          icon: 'error',
-          confirmButtonColor: '#4a9c9f',
-          confirmButtonText: 'Aceptar'
-        });
-      }
-    });
-  }
-  
-}  
-        
-  
+}
+
+
 
 

@@ -1,0 +1,174 @@
+<div class="task-form-container">
+  <!-- Hero Header -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="hero-title">
+        <i class="fas fa-edit"></i>
+        <h1>{{ isEditing ? 'Editar Tarea' : 'Nueva Tarea' }}</h1>
+      </div>
+      <p class="hero-subtitle">
+        {{ isEditing ? 'Modifica los detalles de la tarea' : 'Crea una nueva tarea y asígnala' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <!-- Información Básica -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-info-circle"></i>
+          <h2>Información Básica</h2>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="title">
+            <i class="fas fa-heading"></i>
+            Título <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="title" 
+            formControlName="title" 
+            placeholder="Ej: Implementar sistema de notificaciones"
+            [class.error]="form.get('title')?.invalid && form.get('title')?.touched"
+          />
+          <span class="error-message" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            El título es requerido
+          </span>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="description">
+            <i class="fas fa-align-left"></i>
+            Descripción
+          </label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="4"
+            placeholder="Describe los detalles de la tarea..."
+          ></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="project">
+            <i class="fas fa-folder"></i>
+            Proyecto / Iniciativa
+          </label>
+          <input 
+            type="text" 
+            id="project" 
+            formControlName="project" 
+            placeholder="Ej: Sistema de gestión I-Wellness"
+          />
+        </div>
+      </div>
+
+      <!-- Asignación y Fechas -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-user-check"></i>
+          <h2>Asignación y Fechas</h2>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="responsibleName">
+              <i class="fas fa-user"></i>
+              Responsable
+            </label>
+            <input 
+              type="text" 
+              id="responsibleName" 
+              formControlName="responsibleName" 
+              placeholder="Nombre del responsable"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="dueDate">
+              <i class="fas fa-calendar-alt"></i>
+              Fecha de vencimiento
+            </label>
+            <input 
+              type="date" 
+              id="dueDate" 
+              formControlName="dueDate"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Prioridad y Estado -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-sliders-h"></i>
+          <h2>Configuración</h2>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="priority">
+              <i class="fas fa-exclamation-circle"></i>
+              Prioridad
+            </label>
+            <select id="priority" formControlName="priority" class="custom-select">
+              <option value="LOW">Baja</option>
+              <option value="MEDIUM">Media</option>
+              <option value="HIGH">Alta</option>
+              <option value="URGENT">Urgente</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="status">
+              <i class="fas fa-tasks"></i>
+              Estado
+            </label>
+            <select id="status" formControlName="status" class="custom-select">
+              <option value="TODO">Por Hacer</option>
+              <option value="IN_PROGRESS">En Progreso</option>
+              <option value="DONE">Completada</option>
+              <option value="CANCELLED">Cancelada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="progress">
+            <i class="fas fa-chart-line"></i>
+            Progreso: <span class="progress-value">{{ form.get('progress')?.value || 0 }}%</span>
+          </label>
+          <div class="progress-input-wrapper">
+            <input 
+              type="range" 
+              id="progress" 
+              formControlName="progress" 
+              min="0" 
+              max="100" 
+              step="5"
+              class="range-slider"
+            />
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" [style.width.%]="form.get('progress')?.value || 0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" routerLink="/tasks">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn-save" [disabled]="form.invalid">
+          <i class="fas fa-save"></i>
+          {{ isEditing ? 'Actualizar Tarea' : 'Crear Tarea' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

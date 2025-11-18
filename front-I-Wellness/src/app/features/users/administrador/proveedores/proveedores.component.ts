@@ -25,6 +25,14 @@ export class ProveedoresComponent {
     this.router.navigate([path]);
   }
 
+  /**
+   * Navegar al perfil del proveedor
+   */
+  verPerfilProveedor(id: number) {
+    // Navegar a la ruta de perfil dentro del área de admin
+    this.router.navigate(['/admin/ver-perfil', id]);
+  }
+
   // Método para cargar todos los turistas
   cargarProveedores(): void {
     this.adminService.obtenerProveedores().subscribe(
@@ -37,6 +45,18 @@ export class ProveedoresComponent {
         console.error('Error al obtener los proveedores', error);
       }
     );
+  }
+
+  /**
+   * Contar empresas únicas
+   */
+  getEmpresasUnicas(): number {
+    const empresas = new Set(
+      this.proveedores
+        .filter(p => p.proveedor?.nombre_empresa)
+        .map(p => p.proveedor.nombre_empresa)
+    );
+    return empresas.size;
   }
 
   deleteProveedor(id: number) {

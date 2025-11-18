@@ -1,25 +1,33 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+
+  private readonly userIdSubject = new BehaviorSubject<number | null>(this.getCurrentUserIdSynchronous());
+  readonly userId$ = this.userIdSubject.asObservable();
+
+  private readonly userRoleSubject = new BehaviorSubject<string | null>(this.getCurrentUserRole());
+  readonly userRole$ = this.userRoleSubject.asObservable();
+
   private apiUrl = 'http://localhost:8082/auth'; // URL completa al backend
-  
+  //private apiUrl = 'http://localhost:8765/api/auth';
+
   constructor(private http: HttpClient) { }
 
   // Método para el login
   login(correo: string, contraseña: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  
+
     const body = {
       correo: correo,
       contraseña: contraseña
     };
-  
+
     return this.http.post(`${this.apiUrl}/login`, body, {
       headers,
       responseType: 'text' // JWT en texto plano
@@ -30,32 +38,49 @@ export class AuthService {
         }
       }),
       switchMap((token: string) => {
-        // Una vez que tenemos el token, obtenemos el rol del usuario
-        return this.getUsuarioActual().pipe(
-          map((rol: string) => {
-            // Guardamos el rol
-            localStorage.setItem('rol', rol);
-            
-            // Devolvemos un objeto con el token y el rol
-            return { token, rol };
-          })
-        );
-      }),
+      // Once we have the token, get the user info including ID
+      return this.getUserInfo().pipe(
+        tap((userInfo: any) => {
+          console.log('User Info received in login:', userInfo); // Log para ver qué se recibe
+          // Store the user ID in localStorage
+          localStorage.setItem('USER_ID', userInfo.id.toString());
+          // Store the role as well
+          const userRole = userInfo.rol || '';
+          localStorage.setItem('rol', userRole); // FIX: Changed from userInfo.role to userInfo.rol
+          console.log('Role stored in localStorage:', userRole); // Log para confirmar el rol
+          this.userIdSubject.next(userInfo.id);
+          this.userRoleSubject.next(userRole); // Update role subject
+        }),
+        map((userInfo: any) => {
+          return {
+            token,
+            rol: userInfo.rol, // FIX: Changed from userInfo.role to userInfo.rol
+            userInfo
+          };
+        })
+      );
+    }),
       catchError(error => {
         console.error('Error en login:', error);
+        // Limpiar localStorage en caso de error de login para evitar estado inconsistente
+        localStorage.removeItem('token');
+        localStorage.removeItem('USER_ID');
+        localStorage.removeItem('rol');
+        this.userIdSubject.next(null);
+        this.userRoleSubject.next(null);
         return throwError(() => new Error(error.error || 'Error en el inicio de sesión'));
       })
     );
   }
 
- 
+
 
   getUsuarioActual(): Observable<string> {
     const token = this.getToken();
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get(`${this.apiUrl}/role`, {
       headers,
       responseType: 'text' // evitar el error de JSON.parse
@@ -72,7 +97,7 @@ export class AuthService {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get(`${this.apiUrl}/info`, {
       headers,
       responseType: 'text' // evitar el error de JSON.parse
@@ -83,11 +108,11 @@ export class AuthService {
       })
     );
   }
-  
+
 
   registerProveedor(proveedorData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    
+
     const body = {
       nombre: proveedorData.nombre,
       correo: proveedorData.correo,
@@ -100,14 +125,14 @@ export class AuthService {
       telefonoEmpresa: proveedorData.telefonoEmpresa,
       foto: proveedorData.foto
     };
-  
-    return this.http.post<any>(`${this.apiUrl}/registro/Proveedor`, body, { 
+
+    return this.http.post<any>(`${this.apiUrl}/registro/Proveedor`, body, {
       headers,
       responseType: 'text' as 'json'
     }).pipe(
       switchMap((response) => {
         console.log('Respuesta de registro:', response);
-        
+
         // Después del registro exitoso, hacer login automático
         return this.login(proveedorData.correo, proveedorData.contraseña).pipe(
           map(loginResponse => ({
@@ -123,11 +148,11 @@ export class AuthService {
       })
     );
   }
-  
+
   // Similar para registerTurista
   registerTurista(turistaData: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    
+
     const body = {
       nombre: turistaData.nombre,
       correo: turistaData.correo,
@@ -140,16 +165,16 @@ export class AuthService {
       estadoCivil: turistaData.estadoCivil,
       foto: turistaData.foto
     };
-  
+
     console.log("turista: ",body)
 
-    return this.http.post<any>(`${this.apiUrl}/registro/Turista`, body, { 
+    return this.http.post<any>(`${this.apiUrl}/registro/Turista`, body, {
       headers,
       responseType: 'text' as 'json'
     }).pipe(
       switchMap((response) => {
         console.log('Respuesta de registro:', response);
-        
+
         // Después del registro exitoso, hacer login automático
         return this.login(turistaData.correo, turistaData.contraseña).pipe(
           map(loginResponse => ({
@@ -165,7 +190,7 @@ export class AuthService {
       })
     );
   }
-  
+
   // Verificar si el usuario está autenticado
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
@@ -186,6 +211,10 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('USER_ID');
+    localStorage.removeItem('rol');
+    this.userIdSubject.next(null);
+    this.userRoleSubject.next(null);
   }
 
   getUserInfo(): Observable<any> {
@@ -193,11 +222,11 @@ export class AuthService {
     if (!token) {
       return throwError(() => new Error('No hay token disponible'));
     }
-  
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-  
+
     return this.http.get<any>(`${this.apiUrl}/info`, { headers }).pipe(
       map(response => {
         // Si la respuesta es una cadena JSON, la parseamos
@@ -212,13 +241,18 @@ export class AuthService {
       })
     );
   }
-  
+
   getCurrentUserId(): Observable<number> {
     return this.getUserInfo().pipe(
       map(userInfo => userInfo.id)
     );
   }
-  
+
+  public getCurrentUserIdSynchronous(): number | null {
+  const id = localStorage.getItem('USER_ID');
+  return id ? +id : null;
+}
+
   getCurrentUserRole(): string | null {
     return localStorage.getItem('rol');
   }

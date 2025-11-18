@@ -1,109 +1,187 @@
-
- <main>
-      <h2>Nuestras Recomendaciones para tu Estadia</h2>
-      <div class="recommendations">
-        <div class="search-bar">
+<div class="turista-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-spa"></i>
+      </div>
+      <h1>Descubre Tu Bienestar</h1>
+      <p class="hero-subtitle">Experiencias únicas de turismo wellness en La Fortuna, Costa Rica</p>
+      
+      <!-- Barra de Búsqueda -->
+      <div class="search-bar-hero">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
           <input
             type="text"
-            placeholder="🔍 Buscar servicios..."
+            placeholder="Buscar servicios de bienestar, spa, yoga..."
             [(ngModel)]="searchTerm"
             (input)="filtrarServiciosPorBusqueda()"
           />
+          <button class="clear-btn" *ngIf="searchTerm" (click)="searchTerm = ''; filtrarServiciosPorBusqueda()">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-              <!-- CARRUSEL DE RESULTADOS DE BÚSQUEDA -->
-        <section *ngIf="hayBusquedaActiva()">
-          <h3>Resultados de búsqueda</h3>
+      </div>
+    </div>
+  </section>
 
-           <!-- Mensaje si no hay resultados -->
-          <p *ngIf="serviciosFiltradosBusqueda.length === 0" class="no-results">
-            <span>😕 No se encontraron resultados para "<strong>{{ searchTerm }}</strong>"</span>
-          </p>
-          <div class="scroll-wrapper">
-            <button
-              class="scroll-btn left"
-              [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollLeft }"
-              (click)="scrollLeft('busqueda')"
-            >&#10094;</button>
+  <!-- Recommendations Section -->
+  <main class="recommendations-section">
+    
+    <!-- RESULTADOS DE BÚSQUEDA -->
+    <section *ngIf="hayBusquedaActiva()" class="carousel-section search-results">
+      <div class="section-header">
+        <h3>
+          <i class="fas fa-search"></i>
+          Resultados de búsqueda
+        </h3>
+        <span class="results-count">{{ serviciosFiltradosBusqueda.length }} resultados</span>
+      </div>
 
-            <div
-              class="card-container"
-              id="busqueda"
-              (scroll)="onScroll('busqueda')"
-              #paraTiContainer
-            >
-              <div class="card" *ngFor="let servicio of serviciosFiltradosBusqueda" (click)="navigateToDetalle(servicio._idServicio)">
-                <img [src]="servicio.imagen" [alt]="servicio.nombre">
-                <span>{{ servicio.nombre }}</span>
+      <!-- Mensaje si no hay resultados -->
+      <div *ngIf="serviciosFiltradosBusqueda.length === 0" class="no-results">
+        <i class="fas fa-search"></i>
+        <h4>No se encontraron resultados</h4>
+        <p>No encontramos servicios que coincidan con "<strong>{{ searchTerm }}</strong>"</p>
+        <p class="suggestion">Intenta con otros términos como: spa, masajes, yoga, hotel</p>
+      </div>
+
+      <div class="scroll-wrapper" *ngIf="serviciosFiltradosBusqueda.length > 0">
+        <button
+          class="scroll-btn left"
+          [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollLeft }"
+          (click)="scrollLeft('busqueda')"
+          aria-label="Desplazar a la izquierda">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div
+          class="card-container"
+          id="busqueda"
+          (scroll)="onScroll('busqueda')">
+          <div class="service-card" *ngFor="let servicio of serviciosFiltradosBusqueda" (click)="navigateToDetalle(servicio._idServicio)">
+            <div class="card-image-wrapper">
+              <img [src]="servicio.imagen" [alt]="servicio.nombre">
+              <div class="card-overlay">
+                <span class="card-price">{{ servicio.precio === 0 ? 'Gratis' : '$' + servicio.precio }}</span>
               </div>
             </div>
-
-            <button
-              class="scroll-btn right"
-              [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollRight }"
-              (click)="scrollRight('busqueda')"
-            >&#10095;</button>
+            <div class="card-content">
+              <h4>{{ servicio.nombre }}</h4>
+              <p class="card-description">{{ servicio.descripcion }}</p>
+            </div>
           </div>
-        </section>
+        </div>
 
-        <!-- SECCIÓN AGRUPADA POR PREFERENCIAS SOLO SI NO HAY BÚSQUEDA -->
-        <section *ngIf="!hayBusquedaActiva()">
-          <h3>Nuestra seleccion de servicios para ti</h3>
-          <div class="scroll-wrapper">
-            <button
-              class="scroll-btn left"
-              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollLeft }"
-              (click)="scrollLeft('para-ti')"
-            >&#10094;</button>
+        <button
+          class="scroll-btn right"
+          [ngClass]="{ 'hidden': !scrollStates['busqueda']?.canScrollRight }"
+          (click)="scrollRight('busqueda')"
+          aria-label="Desplazar a la derecha">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </section>
 
-            <div
-              class="card-container"
-              id="para-ti"
-              (scroll)="onScroll('para-ti')"
-            >
-              <div class="card" *ngFor="let servicio of serviciosFiltrados" (click)="navigateToDetalle(servicio._idServicio)">
-                <img [src]="servicio.imagen" [alt]="servicio.nombre">
-                <span>{{ servicio.nombre }}</span>
+    <!-- SECCIÓN "PARA TI" SOLO SI NO HAY BÚSQUEDA -->
+    <section *ngIf="!hayBusquedaActiva()" class="carousel-section">
+      <div class="section-header">
+        <h3>
+          <i class="fas fa-heart"></i>
+          Seleccionados especialmente para ti
+        </h3>
+        <p class="section-subtitle">Basado en tus preferencias de bienestar</p>
+      </div>
+
+      <div class="scroll-wrapper">
+        <button
+          class="scroll-btn left"
+          [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollLeft }"
+          (click)="scrollLeft('para-ti')"
+          aria-label="Desplazar a la izquierda">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div
+          class="card-container"
+          id="para-ti"
+          (scroll)="onScroll('para-ti')">
+          <div class="service-card featured" *ngFor="let servicio of serviciosFiltrados" (click)="navigateToDetalle(servicio._idServicio)">
+            <div class="card-image-wrapper">
+              <img [src]="servicio.imagen" [alt]="servicio.nombre">
+              <div class="featured-badge">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="card-overlay">
+                <span class="card-price">{{ servicio.precio === 0 ? 'Gratis' : '$' + servicio.precio }}</span>
               </div>
             </div>
-
-            <button
-              class="scroll-btn right"
-              [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollRight }"
-              (click)="scrollRight('para-ti')"
-            >&#10095;</button>
+            <div class="card-content">
+              <h4>{{ servicio.nombre }}</h4>
+              <p class="card-description">{{ servicio.descripcion }}</p>
+            </div>
           </div>
-        </section>
+        </div>
 
-        <!-- AGRUPADOS POR PREFERENCIA -->
-        <section *ngIf="!hayBusquedaActiva()">
-          <div *ngFor="let grupo of serviciosAgrupadosPorPreferencia; let i = index">
-            <h3>{{ grupo.preferencia.nombre }}</h3>
-            <div class="scroll-wrapper">
-              <button
-                class="scroll-btn left"
-                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollLeft }"
-                (click)="scrollLeft('grupo-' + i)"
-              >&#10094;</button>
+        <button
+          class="scroll-btn right"
+          [ngClass]="{ 'hidden': !scrollStates['para-ti']?.canScrollRight }"
+          (click)="scrollRight('para-ti')"
+          aria-label="Desplazar a la derecha">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </section>
 
-              <div
-                class="card-container"
-                [id]="'grupo-' + i"
-                (scroll)="onScroll('grupo-' + i)"
-              >
-                <div class="card" *ngFor="let servicio of grupo.servicios" (click)="navigateToDetalle(servicio._idServicio)">
-                  <img [src]="servicio.imagen" [alt]="servicio.nombre">
-                  <span>{{ servicio.nombre }}</span>
+    <!-- AGRUPADOS POR PREFERENCIA -->
+    <section *ngIf="!hayBusquedaActiva()">
+      <div *ngFor="let grupo of serviciosAgrupadosPorPreferencia; let i = index" class="carousel-section category-section">
+        <div class="section-header">
+          <h3>
+            <i class="fas fa-spa"></i>
+            {{ grupo.preferencia.nombre }}
+          </h3>
+          <span class="services-count">{{ grupo.servicios.length }} servicios</span>
+        </div>
+
+        <div class="scroll-wrapper">
+          <button
+            class="scroll-btn left"
+            [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollLeft }"
+            (click)="scrollLeft('grupo-' + i)"
+            aria-label="Desplazar a la izquierda">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div
+            class="card-container"
+            [id]="'grupo-' + i"
+            (scroll)="onScroll('grupo-' + i)">
+            <div class="service-card" *ngFor="let servicio of grupo.servicios" (click)="navigateToDetalle(servicio._idServicio)">
+              <div class="card-image-wrapper">
+                <img [src]="servicio.imagen" [alt]="servicio.nombre">
+                <div class="card-overlay">
+                  <span class="card-price">{{ servicio.precio === 0 ? 'Gratis' : '$' + servicio.precio }}</span>
                 </div>
               </div>
-
-              <button
-                class="scroll-btn right"
-                [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollRight }"
-                (click)="scrollRight('grupo-' + i)"
-              >&#10095;</button>
+              <div class="card-content">
+                <h4>{{ servicio.nombre }}</h4>
+                <p class="card-description">{{ servicio.descripcion }}</p>
+              </div>
             </div>
           </div>
-        </section>
-      
+
+          <button
+            class="scroll-btn right"
+            [ngClass]="{ 'hidden': !scrollStates['grupo-' + i]?.canScrollRight }"
+            (click)="scrollRight('grupo-' + i)"
+            aria-label="Desplazar a la derecha">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
-    </main>
+    </section>
+
+  </main>
+</div>

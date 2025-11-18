@@ -1,31 +1,115 @@
-<div class="container">
-    <h2>Aquí está la lista de proveedores:</h2>
-  
-    <button class="add-service-btn" (click)="navigateTo('crearproveedor')">
-      Añadir nuevo proveedor <span>+</span>
-    </button>
+<div class="proveedores-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-store"></i>
+      </div>
+      <h1>Gestión de Proveedores</h1>
+      <p class="hero-subtitle">Administra y supervisa todos los proveedores de servicios de bienestar</p>
+      <button class="add-provider-btn" (click)="navigateTo('crearproveedor')">
+        <i class="fas fa-plus-circle"></i>
+        Añadir Nuevo Proveedor
+      </button>
+    </div>
+  </section>
 
-    <div class="services-box">
-      <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
-  
-      <div *ngFor="let proveedor of proveedores" class="service-card">
-        <!-- Imagen del proveedor o placeholder -->
-        <img [src]="proveedor.foto || 'https://via.placeholder.com/150'" 
-             alt="Imagen de empresa" 
-             class="service-image">
-  
-        <!-- Información de la empresa -->
-        <div class="service-info">
-          <h3>{{ proveedor.nombre }}</h3>
-          <p>{{ proveedor.proveedor.nombre_empresa }}</p>
+  <!-- Main Content -->
+  <section class="content-section">
+    <!-- Header con estadísticas -->
+    <div class="stats-header" *ngIf="proveedores.length > 0">
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ proveedores.length }}</span>
+          <span class="stat-label">Proveedores Totales</span>
         </div>
-  
-        <!-- Acciones -->
-        <div class="service-actions">
-          <button class="edit-btn" (click)="navigateTo('perfilproveedor/' + proveedor.id)">✏️</button>
-          <button class="delete-btn" (click)="deleteProveedor(proveedor.id)">🗑</button>  
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-building"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ getEmpresasUnicas() }}</span>
+          <span class="stat-label">Empresas Registradas</span>
         </div>
       </div>
     </div>
-  </div>
-  
+
+    <!-- Estado de error -->
+    <div class="error-state" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ errorMessage }}</p>
+      <button class="retry-btn" (click)="cargarProveedores()">
+        <i class="fas fa-redo"></i>
+        Reintentar
+      </button>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="proveedores.length === 0 && !errorMessage">
+      <div class="empty-icon">
+        <i class="fas fa-store-slash"></i>
+      </div>
+      <h3>No hay proveedores registrados</h3>
+      <p>Comienza agregando el primer proveedor de servicios</p>
+      <button class="add-provider-btn-secondary" (click)="navigateTo('crearproveedor')">
+        <i class="fas fa-plus"></i>
+        Crear Primer Proveedor
+      </button>
+    </div>
+
+    <!-- Grid de proveedores -->
+    <div class="providers-grid" *ngIf="proveedores.length > 0 && !errorMessage">
+      <div class="provider-card" *ngFor="let proveedor of proveedores; let i = index" [style.animation-delay.ms]="i * 50">
+        <!-- Imagen del proveedor -->
+        <div class="card-image-container">
+          <img [src]="proveedor.foto || 'https://via.placeholder.com/300x200?text=Sin+Imagen'" 
+               [alt]="proveedor.nombre" 
+               class="card-image">
+          <div class="card-overlay"></div>
+          
+          <!-- Badge de verificación -->
+          <div class="verified-badge" *ngIf="proveedor.proveedor?.nombre_empresa">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="card-content">
+          <div class="provider-info">
+            <h3 class="provider-name">{{ proveedor.nombre }}</h3>
+            <p class="company-name" *ngIf="proveedor.proveedor?.nombre_empresa">
+              <i class="fas fa-building"></i>
+              {{ proveedor.proveedor.nombre_empresa }}
+            </p>
+            <div class="provider-details">
+              <span class="detail-item" *ngIf="proveedor.email">
+                <i class="fas fa-envelope"></i>
+                {{ proveedor.email }}
+              </span>
+              <span class="detail-item" *ngIf="proveedor.telefono">
+                <i class="fas fa-phone"></i>
+                {{ proveedor.telefono }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="card-actions">
+            <button class="action-btn view-btn" 
+                    (click)="verPerfilProveedor(proveedor.id)"
+                    title="Ver perfil completo">
+              <i class="fas fa-eye"></i>
+              <span>Ver Perfil</span>
+            </button>
+            <button class="action-btn delete-btn" 
+                    (click)="deleteProveedor(proveedor.id)"
+                    title="Eliminar proveedor">
+              <i class="fas fa-trash-alt"></i>
+              <span>Eliminar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

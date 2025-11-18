@@ -1,66 +1,187 @@
-<div class="service-container" *ngIf="servicio">
-  <h2 class="service-title">{{ servicio.nombre }}</h2>
+<app-universal-header></app-universal-header>
 
-  <div class="service-header">
-    <img [src]="servicio.imagen" alt="{{ servicio.nombre }}" class="service-image">
-    <div class="service-meta">
-      <p class="service-description">{{ servicio.descripcion }}</p>
-      <p class="service-price" *ngIf="servicio.precio">
-        💰 <strong>Precio (USD):</strong> {{ servicio.precio | currency:'USD' }}
-      </p>
-      <p class="service-price" *ngIf="servicio.precio && tipoCambio">
-        💰 <strong>Precio (CRC):</strong> {{ servicio.precio * tipoCambio | currency:'CRC' }}
-      </p>  
-      <p class="service-hours" *ngIf="servicio.horario">
-        ⏰ <strong>Horario:</strong> {{ servicio.horario }}
-      </p>
+<div class="info-servicio-container" *ngIf="servicio">
+  <!-- Hero Section con Imagen Grande -->
+  <section class="hero-servicio">
+    <div class="hero-image-wrapper">
+      <img [src]="servicio.imagen" [alt]="servicio.nombre" class="hero-image">
+      <div class="hero-overlay">
+        <h1 class="servicio-nombre">{{ servicio.nombre }}</h1>
+        <div class="servicio-badge" [class.free]="servicio.precio === 0">
+          <i class="fas fa-tag"></i>
+          {{ servicio.precio === 0 ? 'Gratis' : (servicio.precio | currency:'USD') }}
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="proveedor-info" *ngIf="proveedor">
-  <h3>🏨 Servicio ofrecido por</h3>
-  <div class="proveedor-contenido">
-    <img *ngIf="proveedor.foto" 
-         [src]="proveedor.foto" 
-         alt="{{ proveedor.nombre }}" 
-         class="proveedor-foto">
-    
-    <div class="proveedor-detalles">
-      <p><strong>Empresa:</strong> {{ proveedor.proveedorInfo.nombre_empresa }}</p>
-      <p><strong>Contacto:</strong> {{ proveedor.nombre }}</p>
-      <p><strong>Cargo:</strong> {{ proveedor.proveedorInfo.cargoContacto }}</p>
-      <p><strong>Correo:</strong> {{ proveedor.correo }}</p>
+  <!-- Contenido Principal -->
+  <section class="content-section">
+    <div class="content-grid">
+      <!-- Columna Izquierda: Info del Servicio -->
+      <div class="info-column">
+        <!-- Descripción -->
+        <div class="info-card">
+          <h3 class="card-title">
+            <i class="fas fa-info-circle"></i>
+            Descripción
+          </h3>
+          <p class="servicio-descripcion">{{ servicio.descripcion }}</p>
+        </div>
+
+        <!-- Detalles del Servicio -->
+        <div class="info-card">
+          <h3 class="card-title">
+            <i class="fas fa-list-ul"></i>
+            Detalles del Servicio
+          </h3>
+          <div class="detalles-list">
+            <div class="detalle-item">
+              <i class="fas fa-dollar-sign"></i>
+              <div>
+                <strong>Precio (USD):</strong>
+                <span>{{ servicio.precio === 0 ? 'Gratis' : (servicio.precio | currency:'USD') }}</span>
+              </div>
+            </div>
+            <div class="detalle-item" *ngIf="servicio.precio && tipoCambio">
+              <i class="fas fa-money-bill-wave"></i>
+              <div>
+                <strong>Precio (CRC):</strong>
+                <span>{{ servicio.precio * tipoCambio | currency:'CRC' }}</span>
+              </div>
+            </div>
+            <div class="detalle-item" *ngIf="servicio.horario">
+              <i class="fas fa-clock"></i>
+              <div>
+                <strong>Horario:</strong>
+                <span>{{ servicio.horario }}</span>
+              </div>
+            </div>
+            <div class="detalle-item" *ngIf="servicio.tiempoAproximado">
+              <i class="fas fa-hourglass-half"></i>
+              <div>
+                <strong>Duración:</strong>
+                <span>{{ servicio.tiempoAproximado }} minutos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información del Proveedor -->
+        <div class="info-card proveedor-card" *ngIf="proveedor">
+          <h3 class="card-title">
+            <i class="fas fa-building"></i>
+            Proveedor del Servicio
+          </h3>
+          <div class="proveedor-content">
+            <img 
+              *ngIf="proveedor.foto" 
+              [src]="proveedor.foto" 
+              [alt]="proveedor.nombre" 
+              class="proveedor-avatar">
+            <div class="proveedor-info">
+              <h4>{{ proveedor.proveedorInfo.nombre_empresa }}</h4>
+              <div class="proveedor-detalle">
+                <i class="fas fa-user"></i>
+                <span>{{ proveedor.nombre }}</span>
+              </div>
+              <div class="proveedor-detalle">
+                <i class="fas fa-briefcase"></i>
+                <span>{{ proveedor.proveedorInfo.cargoContacto }}</span>
+              </div>
+              <div class="proveedor-detalle">
+                <i class="fas fa-envelope"></i>
+                <span>{{ proveedor.correo }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Reserva -->
+      <div class="reserva-column" *ngIf="usuario && servicio">
+        <div class="reserva-card">
+          <h3 class="card-title">
+            <i class="fas fa-calendar-check"></i>
+            Reservar Servicio
+          </h3>
+          
+          <div class="reserva-form">
+            <mat-form-field appearance="fill" class="fecha-field">
+              <mat-label>
+                <i class="fas fa-calendar"></i>
+                Selecciona una fecha
+              </mat-label>
+              <input 
+                matInput
+                [matDatepicker]="picker"
+                [(ngModel)]="fechaSeleccionada"
+                [min]="minFechaObj"
+                [matDatepickerFilter]="filtrarDiasDisponibles"
+                required>
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="hora-field">
+              <mat-label>
+                <i class="fas fa-clock"></i>
+                Selecciona una hora
+              </mat-label>
+              <input 
+                matInput 
+                [matTimepicker]="timepicker" 
+                [(ngModel)]="horaSeleccionada" 
+                required />
+              <mat-timepicker-toggle matSuffix [for]="timepicker"></mat-timepicker-toggle>
+              <mat-timepicker #timepicker></mat-timepicker>
+            </mat-form-field>
+
+            <button class="btn-reservar" (click)="hacerReserva()">
+              <i class="fas fa-check-circle"></i>
+              Confirmar Reserva
+            </button>
+          </div>
+
+          <div class="reserva-info">
+            <i class="fas fa-info-circle"></i>
+            <span>Selecciona fecha y hora dentro del horario disponible</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  </section>
 
-
-  <div *ngIf="usuario && servicio" class="reserva-container">
-    <h3>Reservar este servicio</h3>
-
-    <div class="reserva-campos">
-      <mat-form-field appearance="fill">
-        <mat-label>📅 Selecciona una fecha</mat-label>
-        <input matInput 
-              [matDatepicker]="picker"
-              [(ngModel)]="fechaSeleccionada" 
-              [min]="minFechaObj"
-              [matDatepickerFilter]="filtrarDiasDisponibles"
-              required>
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>⏰ Selecciona una hora:</mat-label>
-        <input matInput [matTimepicker]="timepicker" [(ngModel)]="horaSeleccionada" required />
-        <mat-timepicker-toggle matSuffix [for]="timepicker"></mat-timepicker-toggle>
-        <mat-timepicker #timepicker></mat-timepicker>
-      </mat-form-field>
-
-      <button (click)="hacerReserva()" class="btn-reservar">
-        Reservar
-      </button>
+  <!-- Sección de Reseñas -->
+  <section class="reviews-section">
+    <div class="section-header">
+      <h2>
+        <i class="fas fa-star"></i>
+        Reseñas y Opiniones
+      </h2>
     </div>
-  </div>
+
+    <!-- Formulario de Reseña -->
+    <div class="review-form-container">
+      <app-review-form
+        [entityType]="'servicio'"
+        [entityId]="servicioId">
+      </app-review-form>
+    </div>
+
+    <!-- Mensaje Informativo -->
+    <div *ngIf="currentUserRole === 'Turista' && !hasReservation && !canWriteReview()" 
+         class="info-banner">
+      <i class="fas fa-info-circle"></i>
+      <p>Debes tener una reserva confirmada para poder escribir una reseña sobre este servicio.</p>
+    </div>
+
+    <!-- Display de Reseñas -->
+    <div class="reviews-display-container">
+      <app-review-display
+        [entityType]="'servicio'"
+        [entityId]="servicioId">
+      </app-review-display>
+    </div>
+  </section>
 </div>

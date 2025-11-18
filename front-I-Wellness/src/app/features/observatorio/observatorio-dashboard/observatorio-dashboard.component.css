@@ -1,0 +1,813 @@
+/* Observatorio Dashboard - Diseño moderno y estético */
+
+/* ========================================
+   VARIABLES Y ESTILOS BASE
+======================================== */
+:host {
+  --primary-color: #00897b;
+  --secondary-color: #26a69a;
+  --accent-color: #4db6ac;
+  --danger-color: #f44336;
+  --warning-color: #ff9800;
+  --success-color: #4caf50;
+  --info-color: #2196f3;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-card: #ffffff;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --border-color: #e0e0e0;
+  
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.15);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+.observatorio-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+  padding-bottom: var(--spacing-xl);
+}
+
+/* ========================================
+   HEADER
+======================================== */
+.observatorio-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+  padding: var(--spacing-lg) var(--spacing-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-icon {
+  font-size: 48px;
+  background: rgba(255,255,255,0.2);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.title-section h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+  margin: var(--spacing-xs) 0 0 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.update-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255,255,255,0.95);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.back-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.back-btn .material-icons {
+  font-size: 20px;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn .material-icons.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.last-update {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.9rem;
+  background: rgba(0,0,0,0.2);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================
+   LOADING & ERROR STATES
+======================================== */
+.loading-state,
+.error-state {
+  max-width: 600px;
+  margin: var(--spacing-xl) auto;
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto var(--spacing-md);
+  border: 4px solid rgba(0,137,123,0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.error-state {
+  color: var(--danger-color);
+}
+
+.error-state .material-icons {
+  font-size: 64px;
+  margin-bottom: var(--spacing-md);
+}
+
+.retry-btn {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   DASHBOARD GRID
+======================================== */
+.dashboard-grid {
+  max-width: 1400px;
+  margin: var(--spacing-lg) auto;
+  padding: 0 var(--spacing-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* ========================================
+   CARDS
+======================================== */
+.dashboard-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.card-title h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-title .material-icons {
+  font-size: 32px;
+  color: var(--primary-color);
+}
+
+.view-details {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.view-details:hover {
+  background: rgba(0,137,123,0.1);
+  gap: var(--spacing-sm);
+}
+
+.card-content {
+  padding: var(--spacing-md);
+  flex: 1;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  min-height: 200px;
+}
+
+.error-content .material-icons {
+  font-size: 64px;
+  opacity: 0.5;
+}
+
+/* ========================================
+   CLIMA CARD
+======================================== */
+.clima-card .main-metric {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.temperature {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.feels-like {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-sm);
+}
+
+.weather-description {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.detail-item .material-icons {
+  font-size: 28px;
+  color: var(--info-color);
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ========================================
+   UV CARD
+======================================== */
+.uv-indicator {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto var(--spacing-md);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.uv-indicator::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.uv-value {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.uv-level {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: var(--spacing-xs);
+  text-transform: uppercase;
+}
+
+.uv-category {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.uv-recommendations {
+  background: #fff3e0;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.uv-recommendations h4 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--warning-color);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.uv-recommendations ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+.uv-recommendations li {
+  margin: var(--spacing-xs) 0;
+  color: var(--text-primary);
+}
+
+.uv-protection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: #ffebee;
+  color: var(--danger-color);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+}
+
+/* ========================================
+   VOLCÁN CARD
+======================================== */
+.volcano-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.status-indicator {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.status-indicator .material-icons {
+  font-size: 40px;
+  color: white;
+}
+
+.status-info h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.alert-level {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.volcano-description {
+  padding: var(--spacing-md);
+  background: #e3f2fd;
+  border-left: 4px solid var(--info-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.volcano-description p {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.tourism-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+}
+
+.tourism-status.safe {
+  background: #e8f5e9;
+  color: var(--success-color);
+}
+
+.tourism-status.warning {
+  background: #fff3e0;
+  color: var(--warning-color);
+}
+
+.tourism-status .material-icons {
+  font-size: 28px;
+}
+
+.last-update-volcano {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================
+   EVENTOS CARD
+======================================== */
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.event-item {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.event-item:hover {
+  background: #e0f2f1;
+  transform: translateX(4px);
+}
+
+.event-icon {
+  flex-shrink: 0;
+}
+
+.event-icon .material-icons {
+  font-size: 32px;
+  color: var(--primary-color);
+}
+
+.event-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-content h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.event-summary {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.event-date {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.event-date .material-icons {
+  font-size: 16px;
+}
+
+.event-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.event-link:hover {
+  gap: var(--spacing-sm);
+}
+
+.event-link .material-icons {
+  font-size: 18px;
+}
+
+.no-events {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  color: var(--text-secondary);
+}
+
+.no-events .material-icons {
+  font-size: 64px;
+  opacity: 0.5;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+.observatorio-footer {
+  background: white;
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-md);
+  box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.footer-section h3 {
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1.2rem;
+}
+
+.footer-section p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.data-sources {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.data-sources li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  color: var(--text-primary);
+}
+
+.data-sources .material-icons {
+  color: var(--primary-color);
+  font-size: 20px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.footer-nav a:hover {
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+  padding-left: var(--spacing-md);
+}
+
+.footer-nav .material-icons {
+  color: var(--primary-color);
+  font-size: 20px;
+}
+
+.footer-bottom {
+  max-width: 1400px;
+  margin: var(--spacing-lg) auto 0;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .title-section {
+    flex-direction: column;
+  }
+  
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .update-info {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .refresh-btn,
+  .last-update {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .observatorio-header {
+    padding: var(--spacing-md);
+  }
+  
+  .title-section h1 {
+    font-size: 1.25rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .temperature {
+    font-size: 3rem;
+  }
+  
+  .uv-indicator {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .uv-value {
+    font-size: 2.5rem;
+  }
+}

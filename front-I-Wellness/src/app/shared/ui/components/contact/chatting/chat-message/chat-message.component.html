@@ -1,0 +1,40 @@
+<div
+  class="message-container"
+  [class.own-message]="isOwn"
+  [class.other-message]="!isOwn"
+  [ngClass]="animationClass">
+
+  <!-- Avatar -->
+  <div class="avatar-container">
+    <img
+      title="Avatar de {{ displayName }}"
+      [src]="avatarUrl"
+      [alt]="displayName"
+      [title]="displayName"
+      class="avatar"
+      loading="lazy">
+  </div>
+
+  <!-- Message Content -->
+  <div class="message-content">
+    <!-- Message Bubble -->
+    <div
+      class="message-bubble"
+      [class.own-bubble]="isOwn"
+      [class.other-bubble]="!isOwn">
+      <p class="message-text">{{ message.content }}</p>
+    </div>
+
+    <!-- Message Meta -->
+    <div class="message-meta">
+      <span class="timestamp">{{ message.timestamp | date:'HH:mm' }}</span>
+
+      <!-- Status Icon (solo para mensajes propios) -->
+      <div class="status-container" *ngIf="isOwn && statusIcon">
+        <mat-icon
+          class="status-icon"
+          [ngClass]="statusClass">{{ statusIcon }}</mat-icon>
+      </div>
+    </div>
+  </div>
+</div>

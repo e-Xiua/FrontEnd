@@ -1,0 +1,148 @@
+<div class="task-detail-container" *ngIf="task$ | async as task">
+  <!-- Hero Header -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="hero-header">
+        <div class="hero-title">
+          <i class="fas fa-clipboard-check"></i>
+          <h1>Detalle de Tarea</h1>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-back" routerLink="/tasks">
+            <i class="fas fa-arrow-left"></i>
+            Volver
+          </button>
+          <button class="btn-edit" [routerLink]="['/tasks/edit', task.id]">
+            <i class="fas fa-edit"></i>
+            Editar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Task Info Card -->
+    <div class="task-card">
+      <!-- Header with Priority and Status -->
+      <div class="task-card-header">
+        <div class="header-left">
+          <span class="task-priority" [ngClass]="'priority-' + (task.priority?.toLowerCase() || 'medium')">
+            <i class="fas fa-flag"></i>
+            {{ getPriorityLabel(task.priority) }}
+          </span>
+          <span class="task-status" [ngClass]="'status-' + (task.status?.toLowerCase() || 'todo')">
+            <i [class]="getStatusIcon(task.status)"></i>
+            {{ getStatusLabel(task.status) }}
+          </span>
+        </div>
+        <div class="header-right" *ngIf="task.dueDate">
+          <span class="task-date" [class.overdue]="isOverdue(task.dueDate)">
+            <i class="fas fa-calendar-alt"></i>
+            {{ task.dueDate | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="task-title">{{ task.title }}</h2>
+
+      <!-- Project Badge -->
+      <div class="project-badge" *ngIf="task.project">
+        <i class="fas fa-folder"></i>
+        {{ task.project }}
+      </div>
+
+      <!-- Description -->
+      <div class="task-description" *ngIf="task.description">
+        <h3>
+          <i class="fas fa-align-left"></i>
+          Descripción
+        </h3>
+        <p>{{ task.description }}</p>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <!-- Responsible -->
+        <div class="detail-item" *ngIf="task.responsibleName">
+          <div class="detail-label">
+            <i class="fas fa-user"></i>
+            Responsable
+          </div>
+          <div class="detail-value">{{ task.responsibleName }}</div>
+        </div>
+
+        <!-- Progress -->
+        <div class="detail-item" *ngIf="task.progress !== undefined && task.progress !== null">
+          <div class="detail-label">
+            <i class="fas fa-chart-line"></i>
+            Progreso
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="task.progress"></div>
+            </div>
+            <span class="progress-text">{{ task.progress }}%</span>
+          </div>
+        </div>
+
+        <!-- Created At -->
+        <div class="detail-item" *ngIf="task.createdAt">
+          <div class="detail-label">
+            <i class="fas fa-clock"></i>
+            Creada
+          </div>
+          <div class="detail-value">{{ task.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+
+        <!-- Updated At -->
+        <div class="detail-item" *ngIf="task.updatedAt">
+          <div class="detail-label">
+            <i class="fas fa-sync"></i>
+            Actualizada
+          </div>
+          <div class="detail-value">{{ task.updatedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions" *ngIf="task.status !== 'DONE'">
+        <button class="action-btn" (click)="changeStatus(task, 'TODO')" *ngIf="task.status !== 'TODO'">
+          <i class="fas fa-clipboard-list"></i>
+          Marcar como Pendiente
+        </button>
+        <button class="action-btn" (click)="changeStatus(task, 'IN_PROGRESS')" *ngIf="task.status !== 'IN_PROGRESS'">
+          <i class="fas fa-play"></i>
+          Iniciar Tarea
+        </button>
+        <button class="action-btn success" (click)="changeStatus(task, 'DONE')">
+          <i class="fas fa-check"></i>
+          Completar Tarea
+        </button>
+        <button class="action-btn danger" (click)="deleteTask(task)" *ngIf="task.id">
+          <i class="fas fa-trash"></i>
+          Eliminar Tarea
+        </button>
+      </div>
+      
+      <!-- Completed Message -->
+      <div class="completion-message" *ngIf="task.status === 'DONE'">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <h4>Tarea Completada</h4>
+          <p>Esta tarea ha sido marcada como completada. Ya no están disponibles acciones de cambio de estado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div class="messages-section">
+      <div class="messages-header">
+        <i class="fas fa-comments"></i>
+        <h3>Comentarios y Discusión</h3>
+      </div>
+      <app-message-panel [taskId]="task.id"></app-message-panel>
+    </div>
+  </div>
+</div>

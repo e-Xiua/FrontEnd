@@ -1,0 +1,16 @@
+    <!-- Section 4: General Provider Map -->
+    <section class="map-display-section">
+        <h2 class="section-title">🗺️ Todos los Proveedores</h2>
+        <p class="section-description">
+            Explora todos los proveedores disponibles en el mapa.
+        </p>
+        <app-map-poi
+            [items]="(providers$ | async) || []"
+            [activeItemId]="(activeProviderId$ | async)"
+            (itemSelected)="onProviderMapItemSelected($event)"
+            (nextClicked)="onProviderMapNext()"
+            (previousClicked)="onProviderMapPrevious()"
+            [showCarousel]="true"
+            [showProviderCard]="true">
+        </app-map-poi>
+    </section>

@@ -1,0 +1,262 @@
+<div class="tasks-container">
+  <!-- Hero Header -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="hero-header">
+        <div class="hero-title">
+          <i class="fas fa-tasks"></i>
+          <h1>Gestión de Tareas</h1>
+        </div>
+        <button class="btn-create" routerLink="/tasks/new">
+          <i class="fas fa-plus"></i>
+          Nueva Tarea
+        </button>
+      </div>
+      <p class="hero-subtitle">
+        Organiza y gestiona tus tareas de forma eficiente
+      </p>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-section">
+    <div class="kpi-card todo">
+      <div class="kpi-icon">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ pending.length }}</span>
+        <span class="kpi-label">Por Hacer</span>
+      </div>
+    </div>
+
+    <div class="kpi-card progress">
+      <div class="kpi-icon">
+        <i class="fas fa-spinner"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ inProgress.length }}</span>
+        <span class="kpi-label">En Progreso</span>
+      </div>
+    </div>
+
+    <div class="kpi-card done">
+      <div class="kpi-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ completed.length }}</span>
+        <span class="kpi-label">Completadas</span>
+      </div>
+    </div>
+
+    <div class="kpi-card total">
+      <div class="kpi-icon">
+        <i class="fas fa-chart-pie"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ pending.length + inProgress.length + completed.length }}</span>
+        <span class="kpi-label">Total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="kanban-board">
+    <!-- Column: TODO -->
+    <div class="kanban-column" 
+         cdkDropList 
+         id="todo" 
+         [cdkDropListData]="pending" 
+         [cdkDropListConnectedTo]="['inprogress','done']" 
+         (cdkDropListDropped)="drop($event)">
+      <div class="column-header todo">
+        <div class="column-title">
+          <i class="fas fa-clipboard-list"></i>
+          <h3>Por Hacer</h3>
+        </div>
+        <span class="column-count">{{ pending.length }}</span>
+      </div>
+      
+      <div class="column-content">
+        <div class="task-card" 
+             *ngFor="let task of pending" 
+             cdkDrag 
+             (click)="open(task)"
+             [class.priority-urgent]="task.priority === 'URGENT'"
+             [class.priority-high]="task.priority === 'HIGH'"
+             [class.priority-medium]="task.priority === 'MEDIUM'"
+             [class.priority-low]="task.priority === 'LOW'">
+          
+          <div class="task-header">
+            <span class="task-priority" [ngClass]="'priority-' + (task.priority?.toLowerCase() || 'medium')">
+              {{ getPriorityLabel(task.priority) }}
+            </span>
+            <span class="task-date" *ngIf="task.dueDate">
+              <i class="fas fa-calendar"></i>
+              {{ task.dueDate | date:'dd/MM' }}
+            </span>
+          </div>
+
+          <h4 class="task-title">{{ task.title }}</h4>
+          
+          <p class="task-description" *ngIf="task.description">
+            {{ task.description }}
+          </p>
+
+          <div class="task-footer">
+            <div class="task-assignee" *ngIf="task.responsibleName">
+              <i class="fas fa-user"></i>
+              {{ task.responsibleName }}
+            </div>
+            <div class="task-progress" *ngIf="task.progress !== undefined && task.progress !== null">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="task.progress"></div>
+              </div>
+              <span class="progress-text">{{ task.progress }}%</span>
+            </div>
+          </div>
+
+          <div class="drag-handle" cdkDragHandle>
+            <i class="fas fa-grip-vertical"></i>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="pending.length === 0">
+          <i class="fas fa-inbox"></i>
+          <p>No hay tareas pendientes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: IN PROGRESS -->
+    <div class="kanban-column" 
+         cdkDropList 
+         id="inprogress" 
+         [cdkDropListData]="inProgress" 
+         [cdkDropListConnectedTo]="['todo','done']" 
+         (cdkDropListDropped)="drop($event)">
+      <div class="column-header progress">
+        <div class="column-title">
+          <i class="fas fa-spinner"></i>
+          <h3>En Progreso</h3>
+        </div>
+        <span class="column-count">{{ inProgress.length }}</span>
+      </div>
+      
+      <div class="column-content">
+        <div class="task-card" 
+             *ngFor="let task of inProgress" 
+             cdkDrag 
+             (click)="open(task)"
+             [class.priority-urgent]="task.priority === 'URGENT'"
+             [class.priority-high]="task.priority === 'HIGH'"
+             [class.priority-medium]="task.priority === 'MEDIUM'"
+             [class.priority-low]="task.priority === 'LOW'">
+          
+          <div class="task-header">
+            <span class="task-priority" [ngClass]="'priority-' + (task.priority?.toLowerCase() || 'medium')">
+              {{ getPriorityLabel(task.priority) }}
+            </span>
+            <span class="task-date" *ngIf="task.dueDate">
+              <i class="fas fa-calendar"></i>
+              {{ task.dueDate | date:'dd/MM' }}
+            </span>
+          </div>
+
+          <h4 class="task-title">{{ task.title }}</h4>
+          
+          <p class="task-description" *ngIf="task.description">
+            {{ task.description }}
+          </p>
+
+          <div class="task-footer">
+            <div class="task-assignee" *ngIf="task.responsibleName">
+              <i class="fas fa-user"></i>
+              {{ task.responsibleName }}
+            </div>
+            <div class="task-progress" *ngIf="task.progress !== undefined && task.progress !== null">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="task.progress"></div>
+              </div>
+              <span class="progress-text">{{ task.progress }}%</span>
+            </div>
+          </div>
+
+          <div class="drag-handle" cdkDragHandle>
+            <i class="fas fa-grip-vertical"></i>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="inProgress.length === 0">
+          <i class="fas fa-inbox"></i>
+          <p>No hay tareas en progreso</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: DONE -->
+    <div class="kanban-column" 
+         cdkDropList 
+         id="done" 
+         [cdkDropListData]="completed" 
+         [cdkDropListConnectedTo]="['todo','inprogress']" 
+         (cdkDropListDropped)="drop($event)">
+      <div class="column-header done">
+        <div class="column-title">
+          <i class="fas fa-check-circle"></i>
+          <h3>Completadas</h3>
+        </div>
+        <span class="column-count">{{ completed.length }}</span>
+      </div>
+      
+      <div class="column-content">
+        <div class="task-card" 
+             *ngFor="let task of completed" 
+             cdkDrag 
+             (click)="open(task)"
+             [class.priority-urgent]="task.priority === 'URGENT'"
+             [class.priority-high]="task.priority === 'HIGH'"
+             [class.priority-medium]="task.priority === 'MEDIUM'"
+             [class.priority-low]="task.priority === 'LOW'">
+          
+          <div class="task-header">
+            <span class="task-priority" [ngClass]="'priority-' + (task.priority?.toLowerCase() || 'medium')">
+              {{ getPriorityLabel(task.priority) }}
+            </span>
+            <span class="task-date" *ngIf="task.dueDate">
+              <i class="fas fa-calendar"></i>
+              {{ task.dueDate | date:'dd/MM' }}
+            </span>
+          </div>
+
+          <h4 class="task-title">{{ task.title }}</h4>
+          
+          <p class="task-description" *ngIf="task.description">
+            {{ task.description }}
+          </p>
+
+          <div class="task-footer">
+            <div class="task-assignee" *ngIf="task.responsibleName">
+              <i class="fas fa-user"></i>
+              {{ task.responsibleName }}
+            </div>
+            <div class="task-completed-badge">
+              <i class="fas fa-check"></i>
+              Completada
+            </div>
+          </div>
+
+          <div class="drag-handle" cdkDragHandle>
+            <i class="fas fa-grip-vertical"></i>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="completed.length === 0">
+          <i class="fas fa-inbox"></i>
+          <p>No hay tareas completadas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

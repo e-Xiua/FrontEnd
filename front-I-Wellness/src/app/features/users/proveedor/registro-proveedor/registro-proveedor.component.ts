@@ -1,5 +1,5 @@
 import { Component,AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth/auth.service';
@@ -11,7 +11,7 @@ import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryFiel
 @Component({
   selector: 'app-registro-proveedor',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxIntlTelInputModule],
+  imports: [CommonModule, FormsModule, NgxIntlTelInputModule, RouterModule],
   templateUrl: './registro-proveedor.component.html',
   styleUrl: './registro-proveedor.component.css'
 })
@@ -293,7 +293,7 @@ hasErrors(): boolean {
           this.isLoading = false;          
           // El token ya está guardado por el servicio de auth
           // Redirigir directamente al home del proveedor
-          this.router.navigate(['/homeproveedor']);
+          this.router.navigate(['/proveedor/home']);
         },
         error: (error) => {
           this.isLoading = false;

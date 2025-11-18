@@ -1,0 +1,274 @@
+<div class="profile-page-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner-modern"></div>
+      <p>Cargando información del proveedor...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <h1>Error al cargar el perfil</h1>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Provider Not Found -->
+  <div *ngIf="!provider && !isLoading && !error" class="not-found-state">
+    <div class="not-found-content">
+      <i class="fas fa-user-slash"></i>
+      <h1>Proveedor no encontrado</h1>
+      <p>El proveedor que buscas no existe.</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="provider && !isLoading && !error" class="main-content">
+    <!-- Profile Content -->
+    <main class="profile-content">
+      <!-- Profile Header Card -->
+      <div class="profile-header-card">
+        <!-- Cover Banner with Gradient -->
+        <div class="cover-banner"></div>
+
+        <div class="profile-header-content">
+          <!-- Profile Photo & Basic Info -->
+          <div class="profile-header-grid">
+            <img
+              title="Avatar de {{ provider.contactName }}"
+              [src]="provider.foto"
+              [alt]="provider.contactName"
+              class="profile-avatar">
+
+            <div class="profile-main-info">
+              <h1 class="provider-name">{{ provider.contactName || provider.name || 'Proveedor' }}</h1>
+              <p class="provider-role" *ngIf="provider.cargoContacto">{{ provider.cargoContacto }}</p>
+              <p class="provider-company">{{ provider.name || 'Empresa no especificada' }}</p>
+
+              <div class="provider-stats">
+                <div class="rating-display">
+                  <i class="fas fa-star"></i>
+                  <span class="rating-value">{{ provider.rating?.toFixed(1) || '0.0' }}</span>
+                  <span class="rating-count">({{ provider.totalReviews || 0 }} reseñas)</span>
+                </div>
+
+                <button
+                  *ngIf="isOwnProfile"
+                  class="btn-follow"
+                  (click)="viewMyContacts()">
+                  <i class="fas fa-address-book"></i>
+                  <span>Ver mis contactos</span>
+                </button>
+
+                <!-- Botón de acción: Seguir, Siguiendo o Escribir Mensaje -->
+                <div class="action-button-container">
+                  <!-- Caso 1: El usuario es Turista y no es su propio perfil -->
+                  <ng-container *ngIf="currentUserRole === 'Turista' && !isOwnProfile">
+                    <button class="btn btn-follow btn-message" (click)="startChat()">
+                      <i class="fas fa-paper-plane"></i> Escribir Mensaje
+                    </button>
+                  </ng-container>
+
+                  <!-- Caso 2: El usuario NO es Turista (o es su propio perfil) -->
+                  <ng-container *ngIf="currentUserRole !== 'Turista' && !isOwnProfile">
+                    <button
+                      class="btn btn-follow"
+                      [class.following]="isContact"
+                      [disabled]="isAddingContact || isContact"
+                      (click)="addContact()">
+                      <span *ngIf="!isAddingContact && !isContact"><i class="fas fa-plus"></i> Seguir</span>
+                      <span *ngIf="isAddingContact"><i class="fas fa-spinner fa-spin"></i> Agregando...</span>
+                      <span *ngIf="isContact && !isAddingContact"><i class="fas fa-check"></i> Siguiendo</span>
+                    </button>
+                  </ng-container>
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div class="provider-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ address || provider.address || 'Ubicación no disponible' }}</span>
+              </div>
+            </div>
+
+            <app-make-networking-contact
+              *ngIf="showNetworkingCard"
+              class="networking-card-container"
+              (connect)="startConversation()"
+            ></app-make-networking-contact>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-briefcase"></i>
+          Acerca de
+        </h2>
+        <p class="about-description">{{ provider.description }}</p>
+      </div>
+
+      <!-- Contact & Business Information -->
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-address-book"></i>
+          Información de Contacto
+        </h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <div class="contact-details">
+              <p class="contact-label">Email</p>
+              <p class="contact-value">{{ provider.correo || 'No disponible' }}</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <div class="contact-details">
+              <p class="contact-label">Teléfono</p>
+              <p class="contact-value">{{ provider.phone || 'No disponible' }}</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <div class="contact-details">
+              <p class="contact-label">Teléfono Empresa</p>
+              <p class="contact-value">{{ provider.companyPhone || 'No disponible' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Certifications & Licenses -->
+        <div *ngIf="provider.certificadosCalidad && provider.certificadosCalidad.length > 0" class="certifications-section">
+          <h3 class="section-subtitle">
+            <i class="fas fa-award"></i>
+            Certificaciones y Estándares de Calidad
+          </h3>
+          <div class="badges-container">
+            <span
+              *ngFor="let cert of provider.certificadosCalidad"
+              class="certification-badge">
+              <i class="fas fa-check-circle"></i>
+              {{ cert }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="provider.licenciasPermisos && provider.licenciasPermisos.length > 0" class="certifications-section">
+          <h3 class="section-subtitle">
+            <i class="fas fa-file-alt"></i>
+            Licencias y Permisos
+          </h3>
+          <div class="licenses-list">
+            <p *ngFor="let license of provider.licenciasPermisos" class="license-item">
+              <i class="fas fa-circle"></i>
+              {{ license }}
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="provider.identificacionFiscal" class="fiscal-info">
+          <i class="fas fa-id-card"></i>
+          <span>ID Fiscal:</span>
+          <strong>{{ provider.identificacionFiscal }}</strong>
+        </div>
+      </div>
+
+      <!-- Route Generation Section -->
+      <section *ngIf="showRouteGeneration && provider" class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-route"></i>
+          Rutas Generadas
+        </h2>
+        <app-route-generation
+          [showHeader]="false"
+          [userId]="provider.id"
+          (routeSelected)="routeSelected.emit($event)"
+          (providerSelected)="providerSelected.emit($event)"
+        ></app-route-generation>
+      </section>
+
+      <!-- Services Section -->
+      <div class="info-card">
+        <h2 class="card-title">
+          <i class="fas fa-concierge-bell"></i>
+          Servicios Ofrecidos
+        </h2>
+
+        <ng-container *ngIf="showServiceManager; else providerServicesDefault">
+          <app-provider-service-list-container></app-provider-service-list-container>
+        </ng-container>
+
+        <ng-template #providerServicesDefault>
+          <div *ngIf="services.length > 0" class="services-grid">
+            <div *ngFor="let service of services" class="service-card">
+              <div *ngIf="service.imagen" class="service-image">
+                <img [src]="service.imagen" [alt]="service.nombre" />
+              </div>
+              <div class="service-content">
+                <h3 class="service-name">{{ service.nombre || 'Servicio sin nombre' }}</h3>
+                <p class="service-description">{{ service.descripcion || 'Sin descripción disponible' }}</p>
+
+                <!-- Horario del servicio específico -->
+                <div *ngIf="service.horario" class="service-schedule">
+                  <i class="fas fa-clock"></i>
+                  <span>{{ service.horario }}</span>
+                </div>
+
+                <!-- Tiempo aproximado -->
+                <div *ngIf="service.tiempoAproximado" class="service-duration">
+                  <i class="fas fa-hourglass-half"></i>
+                  <span>{{ service.tiempoAproximado }} min</span>
+                </div>
+
+                <div class="service-footer">
+                  <span class="service-price">
+                    {{ service.precio?.parsedValue !== undefined ? (service.precio.parsedValue | currency:'USD':'symbol':'1.2-2') : (service.precio | currency:'USD':'symbol':'1.2-2') }}
+                  </span>
+                  <span class="service-category">{{ service.categoria || 'General' }}</span>
+                  <span *ngIf="service.estado !== undefined"
+                        class="service-status"
+                        [class.active]="service.estado"
+                        [class.inactive]="!service.estado">
+                    {{ service.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="services.length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <p>No hay servicios disponibles para mostrar.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="info-card reviews-section">
+        <h2 class="card-title">
+          <i class="fas fa-star"></i>
+          Reseñas y Opiniones
+        </h2>
+
+        <div class="review-form-wrapper">
+          <app-review-form
+            [entityType]="'proveedor'"
+            [entityId]="provider.id">
+          </app-review-form>
+        </div>
+
+        <div class="review-display-wrapper">
+          <app-review-display
+            [entityType]="'proveedor'"
+            [entityId]="provider.id">
+          </app-review-display>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

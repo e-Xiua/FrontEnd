@@ -1,30 +1,37 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ServicioService } from '../../../servicios/services/servicio.service';
 import { CommonModule } from '@angular/common';
-import { TipoCambioService } from '../services/tipo-cambio.service';
-import { ReservaService } from '../../../servicios/reservas/reserva.service';
+import { Component } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../../../../core/services/auth/auth.service';
-import Swal from 'sweetalert2';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatTimepickerModule } from '@angular/material/timepicker';
+import { ActivatedRoute } from '@angular/router';
+import Swal from 'sweetalert2';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { UniversalHeaderComponent } from '../../../../shared/components/universal-header/universal-header.component';
+import { Review, ReviewDisplayComponent } from '../../../../shared/ui/components/review-display/review-display.component';
+import { ReviewFormComponent, ReviewSubmission } from '../../../../shared/ui/components/review-form/review-form.component';
+import { ReservaService } from '../../../servicios/reservas/reserva.service';
+import { ServicioService } from '../../../servicios/services/servicio.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { TipoCambioService } from '../services/tipo-cambio.service';
 
 @Component({
   selector: 'app-info-servicio',
   imports: [
-    CommonModule, 
-    FormsModule,    
+    CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
     MatNativeDateModule,
-    MatTimepickerModule],
+    MatTimepickerModule,
+    ReviewDisplayComponent,
+    ReviewFormComponent,
+    UniversalHeaderComponent
+  ],
   templateUrl: './info-servicio.component.html',
   styleUrl: './info-servicio.component.css'
 })
@@ -40,20 +47,19 @@ export class InfoServicioComponent {
   minFecha: string = '';
   minFechaObj: Date = new Date();
   horaSeleccionada: Date = new Date();
-  horariosDisponibles: string = ''; 
-  fechaHora: any = new FormControl();  
+  horariosDisponibles: string = '';
+  fechaHora: any = new FormControl();
   diasPermitidos: number[] = [];
 
-  reviews = [
-    { name: 'Laura G.', comment: 'Excelente servicio, muy profesional.', rating: 5 },
-    { name: 'Carlos M.', comment: 'Todo fue muy puntual y agradable.', rating: 4 },
-    { name: 'Ana P.', comment: 'Me encantó, repetiría sin dudar.', rating: 5 },
-  ];
-  
-  averageRating = 4.7;
+  // Review properties
+  reviews: Review[] = [];
+  averageRating: number = 4.7;
+  hasReservation: boolean = false;
+  currentUserRole: string | null = null;
+  servicioId: number = 0;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private servicioService: ServicioService,
     private tipoCambioService: TipoCambioService,
     private reservaService: ReservaService,
@@ -68,25 +74,33 @@ ngOnInit(): void {
   this.minFecha = hoy.toISOString().split('T')[0];
   this.minFechaObj = hoy;
 
-  const rol = localStorage.getItem('rol');
-  if (rol === 'Turista') {
-    this.authService.usuarioHome().subscribe({
-      next: (usuario) => {
-        this.usuario = JSON.parse(usuario);
-      },
-      error: (err) => {
-        console.error('Error al obtener el usuario:', err);
-      }
-    });
-  }
+  // Obtener el rol del usuario
+  this.currentUserRole = localStorage.getItem('rol');
 
   this.route.paramMap.subscribe(params => {
     const id = Number(params.get('id'));
+    this.servicioId = id;
+
     this.servicioService.buscarPorId(id).subscribe({
       next: data => {
         this.servicio = data;
         console.log(this.servicio);
         this.horariosDisponibles = this.servicio.horario;
+
+        // Si es turista, cargar usuario primero y LUEGO verificar reservas
+        if (this.currentUserRole === 'Turista') {
+          this.authService.usuarioHome().subscribe({
+            next: (usuario) => {
+              this.usuario = JSON.parse(usuario);
+              console.log('Usuario turista cargado:', this.usuario);
+              // AHORA sí verificar reservas con el usuario cargado
+              this.checkUserHasReservation(id, this.usuario.id);
+            },
+            error: (err) => {
+              console.error('Error al obtener el usuario:', err);
+            }
+          });
+        }
 
         // Luego de obtener el servicio, obtener proveedores
         this.usuarioService.obtenerProveedores().subscribe({
@@ -156,7 +170,7 @@ ngOnInit(): void {
       title: 'Fecha no seleccionada',
       text: 'Por favor, selecciona una fecha para tu reserva.',
       confirmButtonText: 'Entendido',
-      confirmButtonColor: '#4a9c9f' 
+      confirmButtonColor: '#4a9c9f'
     });
     return;
   }
@@ -184,7 +198,7 @@ ngOnInit(): void {
           title: '¡Reserva confirmada!',
           text: 'Tu reserva se ha realizado exitosamente.',
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#4a9c9f' 
+          confirmButtonColor: '#4a9c9f'
         });
       },
       error: (error) => {
@@ -203,7 +217,7 @@ ngOnInit(): void {
       title: 'Hora no disponible',
       text: 'La hora seleccionada no está dentro del horario disponible para este servicio.',
       confirmButtonText: 'Entendido',
-      confirmButtonColor: '#4a9c9f' 
+      confirmButtonColor: '#4a9c9f'
     });
   }
 }
@@ -239,7 +253,7 @@ filtrarDiasDisponibles = (d: Date | null): boolean => {
 
   // Obtener el día de la semana actual
   const dayOfWeek = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-  
+
   // Obtener los días habilitados del servicio
   const diasServicio = this.servicio.horario.split(';')[0].split(',').map((dia: string) => dia.trim());
 
@@ -253,6 +267,80 @@ getDayName(index: number): string {
   return daysOfWeek[index];
 }
 
+// Métodos para gestión de reseñas
+
+/**
+ * Verifica si el usuario turista tiene una reserva para este servicio
+ */
+checkUserHasReservation(servicioId: number, usuarioId: number): void {
+  console.log('Verificando reservas para:', { servicioId, usuarioId });
+
+  this.reservaService.getAll().subscribe({
+    next: (reservas: any[]) => {
+      console.log('Total de reservas obtenidas:', reservas.length);
+      console.log('Reservas completas:', reservas);
+
+      // Buscar si existe una reserva del usuario para este servicio
+      this.hasReservation = reservas.some(
+        (reserva: any) => {
+          const coincideServicio = reserva._idServicio === servicioId;
+          const coincideTurista = reserva._idTurista === usuarioId;
+          const estaConfirmada = reserva.estado === 'confirmada';
+
+          console.log('Comparando reserva:', {
+            reserva: reserva,
+            coincideServicio,
+            coincideTurista,
+            estaConfirmada,
+            resultado: coincideServicio && coincideTurista && estaConfirmada
+          });
+
+          return coincideServicio && coincideTurista && estaConfirmada;
+        }
+      );
+
+      console.log('✅ Resultado final - Usuario tiene reserva:', this.hasReservation);
+    },
+    error: (err: any) => {
+      console.error('❌ Error al verificar reservas:', err);
+      this.hasReservation = false;
+    }
+  });
+}
+
+/**
+ * Determina si el usuario actual puede escribir reseñas
+ */
+canWriteReview(): boolean {
+  if (this.currentUserRole === 'PROVEEDOR' || this.currentUserRole === 'Proveedor') {
+    return true;
+  }
+  if (this.currentUserRole === 'TURISTA' || this.currentUserRole === 'Turista') {
+    return this.hasReservation;
+  }
+  return false;
+}
+
+/**
+ * Maneja el envío de una nueva reseña
+ */
+handleReviewSubmit(reviewData: ReviewSubmission): void {
+  console.log('Nueva reseña recibida:', reviewData);
+
+  // TODO: Enviar la reseña al backend
+  // this.reviewService.createReview(reviewData).subscribe(...)
+
+  Swal.fire({
+    icon: 'success',
+    title: '¡Gracias por tu reseña!',
+    text: 'Tu opinión ha sido publicada exitosamente.',
+    confirmButtonText: 'Aceptar',
+    confirmButtonColor: '#4a9c9f'
+  });
+
+  // Recargar las reseñas (cuando esté implementado en el backend)
+  // this.loadReviews(this.servicioId);
+}
 
 
 }

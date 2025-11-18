@@ -1,0 +1,176 @@
+<div class="card">
+  <div class="scroll-area">
+    <!-- Header with gradient background -->
+    <div class="card-cover">
+      <div class="cover-gradient"></div>
+    </div>
+
+    <!-- Provider Avatar & Name -->
+    <div class="provider-header">
+      <div class="provider-avatar-wrapper">
+        <img
+          [src]="placeData.foto || 'assets/img/placeholder-provider.svg'"
+          [alt]="placeData.contactName || placeData.name || 'Proveedor'"
+          [title]="placeData.contactName || placeData.name || 'Proveedor'"
+          class="provider-avatar"
+        />
+      </div>
+      
+      <div class="provider-name-section">
+        <h2 class="provider-name">{{ placeData.contactName || placeData.name || 'Proveedor' }}</h2>
+        <p class="provider-company" *ngIf="placeData.name && placeData.contactName !== placeData.name">
+          {{ placeData.name }}
+        </p>
+        <p class="provider-role" *ngIf="placeData.cargoContacto">
+          {{ placeData.cargoContacto }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-section">
+      <span class="category-badge" *ngIf="placeData.categories && placeData.categories.length > 0">
+        <i class="fas fa-tag"></i>
+        {{ placeData.categories.join(', ') }}
+      </span>
+      <span class="category-badge" *ngIf="!placeData.categories || placeData.categories.length === 0">
+        <i class="fas fa-tag"></i>
+        {{ placeData.category || defaults.category }}
+      </span>
+    </div>
+
+    <!-- Rating Section -->
+    <div class="rating-section">
+      <div class="stars-display">
+        <span *ngFor="let star of [1,2,3,4,5]"
+              class="star" 
+              [class.filled]="star <= (placeData.rating || 0)">
+          <i class="fas fa-star"></i>
+        </span>
+      </div>
+      <div class="rating-info">
+        <span class="rating-value">{{ (placeData.rating || 0).toFixed(1) }}</span>
+        <span class="rating-reviews">({{ placeData.totalReviews || 0 }} reseñas)</span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="info-section" *ngIf="placeData.description">
+      <h3 class="section-title">
+        <i class="fas fa-info-circle"></i>
+        Descripción
+      </h3>
+      <p class="description-text">{{ placeData.description }}</p>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="info-section contact-section" *ngIf="hasValidContactInfo()">
+      <h3 class="section-title">
+        <i class="fas fa-address-book"></i>
+        Información de Contacto
+      </h3>
+      <div class="contact-grid">
+        <div class="contact-item" *ngIf="placeData.correo && placeData.correo !== defaults.correo">
+          <i class="fas fa-envelope contact-icon"></i>
+          <div class="contact-details">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">{{ placeData.correo }}</span>
+          </div>
+        </div>
+        
+        <div class="contact-item" *ngIf="placeData.phone && placeData.phone !== defaults.phone">
+          <i class="fas fa-phone contact-icon"></i>
+          <div class="contact-details">
+            <span class="contact-label">Teléfono Personal</span>
+            <span class="contact-value">{{ placeData.phone }}</span>
+          </div>
+        </div>
+        
+        <div class="contact-item" *ngIf="placeData.companyPhone && placeData.companyPhone !== defaults.companyPhone">
+          <i class="fas fa-building contact-icon"></i>
+          <div class="contact-details">
+            <span class="contact-label">Teléfono Empresa</span>
+            <span class="contact-value">{{ placeData.companyPhone }}</span>
+          </div>
+        </div>
+        
+        <div class="contact-item" *ngIf="placeData.address && placeData.address !== defaults.address">
+          <i class="fas fa-map-marker-alt contact-icon"></i>
+          <div class="contact-details">
+            <span class="contact-label">Dirección</span>
+            <span class="contact-value">{{ placeData.address }}</span>
+          </div>
+        </div>
+        
+        <div class="contact-item" *ngIf="placeData.hours && placeData.hours !== defaults.hours">
+          <i class="fas fa-clock contact-icon"></i>
+          <div class="contact-details">
+            <span class="contact-label">Horario</span>
+            <span class="contact-value">{{ placeData.hours }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Business Metrics -->
+    <div class="info-section metrics-section" *ngIf="hasValidMetrics()">
+      <h3 class="section-title">
+        <i class="fas fa-chart-line"></i>
+        Información del Servicio
+      </h3>
+      <div class="metrics-grid">
+        <div class="metric-card" *ngIf="placeData.averageCost && placeData.averageCost < 999999">
+          <i class="fas fa-dollar-sign metric-icon"></i>
+          <div class="metric-content">
+            <span class="metric-label">Precio Promedio</span>
+            <span class="metric-value">{{ getFormattedPrice() }}</span>
+          </div>
+        </div>
+        
+        <div class="metric-card" *ngIf="placeData.averageVisitDuration">
+          <i class="fas fa-hourglass-half metric-icon"></i>
+          <div class="metric-content">
+            <span class="metric-label">Duración Promedio</span>
+            <span class="metric-value">{{ placeData.averageVisitDuration }} min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Section -->
+    <div class="info-section services-section" *ngIf="hasServices()">
+      <h3 class="section-title">
+        <i class="fas fa-concierge-bell"></i>
+        Servicios Disponibles ({{ placeData.services?.length || 0 }})
+      </h3>
+      <p class="services-hint">
+        <i class="fas fa-hand-pointer"></i>
+        Haz clic en un servicio para ver más información
+      </p>
+      <div class="services-grid">
+        <div *ngFor="let service of placeData.services || []" 
+             class="service-card-wrapper"
+             (click)="navigateToService(service.id || service._idServicio)"
+             [title]="'Ver detalles de ' + service.title">
+          <app-service-card
+            [id]="service.id || service._idServicio"
+            [title]="service.title"
+            [description]="service.description"
+            [image]="service.image"
+            [schedule]="service.schedule"
+            [duration]="service.duration"
+            [price]="service.price">
+          </app-service-card>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="info-section actions-section">
+      <button class="btn-primary btn-full" (click)="viewFullProfile()">
+        <i class="fas fa-user"></i>
+        Ver Perfil Completo
+      </button>
+    </div>
+  </div>
+</div>

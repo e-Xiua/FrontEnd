@@ -1,0 +1,23 @@
+<div class="messages-root">
+  <div class="messages-list" *ngIf="messages$ | async as messages">
+    <div *ngFor="let m of messages" class="bubble" [ngClass]="{'mine': false}">
+      <div class="meta">{{ m.senderId || 'Usuario' }} · {{ m.timestamp | date:'short' }}</div>
+      <div class="content">{{ m.content }}</div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="send()" class="send-form">
+    <div class="full">
+      <input 
+        type="text" 
+        placeholder="Escribe un comentario..." 
+        formControlName="content"
+        autocomplete="off"
+      />
+    </div>
+    <button type="submit" [disabled]="form.invalid">
+      <i class="fas fa-paper-plane"></i>
+      Enviar
+    </button>
+  </form>
+</div>

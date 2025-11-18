@@ -1,370 +1,398 @@
+/* Variables del sistema */
+:host {
+  --primary-color: #4a9c9f;
+  --secondary-color: #2973B2;
+  --accent-color: #34d399;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --bg-light: #f9fafb;
+  --border-color: #e5e7eb;
+  --error-color: #ef4444;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f8f8f8;
-    padding-top: 4%;
+.registro-turista-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4a9c9f 0%, #34d399 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-.container {
-    margin-top: 0.6%;
-    display: flex;
-    width: 900px;
-    max-height: 85%;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
-    overflow: hidden;
-}
-
-/* Panel izquierdo */
-.left-panel {
-    width: 50%;
-    background: url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/602524337.jpg?k=22bf85a61ea14645bc54c0ee436aae8583754e4154ef7b5f4e2c353bd7a86e34&o=&hp=1') no-repeat center/cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.logo {
-    text-align: center;
-    color: white;
-}
-
-.logo img {
-    width: 120px;
-    margin-bottom: 10px;
-}
-
-.logo h1 {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-/* Panel derecho */
-.right-panel {
-    width: 50%;
-    padding: 30px;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow-y: auto;  
-}
-
-.title {
-    text-align: center;
-    font-size: 22px;
-    margin-bottom: 15px;
-    padding-top: 50%;
-}
-
-.turista {
-    color: #3166A6;
-    font-weight: bold;
-}
-
-.registro {
-    color: #A8D0C6;
-    font-weight: bold;
-}
-
-/* Botón de secciones */
-.btn-section {
-    width: 100%;
-    background: #3166A6;
-    border: none;
-    padding: 10px;
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Campos de entrada */
-input[type="text"], 
-input[type="email"], 
-input[type="password"], 
-input[type="date"],
-select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-::ng-deep ngx-intl-tel-input input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-  
-  ::ng-deep .iti {
-    display: block;
-    margin-top: 10px;
-  }
-  
-  ::ng-deep .iti__arrow {
-    display: none !important;
-  }
-  
-  ::ng-deep .iti .dropdown-menu.country-dropdown {
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    border-color: #c7cace;
-    margin-top: -1px;
-  }
-  
-  ::ng-deep .iti .iti__country-list {
-    box-shadow: none;
-    font-size: 14px;
-    margin-left: 0;
-    width: 244px;
-    max-height: 170px;
-  }
-  
-  ::ng-deep .iti__flag-container.open + input {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-  
-  ::ng-deep .iti .search-container input {
-    font-size: 14px;
-    border-color: #c7cace;
-    border-radius: 0;
-    padding: 5px 10px;
-  }
-  
-  ::ng-deep .iti .search-container input:focus {
-    outline: none;
-  }
-  
-  ::ng-deep ngx-intl-tel-input .iti {
-    position: relative;
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    background: #f6f3eb;
-    border-radius: 5px;
-    padding: 5px 10px;
-  }
-  
-  ::ng-deep ngx-intl-tel-input .iti__flag-container {
-    position: static !important;
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-  }
-  
-  ::ng-deep ngx-intl-tel-input input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    padding: 5px;
-  }
-  
-::ng-deep .iti--allow-dropdown input.iti__tel-input,
-.iti--show-selected-dial-code input.iti__tel-input {
-    padding-left: 10px !important;
-}  
-/* Estilos específicos para el campo de fecha */
-.fecha-nacimiento-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.fecha-nacimiento-label {
-    margin-left: 5px;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
-    background: transparent;
-}
-
-input[type="date"] {
-    color: #333;
-    letter-spacing: 1px;
-}
-
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    background-color: #f6f3eb;
-    padding: 5px;
-    border-radius: 3px;
-}
-
-/* Estilo para que el placeholder de fecha se vea correctamente */
-input[type="date"]::-webkit-datetime-edit { 
-    color: #888;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    background-color: #f6f3eb;
-    padding: 5px;
-    border-radius: 3px;
-}
-
-/* Label para campos con etiqueta */
-.form-label {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #3166A6;
-    font-size: 14px;
-}
-
-/* Checkbox */
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.checkbox-container input {
-    margin-right: 10px;
-}
-
-.checkbox-container label{
-    color: black;
-}
-
-/* Botón de envío */
-.btn-submit {
-    width: 100%;
-    background: #4B9E9E;
-    color: white;
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.btn-submit:hover {
-    background: #3e8383;
-}
-
-.error-message {
-    color: red;
-    font-size: 14px;
-    margin-top: 5px;
-    display: block;
-}
-
-/* Estilos para los nuevos campos con grupo y label */
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
-}
-
-
-
-/* Responsividad */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        width: 90%;
-    }
-    
-    .left-panel, .right-panel {
-        width: 100%;
-    }
-    
-    .left-panel {
-        height: 200px;
-    }
-}
-
-.password-container {
-    position: relative;
-    width: 100%;
-  }
-  
-  .password-container input {
-    width: 100%;
-    padding: 10px;
-    padding-right: 40px; /* Espacio para el botón */
-  }
-  
-  .toggle-password {
-    position: absolute;
-    font-size: 14px;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-30%);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #3166A6;
-  }
-  
-.section-title {
-    background-color: #2F5EA7;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 16px;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-/* Ocultar el input file nativo */
-.file-upload-label input[type="file"] {
-  display: none;
-}
-
-/* Estilo del label que actúa como botón */
-.file-upload-label {
-  display: inline-block;
+.registro-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  max-width: 900px;
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background-color: #4B9E9E; 
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  user-select: none;
-  font-size: 14px;
-  box-shadow: 0 2px 5px rgba(49, 102, 166, 0.3);
+  padding: 3rem;
+  animation: fadeIn 0.5s ease-in;
 }
 
-/* Hover para el label */
-.file-upload-label:hover {
-  background-color: #3e8383;
-  box-shadow: 0 4px 10px rgba(37, 77, 127, 0.5);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Section */
+.header-section {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+}
+
+.brand-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+
+.highlight-turista {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.subtitle-text {
+  color: var(--text-dark);
+  font-weight: 400;
+}
+
+.welcome-text {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Profile Photo Section */
+.profile-photo-section {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.file-upload-label {
+  cursor: pointer;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-light);
+  transition: var(--transition);
+  min-width: 250px;
+}
+
+.upload-placeholder:hover {
+  border-color: var(--primary-color);
+  background: rgba(74, 156, 159, 0.05);
+}
+
+.upload-placeholder i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+}
+
+.upload-placeholder span {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  text-align: center;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.section-title i {
+  color: var(--primary-color);
+  font-size: 1.4rem;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.form-input,
+.form-select {
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+  background: white;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 156, 159, 0.1);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-select:disabled {
+  background: var(--bg-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Password Container */
+.password-container {
+  position: relative;
+  display: flex;
+}
+
+.password-container .form-input {
+  flex: 1;
+  padding-right: 3.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: var(--transition);
+}
+
+.toggle-password:hover {
+  color: var(--primary-color);
+}
+
+.toggle-password i {
+  font-size: 1.1rem;
+}
+
+/* Phone Input Integration */
+::ng-deep .custom {
+  width: 100%;
+}
+
+::ng-deep .custom .iti {
+  width: 100%;
+}
+
+::ng-deep .custom .iti__flag-container {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+::ng-deep .custom input {
+  padding: 0.875rem 1rem !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: var(--border-radius) !important;
+  font-size: 1rem !important;
+  width: 100%;
+}
+
+::ng-deep .custom input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(74, 156, 159, 0.1) !important;
+}
+
+/* Error Messages */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--error-color);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.error-message i {
+  font-size: 0.9rem;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-submit {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3d8386, #2bb87e);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-submit i {
+  font-size: 1.2rem;
+}
+
+.login-link {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  text-align: center;
+}
+
+.login-link a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.login-link a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .registro-card {
+    padding: 2rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-title {
+    font-size: 1.75rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .registro-turista-container {
+    padding: 1rem;
+  }
+
+  .registro-card {
+    padding: 1.5rem;
+  }
+
+  .logo-brand {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .logo-img {
+    height: 40px;
+  }
+
+  .brand-title {
+    font-size: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.3rem;
+  }
 }

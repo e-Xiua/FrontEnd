@@ -1,0 +1,105 @@
+<div class="provider-search-container">
+  <!-- Botón de toggle para mostrar/ocultar buscador -->
+  <button 
+    class="search-toggle-btn"
+    (click)="toggleSearch()"
+    type="button"
+    [attr.aria-label]="isSearchVisible ? 'Ocultar búsqueda' : 'Mostrar búsqueda'"
+    [class.active]="isSearchVisible"
+  >
+    <span class="search-icon">🔍</span>
+  </button>
+
+  <!-- Input de búsqueda (solo visible cuando isSearchVisible = true) -->
+  <div class="search-input-wrapper" *ngIf="isSearchVisible" [@slideIn]>
+    <input #searchInput
+      type="text"
+      class="search-input"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange()"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      placeholder="Buscar proveedores por nombre o categoría..."
+      [disabled]="isLoading"
+    />
+
+    <button
+      *ngIf="searchQuery"
+      class="clear-button"
+      (click)="clearSearch()"
+      type="button"
+      aria-label="Limpiar búsqueda"
+    >
+      ✕
+    </button>
+
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- Resultados de búsqueda -->
+  <div *ngIf="showResults && isSearchVisible" class="search-results">
+    <!-- Sin resultados de búsqueda -->
+    <div *ngIf="filteredProviders.length === 0 && !isLoading && searchQuery" class="no-results">
+      <p>No se encontraron proveedores que coincidan con "{{ searchQuery }}"</p>
+    </div>
+    
+    <!-- No hay proveedores cargados -->
+    <div *ngIf="allProviders.length === 0 && !isLoading && searchQuery" class="no-results">
+      <p style="color: orange;">⚠️ No hay proveedores disponibles. Verifica la conexión con el servidor.</p>
+    </div>
+
+    <div *ngIf="filteredProviders.length > 0" class="results-list">
+      <button
+        *ngFor="let provider of filteredProviders"
+        class="provider-card"
+        (click)="selectProvider(provider)"
+        type="button"
+        [attr.aria-label]="'Seleccionar proveedor ' + provider.nombre"
+      >
+        <div class="provider-photo">
+          <img
+            [src]="provider.foto ? provider.foto : getAvatarUrl(provider)"
+            [alt]="'Foto de ' + (provider.nombre || 'Proveedor')"
+            [title]="provider.nombre || 'Proveedor'"
+            (error)="$any($event.target).src = '/assets/default-avatar.svg'"
+          />
+        </div>
+
+        <div class="provider-info">
+          <h3 class="provider-name">{{ provider.nombre || 'Sin nombre' }}</h3>
+
+          <div *ngIf="provider.proveedorInfo?.categories?.length" class="provider-categories">
+            <span
+              *ngFor="let category of provider.proveedorInfo.categories.slice(0, 3)"
+              class="category-badge"
+            >
+              {{ category }}
+            </span>
+          </div>
+          
+          <!-- Mostrar mensaje si no hay categorías -->
+          <div *ngIf="!provider.proveedorInfo?.categories?.length" class="provider-categories">
+            <span class="category-badge category-badge-default">
+              Sin categorías
+            </span>
+          </div>
+
+          <p *ngIf="provider.correo" class="provider-email">
+            📧 {{ provider.correo }}
+          </p>
+          
+          <!-- Mostrar ID del proveedor como información adicional -->
+          <p class="provider-id">
+            <small>ID: {{ provider.id }}</small>
+          </p>
+        </div>
+
+        <div class="arrow-icon">
+          →
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

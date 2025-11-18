@@ -1,0 +1,12 @@
+    <app-map-for-all-providers
+        ></app-map-for-all-providers>
+
+    <div class="admin-routes-container">
+      <app-route-generation
+        title="Gestión de Rutas del Sistema"
+        description="Visualiza y administra todas las rutas optimizadas generadas en la plataforma"
+        [showHeader]="true"
+        (routeSelected)="onRouteSelected($event)"
+        (providerSelected)="onProviderSelected($event)">
+      </app-route-generation>
+    </div>

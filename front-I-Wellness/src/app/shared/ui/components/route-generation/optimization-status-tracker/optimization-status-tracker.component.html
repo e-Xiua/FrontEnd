@@ -1,0 +1,217 @@
+<div class="status-tracker-container">
+  <!-- Header -->
+  <div class="tracker-header">
+    <h2 class="tracker-title">
+      <i class="fas fa-tasks"></i>
+      Trabajos de Optimización de Rutas
+    </h2>
+  </div>
+
+  <!-- Active Jobs Section -->
+  <div class="jobs-section" *ngIf="hasActiveJobs">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-sync-alt fa-spin"></i>
+        Trabajos Activos ({{ activeJobs.length }})
+      </h3>
+    </div>
+
+    <div class="jobs-list">
+      <div
+        *ngFor="let job of activeJobs; trackBy: trackByJobId"
+        class="job-card job-active"
+      >
+        <!-- Job Header -->
+        <div class="job-header">
+          <div class="job-title-section">
+            <i [class]="'fas ' + getStatusIcon(job.status)" [class.spinner]="job.status === 'PROCESSING'"></i>
+            <div class="job-info">
+              <h4 class="job-name">{{ job.routeName }}</h4>
+              <span class="job-id">ID del Trabajo de Optimización {{ job.jobId }}</span>
+            </div>
+          </div>
+          <span [class]="'status-badge ' + getStatusClass(job.status)">
+            {{ job.status }}
+          </span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section">
+          <div class="progress-bar-container">
+            <div
+              class="progress-bar-fill"
+              [style.width.%]="job.progress"
+              [style.background-color]="getProgressColor(job.status)"
+            ></div>
+          </div>
+          <span class="progress-percentage">{{ job.progress }}%</span>
+        </div>
+
+        <!-- Job Details -->
+        <div class="job-details">
+          <div class="detail-item">
+            <i class="far fa-clock"></i>
+            <span>{{ getElapsedTime(job) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="job.estimatedCompletionTime && job.status === 'PROCESSING'">
+            <i class="fas fa-hourglass-half"></i>
+            <span>{{ getEstimatedCompletion(job) }}</span>
+          </div>
+        </div>
+
+        <!-- Message -->
+        <div class="job-message" *ngIf="job.message">
+          <i class="fas fa-info-circle"></i>
+          <span>{{ job.message }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="job-actions">
+          <button
+            class="btn-action btn-cancel"
+            (click)="onCancelJob(job.jobId)"
+            title="Cancel this job"
+          >
+            <i class="fas fa-stop"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed Jobs Section -->
+  <div class="jobs-section" *ngIf="showCompleted && hasCompletedJobs">
+    <div class="section-header">
+      <h3 class="section-title">
+        <i class="fas fa-check-double"></i>
+        Trabajos Completados ({{ completedJobs.length }})
+      </h3>
+      <button
+        class="btn-clear-all"
+        (click)="onClearCompleted()"
+        *ngIf="completedJobs.length > 0"
+      >
+        <i class="fas fa-broom"></i>
+        Limpiar Todo
+      </button>
+    </div>
+
+    <div class="jobs-list">
+      <div
+        *ngFor="let job of completedJobs; trackBy: trackByJobId"
+        class="job-card job-completed"
+        [class.job-success]="job.status === 'COMPLETED'"
+        [class.job-failed]="job.status === 'FAILED'"
+        [class.job-cancelled]="job.status === 'CANCELLED'"
+      >
+        <!-- Job Header -->
+        <div class="job-header">
+          <div class="job-title-section">
+            <i [class]="'fas ' + getStatusIcon(job.status)"></i>
+            <div class="job-info">
+              <h4 class="job-name">{{ job.routeName }}</h4>
+              <span class="job-id">Job ID: {{ job.jobId }}</span>
+            </div>
+          </div>
+          <span [class]="'status-badge ' + getStatusClass(job.status)">
+            {{ job.status }}
+          </span>
+        </div>
+
+        <!-- Completed Details -->
+        <div class="job-details">
+          <div class="detail-item">
+            <i class="far fa-clock"></i>
+            <span>Completed in {{ getElapsedTime(job) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="job.completedAt">
+            <i class="far fa-calendar"></i>
+            <span>{{ job.completedAt | date:'short' }}</span>
+          </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="job-message job-message-success" *ngIf="job.status === 'COMPLETED' && job.message">
+          <i class="fas fa-check-circle"></i>
+          <span>{{ job.message }}</span>
+        </div>
+
+        <!-- Error Message -->
+        <div class="job-message job-message-error" *ngIf="job.status === 'FAILED' && job.error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>{{ job.error }}</span>
+        </div>
+
+        <!-- Cancelled Message -->
+        <div class="job-message job-message-warning" *ngIf="job.status === 'CANCELLED' && job.message">
+          <i class="fas fa-info-circle"></i>
+          <span>{{ job.message }}</span>
+        </div>
+
+        <!-- Result Summary (for completed jobs) -->
+        <div class="result-summary" *ngIf="job.status === 'COMPLETED' && job.result">
+          <div class="summary-item">
+            <i class="fas fa-route"></i>
+            <span>{{ job.result.optimizedSequence.length }} POIs</span>
+          </div>
+          <div class="summary-item">
+            <i class="fas fa-road"></i>
+            <span>{{ job.result.totalDistanceKm | number:'1.2-2' }} km</span>
+          </div>
+          <div class="summary-item">
+            <i class="fas fa-star"></i>
+            <span>{{ (job.result.optimizationScore * 100) | number:'1.0-0' }}% Score</span>
+          </div>
+          <div class="summary-item">
+            <i class="far fa-clock"></i>
+            <span>{{ job.result.totalTimeMinutes }} min</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="job-actions">
+          <button
+            *ngIf="job.status === 'COMPLETED'"
+            class="btn-action btn-view"
+            (click)="onViewResult(job)"
+            title="View optimized route"
+          >
+            <i class="fas fa-eye"></i>
+            Ver Rutas
+          </button>
+          <button
+            class="btn-action btn-remove"
+            (click)="onRemoveJob(job.jobId)"
+            title="Remove from list"
+          >
+            <i class="fas fa-trash-alt"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!hasActiveJobs && !hasCompletedJobs">
+    <div class="empty-icon">
+      <i class="fas fa-inbox"></i>
+    </div>
+    <h3 class="empty-title">No Hay Trabajos de Optimización</h3>
+    <p class="empty-description">
+      Envía una optimización de ruta para ver el progreso aquí
+    </p>
+  </div>
+
+  <!-- No Active Jobs (but has completed) -->
+  <div class="empty-state" *ngIf="!hasActiveJobs && hasCompletedJobs && !showCompleted">
+    <div class="empty-icon">
+      <i class="fas fa-coffee"></i>
+    </div>
+    <h3 class="empty-title">Ya terminamos</h3>
+    <p class="empty-description">
+      No hay trabajos de optimización activos en este momento
+    </p>
+  </div>
+</div>

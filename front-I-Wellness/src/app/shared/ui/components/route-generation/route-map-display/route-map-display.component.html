@@ -1,0 +1,57 @@
+<div
+  class="route-map-container"
+  [ngClass]="{ 'with-panel': showProviderCard && showProviderCardVisible, 'full-map': !(showProviderCard && showProviderCardVisible) }"
+  [style.gridTemplateColumns]="showProviderCard && showProviderCardVisible ? (100 - panelWidthPercent) + '% ' + panelWidthPercent + '%' : '1fr'"
+>
+  <!-- Map Column -->
+  <div class="map-container" #mapContainer [style.height.px]="mapHeight">
+    <div [id]="mapId" class="map-leaflet-wrapper"></div>
+  </div>
+
+  <!-- Panel Column: Solo Provider Card (carousel se movió arriba) -->
+  <div
+    class="panel-wrapper"
+    #panelWrapper
+    *ngIf="showProviderCard && showProviderCardVisible"
+    [style.height.px]="mapHeight"
+  >
+    <div class="panel-inner">
+      <app-provider-card
+        *ngIf="placeData"
+        class="provider-card-section"
+        [style.height.px]="providerSectionHeight"
+        [placeData]="placeData"
+        (submitReview)="onSubmitReview($event)"
+      ></app-provider-card>
+    </div>
+  </div>
+
+  <!-- UNIFIED Carousel - se reposiciona según visibilidad del panel -->
+  <div
+    class="carousel-unified"
+    [ngClass]="{
+      'carousel-overlay': !showProviderCardVisible || !showProviderCard,
+      'carousel-panel': showProviderCard && showProviderCardVisible
+    }"
+    [style.height.px]="showProviderCard && showProviderCardVisible ? carouselSectionHeight : null"
+    *ngIf="showCarousel && mapDisplayItems.length > 0"
+    title="Servicios en esta ruta"
+  >
+    <app-carousel
+      [showHeader]="false"
+      [linkedItems]="mapDisplayItems"
+      (linkedItemChange)="onCarouselProviderChange($event)"
+      [mode]="'map-linked'"
+
+    ></app-carousel>
+  </div>
+
+  <!-- Empty State (no route) -->
+  <div class="empty-state" *ngIf="!optimizedRoute">
+    <div class="empty-icon">
+      <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3>No se encontraron rutas optimizadas</h3>
+    <p>Construya y optimice una ruta para verla en el mapa</p>
+  </div>
+</div>
