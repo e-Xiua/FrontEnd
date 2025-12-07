@@ -39,7 +39,7 @@
 }
 
 ::ng-deep .cdk-overlay-backdrop {
-  z-index: 9998 !important;
+  z-index: 0 !important;
 }
 
 ::ng-deep .mat-mdc-menu-panel.contact-menu {

@@ -14,7 +14,7 @@
 <mat-menu #contactMenu="matMenu" class="contact-menu" [overlapTrigger]="false">
   <button
     mat-menu-item
-    *ngIf="hasPhone"
+
     (click)="openWhatsApp(provider)"
     class="menu-item whatsapp-item">
     <mat-icon class="menu-icon whatsapp-icon">message</mat-icon>
@@ -23,7 +23,7 @@
 
   <button
     mat-menu-item
-    *ngIf="hasPhone"
+
     (click)="openTelegram(provider)"
     class="menu-item telegram-item">
     <mat-icon class="menu-icon telegram-icon">send</mat-icon>
